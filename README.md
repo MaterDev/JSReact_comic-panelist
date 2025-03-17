@@ -22,20 +22,20 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
 ### Installation
 
 1. Clone the repository:
-\`\`\`bash
-git clone [repository-url]
-cd comic-panelist
-\`\`\`
+```
+git clone https://github.com/MaterDev/JSReact_comic-panelist.git
+cd JSReact_comic-panelist
+```
 
 2. Install dependencies:
-\`\`\`bash
+```
 npm install
-\`\`\`
+```
 
 3. Start the development server:
-\`\`\`bash
+```
 npm start
-\`\`\`
+```
 
 The app will open in your default browser at [http://localhost:3000](http://localhost:3000).
 
@@ -55,9 +55,9 @@ The app will open in your default browser at [http://localhost:3000](http://loca
 
 ## Available Scripts
 
-- \`npm start\`: Run the development server
-- \`npm build\`: Create a production build
-- \`npm test\`: Run tests
+- `npm start`: Run the development server
+- `npm build`: Create a production build
+- `npm test`: Run tests
 
 ## License
 
