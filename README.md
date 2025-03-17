@@ -1,16 +1,34 @@
 # Comic Panel Creator
 
-A React-based tool for creating and managing comic panel layouts with an intuitive drag-and-drop interface.
+A React-based tool for creating and managing comic panel layouts with an intuitive drag-and-drop interface. Create dynamic comic page layouts with customizable panels, export them to PDF, and maintain precise control over your comic page design.
 
 ![Comic Panel Creator Screenshot](screenshot.png)
 
 ## Features
 
-- **Dynamic Panel Management**: Create, resize, and arrange comic panels with drag-and-drop functionality
-- **Split Panels**: Split panels horizontally or vertically with automatic gutter spacing
-- **Customizable Layout**: Adjust gutter size and panel dimensions in real-time
-- **Export to PDF**: Export your comic panel layout as a high-quality PDF
-- **Modern UI**: Clean, responsive interface with intuitive controls
+- **Dynamic Panel Management**
+  - Drag and drop panels to reposition
+  - Resize panels from any edge or corner
+  - Maintain aspect ratios during resizing
+  - Smart panel snapping and alignment
+
+- **Advanced Layout Tools**
+  - Split panels horizontally or vertically
+  - Automatic gutter spacing between panels
+  - Adjustable gutter size for precise layout control
+  - Reset layout option for quick iterations
+
+- **High-Quality Export**
+  - Export layouts to PDF format
+  - High-resolution panel capture
+  - Maintains panel proportions and spacing
+  - Clean export without UI elements
+
+- **Modern Interface**
+  - Responsive design
+  - Intuitive panel controls
+  - Real-time layout updates
+  - Clean, minimalist UI
 
 ## Getting Started
 
@@ -41,23 +59,40 @@ The app will open in your default browser at [http://localhost:3000](http://loca
 
 ## Usage
 
-1. **Create Panels**: Start with a default panel that you can resize and position
-2. **Split Panels**: Use the panel controls to split panels horizontally or vertically
-3. **Adjust Layout**: Drag panels to reposition them, or use the resize handles to adjust dimensions
-4. **Export**: Click the "Export to PDF" button to save your layout
+1. **Panel Creation and Management**
+   - Start with a default panel
+   - Use the resize handles to adjust panel dimensions
+   - Drag panels to reposition them on the page
+   - Click panel controls to split or delete panels
+
+2. **Layout Customization**
+   - Adjust gutter size using the controls
+   - Split panels horizontally or vertically for complex layouts
+   - Reset the layout to start fresh
+   - Drag panels to create dynamic arrangements
+
+3. **Exporting Your Work**
+   - Click the "Export to PDF" button
+   - The layout will be captured in high resolution
+   - A PDF will be generated with your panel layout
+   - Download and save your work
 
 ## Built With
 
-- React with TypeScript
-- Tailwind CSS for styling
-- html2canvas for panel capture
-- jsPDF for PDF generation
+- **React + TypeScript** - For robust, type-safe components
+- **Tailwind CSS** - For modern, responsive styling
+- **html2canvas** - For high-quality panel capture
+- **jsPDF** - For PDF generation and export
 
 ## Available Scripts
 
-- `npm start`: Run the development server
-- `npm build`: Create a production build
-- `npm test`: Run tests
+- `npm start` - Runs the development server
+- `npm build` - Creates a production build
+- `npm test` - Runs the test suite
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
