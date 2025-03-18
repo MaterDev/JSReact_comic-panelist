@@ -8,11 +8,19 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
 
 ## Features
 
-- **AI-Powered Script Generation**
-  - Generate complete comic scripts based on your panel layout
-  - Detailed scene descriptions, character details, and dialogue
-  - Visual direction for each panel including shot types and angles
-  - Optional custom Anthropic API key support
+- **AI-Powered Script Generation with Claude 3**
+  - Generate complete comic scripts based on your panel layout using Anthropic's Claude 3 Opus
+  - Smart interpretation of panel sizes and positions for storytelling:
+    - Larger panels become dramatic moments
+    - Wide panels translate to establishing shots
+    - Tall panels emphasize character moments
+    - Small panels suggest quick action
+  - Rich script details including:
+    - Scene descriptions with setting, time, and weather
+    - Character profiles with age, appearance, and emotions
+    - Dynamic dialogue (speech, thoughts, captions, sound effects)
+    - Visual direction covering shot types, angles, lighting, and symbolism
+  - Optional custom Anthropic API key support with fallback to environment config
 
 - **Dynamic Panel Management**
   - Drag and drop panels to reposition
@@ -73,7 +81,7 @@ npm start
 npm run server
 ```
 
-The app will open in your default browser at [http://localhost:3000](http://localhost:3000).
+The app will open in your default browser at [http://localhost:3000](http://localhost:3000). The server runs on port 3001 with a 120-second timeout for script generation requests.
 
 ## Usage
 
@@ -84,16 +92,22 @@ The app will open in your default browser at [http://localhost:3000](http://loca
    - Click panel controls to split or delete panels
 
 2. **Script Generation**
-   - Create your desired panel layout
+   - Create your desired panel layout - the AI will interpret panel sizes and positions for storytelling:
+     - Use larger panels for important dramatic moments
+     - Create wide panels for establishing shots or panoramic views
+     - Design tall panels for character moments or vertical action
+     - Add small panels for quick action sequences or rapid dialogue
    - (Optional) Enter your Anthropic API key in the input field
+     - If not provided, the app will use the API key from your environment config
    - Click "Generate Script" to create a complete comic script
-   - View the generated script in a modal window
-   - The script includes:
-     - Title and synopsis
-     - Scene descriptions
-     - Character details
-     - Dialogue and captions
-     - Visual direction for each panel
+     - Please allow up to 2 minutes for the AI to analyze your layout and generate the script
+   - View the generated script in a modal window, which includes:
+     - Title and synopsis of the story
+     - Scene descriptions with setting, time, and weather details
+     - Character profiles including age, appearance, and emotional states
+     - Various dialogue types (speech, thoughts, captions, sound effects)
+     - Detailed visual direction covering shot types, angles, lighting, and symbolism
+   - The script is automatically structured to follow the natural flow of your panels (left-to-right, top-to-bottom)
 
 2. **Layout Customization**
    - Adjust gutter size using the controls
