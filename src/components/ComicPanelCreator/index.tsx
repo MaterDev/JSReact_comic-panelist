@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { ScriptModal } from './ScriptModal';
+import { ComicPage, PanelLayout } from './scriptTypes';
+import { generateScript, validateComicPage } from './scriptService';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Panel as PanelComponent } from './Panel';
@@ -22,6 +25,11 @@ const ComicPanelCreator: React.FC = () => {
   const [resizingInfo, setResizingInfo] = useState<ResizingInfo | null>(null);
   const [draggingInfo, setDraggingInfo] = useState<DraggingInfo | null>(null);
   const [showControls, setShowControls] = useState(true);
+  const [generatedScript, setGeneratedScript] = useState<ComicPage | null>(null);
+  const [isGeneratingScript, setIsGeneratingScript] = useState(false);
+  const [showScriptModal, setShowScriptModal] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [showApiKey, setShowApiKey] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const nextPanelId = useRef(2);
@@ -218,6 +226,38 @@ const ComicPanelCreator: React.FC = () => {
     ));
   }, [draggingInfo, panels]);
 
+  const generatePanelScript = useCallback(async (): Promise<void> => {
+    try {
+      setIsGeneratingScript(true);
+      
+      // Convert current panels to layout format
+      const layout: PanelLayout = {
+        panels: panels.map(panel => ({
+          id: panel.id,
+          x: panel.x,
+          y: panel.y,
+          width: panel.width,
+          height: panel.height
+        }))
+      };
+
+      // Generate script using AI with optional API key
+      const script = await generateScript(layout, apiKey || undefined);
+
+      // Validate the response
+      if (!validateComicPage(script)) {
+        throw new Error('Generated script does not match expected format');
+      }
+
+      setGeneratedScript(script);
+    } catch (error) {
+      console.error('Error generating script:', error);
+      // TODO: Add proper error handling UI
+    } finally {
+      setIsGeneratingScript(false);
+    }
+  }, [panels, apiKey]);
+
   const exportToPDF = useCallback(async (): Promise<void> => {
     if (!containerRef.current) return;
 
@@ -307,6 +347,50 @@ const ComicPanelCreator: React.FC = () => {
     <div className="p-4 flex flex-col gap-6 max-w-4xl">
       <h1 className="text-2xl font-bold">Independent Comic Panel Creator (5:7 Ratio)</h1>
 
+      <div className="flex gap-4 mb-4 items-center justify-between">
+        <div className="flex gap-4">
+          <button
+            onClick={generatePanelScript}
+            disabled={isGeneratingScript}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+          >
+            {isGeneratingScript ? 'Generating...' : 'Generate Script'}
+          </button>
+          {generatedScript && (
+            <button
+              onClick={() => setShowScriptModal(true)}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              View Script
+            </button>
+          )}
+        </div>
+        <form className="relative flex-1 max-w-md" onSubmit={(e) => e.preventDefault()}>
+          <input
+            type={showApiKey ? 'text' : 'password'}
+            placeholder="Anthropic API Key (optional)"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            className="w-full px-3 py-2 border rounded-md text-sm"
+            name="apiKey"
+            autoComplete="current-password"
+          />
+          <button
+            onClick={() => setShowApiKey(!showApiKey)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-sm px-2 py-1"
+            type="button"
+          >
+            {showApiKey ? 'Hide' : 'Show'}
+          </button>
+        </form>
+        <button
+          onClick={exportToPDF}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        >
+          Export to PDF
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Controls
           gutterSize={gutterSize}
@@ -344,6 +428,13 @@ const ComicPanelCreator: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {showScriptModal && generatedScript && (
+        <ScriptModal
+          script={generatedScript}
+          onClose={() => setShowScriptModal(false)}
+        />
+      )}
     </div>
   );
 };

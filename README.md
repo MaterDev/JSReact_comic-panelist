@@ -1,10 +1,18 @@
 # Comic Panel Creator
 
-A React-based tool for creating and managing comic panel layouts with an intuitive drag-and-drop interface. Create dynamic comic page layouts with customizable panels, export them to PDF, and maintain precise control over your comic page design.
+A React-based tool for creating and managing comic panel layouts with an intuitive drag-and-drop interface. Create dynamic comic page layouts with customizable panels, generate AI-powered scripts based on your layout, export to PDF, and maintain precise control over your comic page design.
 
-![Comic Panel Creator Screenshot](screenshot.png)
+| Main Screenshot | Script Modal Screenshot |
+| --- | --- |
+| ![Comic Panel Creator Screenshot](screenshot.png) | ![Script Modal Screenshot](screenshot2.png) |
 
 ## Features
+
+- **AI-Powered Script Generation**
+  - Generate complete comic scripts based on your panel layout
+  - Detailed scene descriptions, character details, and dialogue
+  - Visual direction for each panel including shot types and angles
+  - Optional custom Anthropic API key support
 
 - **Dynamic Panel Management**
   - Drag and drop panels to reposition
@@ -36,6 +44,7 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
 
 - Node.js (v14 or higher)
 - npm or yarn
+- Anthropic API key (can be configured in `.env` or provided through the UI)
 
 ### Installation
 
@@ -50,9 +59,18 @@ cd JSReact_comic-panelist
 npm install
 ```
 
-3. Start the development server:
-```
+3. Configure your Anthropic API key:
+   - Create a `.env` file in the root directory
+   - Add your API key: `ANTHROPIC_API_KEY=your-key-here`
+   - Or provide it through the UI when generating scripts
+
+4. Start both the client and server:
+```bash
+# Start the client
 npm start
+
+# In a new terminal, start the server
+npm run server
 ```
 
 The app will open in your default browser at [http://localhost:3000](http://localhost:3000).
@@ -64,6 +82,18 @@ The app will open in your default browser at [http://localhost:3000](http://loca
    - Use the resize handles to adjust panel dimensions
    - Drag panels to reposition them on the page
    - Click panel controls to split or delete panels
+
+2. **Script Generation**
+   - Create your desired panel layout
+   - (Optional) Enter your Anthropic API key in the input field
+   - Click "Generate Script" to create a complete comic script
+   - View the generated script in a modal window
+   - The script includes:
+     - Title and synopsis
+     - Scene descriptions
+     - Character details
+     - Dialogue and captions
+     - Visual direction for each panel
 
 2. **Layout Customization**
    - Adjust gutter size using the controls
@@ -81,13 +111,16 @@ The app will open in your default browser at [http://localhost:3000](http://loca
 
 - **React + TypeScript** - For robust, type-safe components
 - **Tailwind CSS** - For modern, responsive styling
+- **Express** - For the backend server
+- **Anthropic Claude API** - For AI-powered script generation
 - **html2canvas** - For high-quality panel capture
 - **jsPDF** - For PDF generation and export
 
 ## Available Scripts
 
 - `npm start` - Runs the development server
-- `npm build` - Creates a production build
+- `npm run server` - Runs the backend server
+- `npm run build` - Creates a production build
 - `npm test` - Runs the test suite
 
 ## Contributing
