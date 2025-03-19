@@ -1,6 +1,6 @@
 # Comic Panel Creator
 
-A React-based tool for creating and managing comic panel layouts with an intuitive drag-and-drop interface. Create dynamic comic page layouts with customizable panels, generate AI-powered scripts based on your layout, export to PDF, and maintain precise control over your comic page design. The application uses industry-standard 5.25 x 7.75 inch proportions for comic book bleed size.
+A React-based tool for creating and managing comic panel layouts with an intuitive drag-and-drop interface. Create dynamic comic page layouts with customizable panels, generate AI-powered scripts based on your layout, export to PDF or PNG, and maintain precise control over your comic page design. The application uses industry-standard 5.25 x 7.75 inch proportions for comic book bleed size, with professional print guidelines for trim and safe areas.
 
 | Main Screenshot | Script Modal Screenshot |
 | --- | --- |
@@ -30,20 +30,26 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
   - Smart panel snapping and alignment
   - Automatic panel numbering that updates when panels are deleted or rearranged
   - Panel numbers displayed in the center for easy reference (hidden in exports)
+  - Initial panel automatically sized to the trim area
 
 - **Advanced Layout Tools**
   - Split panels horizontally or vertically
   - Automatic gutter spacing between panels
   - Adjustable gutter size for precise layout control
   - Reset layout option for quick iterations
+  - Professional print guidelines showing trim and safe areas
+  - Industry-standard color coding: cyan for trim, magenta for safe area
 
-- **High-Quality Export**
+- **Professional Export Options**
   - Export layouts to PDF or PNG format
   - Select export format with convenient radio buttons
   - High-resolution panel capture
+  - Panels exported with clean black borders
+  - Print guidelines included in non-photo blue for professional printing
+  - Trim and safe area guidelines visible in exports but won't interfere with artwork
   - Maintains panel proportions and spacing
   - Clean export without UI elements
-  - Panel numbers are automatically hidden in exports
+  - Panel numbers automatically hidden in exports
   - Improved edge handling to prevent panel cropping
 
 - **Modern Interface**
