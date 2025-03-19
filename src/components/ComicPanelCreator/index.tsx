@@ -12,6 +12,9 @@ import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from './types';
 import { 
   CONTAINER_WIDTH, 
   CONTAINER_HEIGHT, 
+  TRIM_INSET_PERCENT,
+  TRIM_WIDTH_PERCENT,
+  TRIM_HEIGHT_PERCENT,
   percentToPixels, 
   pixelsToPercent, 
   generatePanelId, 
@@ -20,14 +23,21 @@ import {
 
 const ComicPanelCreator: React.FC = () => {
   const [panels, setPanels] = useState<Panel[]>([
-    { id: 'panel-1', x: 0, y: 0, width: 100, height: 100, number: 1 }
+    { 
+      id: 'panel-1', 
+      x: TRIM_INSET_PERCENT, 
+      y: (100 - TRIM_HEIGHT_PERCENT) / 2, 
+      width: TRIM_WIDTH_PERCENT, 
+      height: TRIM_HEIGHT_PERCENT, 
+      number: 1 
+    }
   ]);
   const [gutterSize, setGutterSize] = useState(10);
   const [selectedPanelId, setSelectedPanelId] = useState<string | null>(null);
   const [resizingInfo, setResizingInfo] = useState<ResizingInfo | null>(null);
   const [draggingInfo, setDraggingInfo] = useState<DraggingInfo | null>(null);
   const [showControls, setShowControls] = useState(true);
-  const [showGuides, setShowGuides] = useState(false);
+  const [showGuides, setShowGuides] = useState(true);
   const [exportFormat, setExportFormat] = useState<ExportFormat>('pdf');
   const [generatedScript, setGeneratedScript] = useState<ComicPage | null>(null);
   const [isGeneratingScript, setIsGeneratingScript] = useState(false);
@@ -139,10 +149,10 @@ const ComicPanelCreator: React.FC = () => {
     setPanels([
       {
         id: 'panel-1',
-        x: 0,
-        y: 0,
-        width: 100,
-        height: 100,
+        x: TRIM_INSET_PERCENT,
+        y: (100 - TRIM_HEIGHT_PERCENT) / 2,
+        width: TRIM_WIDTH_PERCENT,
+        height: TRIM_HEIGHT_PERCENT,
         number: 1
       }
     ]);
