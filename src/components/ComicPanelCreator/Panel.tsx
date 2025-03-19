@@ -13,6 +13,8 @@ interface PanelProps {
   onSplitVertically: (id: string) => void;
   onDelete: (id: string) => void;
   canDelete: boolean;
+  hasScript: boolean;
+  onViewScript?: (id: string) => void;
 }
 
 export const Panel: React.FC<PanelProps> = ({
@@ -26,6 +28,8 @@ export const Panel: React.FC<PanelProps> = ({
   onSplitVertically,
   onDelete,
   canDelete,
+  hasScript,
+  onViewScript,
 }) => {
   const pixelDims = percentToPixels(panel);
   const isLargeEnough = pixelDims.width > 60 && pixelDims.height > 60;
@@ -68,6 +72,18 @@ export const Panel: React.FC<PanelProps> = ({
             title="Delete Panel"
           >
             ×
+          </button>
+        )}
+        {hasScript && onViewScript && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewScript(panel.id);
+            }}
+            className="bg-purple-500 hover:bg-purple-600 text-white p-1 rounded w-6 h-6 flex items-center justify-center text-xs"
+            title="View Script"
+          >
+            📝
           </button>
         )}
       </>

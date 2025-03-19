@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ScriptModal } from './ScriptModal';
-import { ComicPage, PanelLayout } from './scriptTypes';
+import { PanelScriptModal } from './PanelScriptModal';
+import { ComicPage, PanelLayout, Panel as ScriptPanel } from './scriptTypes';
 import { generateScript, validateComicPage } from './scriptService';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -29,6 +30,7 @@ const ComicPanelCreator: React.FC = () => {
   const [generatedScript, setGeneratedScript] = useState<ComicPage | null>(null);
   const [isGeneratingScript, setIsGeneratingScript] = useState(false);
   const [showScriptModal, setShowScriptModal] = useState(false);
+  const [selectedScriptPanel, setSelectedScriptPanel] = useState<ScriptPanel | null>(null);
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
 
@@ -409,6 +411,21 @@ const ComicPanelCreator: React.FC = () => {
 
   const selectedPanel = panels.find((p: Panel) => p.id === selectedPanelId);
 
+  // Function to handle viewing script for a specific panel
+  const handleViewPanelScript = useCallback((panelId: string) => {
+    if (!generatedScript) return;
+    
+    // Find the panel number from the canvas panel id
+    const canvasPanel = panels.find(p => p.id === panelId);
+    if (!canvasPanel || canvasPanel.number === undefined) return;
+    
+    // Find the corresponding script panel by matching position
+    const scriptPanel = generatedScript.panels.find(p => p.id === canvasPanel.number);
+    if (scriptPanel) {
+      setSelectedScriptPanel(scriptPanel);
+    }
+  }, [generatedScript, panels]);
+
   return (
     <div className="p-4 flex flex-col gap-6 max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row gap-6">
@@ -493,6 +510,8 @@ const ComicPanelCreator: React.FC = () => {
                 onSplitVertically={splitPanelVertically}
                 onDelete={deletePanel}
                 canDelete={panels.length > 1}
+                hasScript={!!generatedScript}
+                onViewScript={handleViewPanelScript}
               />
             ))}
           </div>
@@ -503,6 +522,13 @@ const ComicPanelCreator: React.FC = () => {
         <ScriptModal
           script={generatedScript}
           onClose={() => setShowScriptModal(false)}
+        />
+      )}
+      
+      {selectedScriptPanel && (
+        <PanelScriptModal
+          panel={selectedScriptPanel}
+          onClose={() => setSelectedScriptPanel(null)}
         />
       )}
     </div>
