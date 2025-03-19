@@ -1,7 +1,7 @@
 import { Panel } from './types';
 
 export const CONTAINER_WIDTH = 600;
-export const ASPECT_RATIO = 5/7;
+export const ASPECT_RATIO = 5/7.5;
 export const CONTAINER_HEIGHT = CONTAINER_WIDTH / ASPECT_RATIO;
 
 export const percentToPixels = (panel: Panel) => ({
