@@ -18,7 +18,7 @@ import {
 
 const ComicPanelCreator: React.FC = () => {
   const [panels, setPanels] = useState<Panel[]>([
-    { id: 'panel-1', x: 0, y: 0, width: 100, height: 100 }
+    { id: 'panel-1', x: 0, y: 0, width: 100, height: 100, number: 1 }
   ]);
   const [gutterSize, setGutterSize] = useState(10);
   const [selectedPanelId, setSelectedPanelId] = useState<string | null>(null);
@@ -33,6 +33,27 @@ const ComicPanelCreator: React.FC = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const nextPanelId = useRef(2);
+
+  // Helper function to update panel numbers
+  const updatePanelNumbers = useCallback((updatedPanels: Panel[]): Panel[] => {
+    // Sort panels by position (top to bottom, left to right)
+    const sortedPanels = [...updatedPanels].sort((a, b) => {
+      const aPixels = percentToPixels(a);
+      const bPixels = percentToPixels(b);
+      // First sort by y (top to bottom)
+      if (Math.abs(aPixels.y - bPixels.y) > 20) { // Use a threshold to group panels in roughly the same row
+        return aPixels.y - bPixels.y;
+      }
+      // If y is similar, sort by x (left to right)
+      return aPixels.x - bPixels.x;
+    });
+
+    // Assign numbers sequentially
+    return sortedPanels.map((panel, index) => ({
+      ...panel,
+      number: index + 1
+    }));
+  }, []);
 
   const splitPanelHorizontally = useCallback((panelId: string): void => {
     const panel = findPanelById(panels, panelId);
@@ -55,13 +76,16 @@ const ComicPanelCreator: React.FC = () => {
       height: pixelsToPercent(0, 0, 0, halfHeight - gapHeight).height
     };
 
-    setPanels(prev => [
-      ...prev.filter(p => p.id !== panelId),
-      topPanel,
-      bottomPanel
-    ]);
+    setPanels(prev => {
+      const updatedPanels = [
+        ...prev.filter(p => p.id !== panelId),
+        topPanel,
+        bottomPanel
+      ];
+      return updatePanelNumbers(updatedPanels);
+    });
     setSelectedPanelId(null);
-  }, [panels, gutterSize]);
+  }, [panels, gutterSize, updatePanelNumbers]);
 
   const splitPanelVertically = useCallback((panelId: string): void => {
     const panel = findPanelById(panels, panelId);
@@ -84,21 +108,27 @@ const ComicPanelCreator: React.FC = () => {
       width: pixelsToPercent(0, 0, halfWidth - gapWidth, 0).width
     };
 
-    setPanels(prev => [
-      ...prev.filter(p => p.id !== panelId),
-      leftPanel,
-      rightPanel
-    ]);
+    setPanels(prev => {
+      const updatedPanels = [
+        ...prev.filter(p => p.id !== panelId),
+        leftPanel,
+        rightPanel
+      ];
+      return updatePanelNumbers(updatedPanels);
+    });
     setSelectedPanelId(null);
-  }, [panels, gutterSize]);
+  }, [panels, gutterSize, updatePanelNumbers]);
 
   const deletePanel = useCallback((panelId: string): void => {
     if (panels.length <= 1) return;
-    setPanels(prev => prev.filter(p => p.id !== panelId));
+    setPanels(prev => {
+      const filteredPanels = prev.filter(p => p.id !== panelId);
+      return updatePanelNumbers(filteredPanels);
+    });
     if (selectedPanelId === panelId) {
       setSelectedPanelId(null);
     }
-  }, [panels.length, selectedPanelId]);
+  }, [panels.length, selectedPanelId, updatePanelNumbers]);
 
   const resetPanels = useCallback((): void => {
     setPanels([
@@ -108,6 +138,7 @@ const ComicPanelCreator: React.FC = () => {
         y: 0,
         width: 100,
         height: 100,
+        number: 1
       }
     ]);
     nextPanelId.current = 2;
@@ -278,16 +309,29 @@ const ComicPanelCreator: React.FC = () => {
       // Clone the comic container
       const clone = containerRef.current.cloneNode(true) as HTMLElement;
       clone.style.backgroundColor = 'white';
+      clone.style.overflow = 'visible';
+      clone.style.position = 'relative';
+      clone.style.width = `${CONTAINER_WIDTH}px`;
+      clone.style.height = `${CONTAINER_HEIGHT}px`;
+      clone.style.padding = '10px'; // Add padding to prevent edge cropping
       tempContainer.appendChild(clone);
+      
+      // Hide panel numbers in the clone for export
+      const panelNumbers = clone.querySelectorAll('.panel-number');
+      panelNumbers.forEach((element) => {
+        (element as HTMLElement).style.display = 'none';
+      });
 
       // Use html2canvas to capture the comic container
       const canvas = await html2canvas(clone, {
         backgroundColor: 'white',
         scale: 2, // Higher resolution
-        width: CONTAINER_WIDTH,
-        height: CONTAINER_HEIGHT,
+        width: CONTAINER_WIDTH + 20, // Add padding to prevent cropping
+        height: CONTAINER_HEIGHT + 20,
         logging: false,
-        removeContainer: true
+        removeContainer: true,
+        x: -10, // Offset to account for padding
+        y: -10
       });
 
       // Create PDF with correct aspect ratio
@@ -404,10 +448,12 @@ const ComicPanelCreator: React.FC = () => {
 
         <div
           ref={containerRef}
-          className="relative border border-gray-300 bg-gray-100 overflow-hidden"
+          className="relative border border-gray-300 bg-gray-100"
           style={{
             width: CONTAINER_WIDTH,
             height: CONTAINER_HEIGHT,
+            overflow: 'visible',
+            position: 'relative'
           }}
           onClick={() => setSelectedPanelId(null)}
         >

@@ -4,6 +4,7 @@ export interface Panel {
   y: number;
   width: number;
   height: number;
+  number?: number; // Panel number for display
 }
 
 export interface ResizingInfo {

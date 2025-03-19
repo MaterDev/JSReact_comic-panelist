@@ -141,6 +141,13 @@ export const Panel: React.FC<PanelProps> = ({
       onClick={handleClick}
       onMouseDown={(e) => onStartDrag(e, panel.id)}
     >
+      {panel.number !== undefined && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-gray-300 text-5xl font-bold panel-number">
+            {panel.number}
+          </div>
+        </div>
+      )}
       {showControls && renderControls()}
       {showControls && renderResizeHandles()}
     </div>

@@ -27,6 +27,8 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
   - Resize panels from any edge or corner
   - Maintain aspect ratios during resizing
   - Smart panel snapping and alignment
+  - Automatic panel numbering that updates when panels are deleted or rearranged
+  - Panel numbers displayed in the center for easy reference (hidden in exports)
 
 - **Advanced Layout Tools**
   - Split panels horizontally or vertically
@@ -39,6 +41,8 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
   - High-resolution panel capture
   - Maintains panel proportions and spacing
   - Clean export without UI elements
+  - Panel numbers are automatically hidden in exports
+  - Improved edge handling to prevent panel cropping
 
 - **Modern Interface**
   - Responsive design
