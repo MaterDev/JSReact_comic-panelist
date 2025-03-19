@@ -1,13 +1,17 @@
 import React from 'react';
 import { Panel } from './types';
 
+export type ExportFormat = 'pdf' | 'png';
+
 interface ControlsProps {
   gutterSize: number;
   onGutterSizeChange: (size: number) => void;
   showControls: boolean;
   onShowControlsChange: (show: boolean) => void;
   onResetPanels: () => void;
-  onExportPDF: () => void;
+  onExport: (format: ExportFormat) => void;
+  exportFormat: ExportFormat;
+  onExportFormatChange: (format: ExportFormat) => void;
   selectedPanel: Panel | undefined;
 }
 
@@ -17,7 +21,9 @@ export const Controls: React.FC<ControlsProps> = ({
   showControls,
   onShowControlsChange,
   onResetPanels,
-  onExportPDF,
+  onExport,
+  exportFormat,
+  onExportFormatChange,
   selectedPanel,
 }) => {
   return (
@@ -60,12 +66,38 @@ export const Controls: React.FC<ControlsProps> = ({
             Reset All Panels
           </button>
 
-          <button
-            onClick={onExportPDF}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm"
-          >
-            Export as PDF
-          </button>
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center space-x-4 text-sm">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="exportFormat"
+                  value="pdf"
+                  checked={exportFormat === 'pdf'}
+                  onChange={() => onExportFormatChange('pdf')}
+                  className="mr-1"
+                />
+                PDF
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="exportFormat"
+                  value="png"
+                  checked={exportFormat === 'png'}
+                  onChange={() => onExportFormatChange('png')}
+                  className="mr-1"
+                />
+                PNG
+              </label>
+            </div>
+            <button
+              onClick={() => onExport(exportFormat)}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm"
+            >
+              Export as {exportFormat.toUpperCase()}
+            </button>
+          </div>
         </div>
 
         {selectedPanel && (
@@ -85,7 +117,7 @@ export const Controls: React.FC<ControlsProps> = ({
           <li>Drag any panel to reposition it</li>
           <li>Resize panels with the corner and edge handles</li>
           <li>Toggle "Show Controls" to hide panel controls</li>
-          <li>Controls are automatically hidden when exporting to PDF</li>
+          <li>Controls are automatically hidden when exporting</li>
         </ul>
       </div>
     </div>

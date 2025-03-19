@@ -5,7 +5,7 @@ import { generateScript, validateComicPage } from './scriptService';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Panel as PanelComponent } from './Panel';
-import { Controls } from './Controls';
+import { Controls, ExportFormat } from './Controls';
 import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from './types';
 import { 
   CONTAINER_WIDTH, 
@@ -25,6 +25,7 @@ const ComicPanelCreator: React.FC = () => {
   const [resizingInfo, setResizingInfo] = useState<ResizingInfo | null>(null);
   const [draggingInfo, setDraggingInfo] = useState<DraggingInfo | null>(null);
   const [showControls, setShowControls] = useState(true);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('pdf');
   const [generatedScript, setGeneratedScript] = useState<ComicPage | null>(null);
   const [isGeneratingScript, setIsGeneratingScript] = useState(false);
   const [showScriptModal, setShowScriptModal] = useState(false);
@@ -289,7 +290,7 @@ const ComicPanelCreator: React.FC = () => {
     }
   }, [panels, apiKey]);
 
-  const exportToPDF = useCallback(async (): Promise<void> => {
+  const exportComic = useCallback(async (format: ExportFormat): Promise<void> => {
     if (!containerRef.current) return;
 
     // Temporarily hide controls
@@ -304,6 +305,10 @@ const ComicPanelCreator: React.FC = () => {
       tempContainer.style.position = 'absolute';
       tempContainer.style.left = '-9999px';
       tempContainer.style.backgroundColor = 'white';
+      // Set explicit dimensions and reset any potential margins/borders
+      tempContainer.style.margin = '0';
+      tempContainer.style.padding = '0';
+      tempContainer.style.border = 'none';
       document.body.appendChild(tempContainer);
 
       // Clone the comic container
@@ -313,7 +318,10 @@ const ComicPanelCreator: React.FC = () => {
       clone.style.position = 'relative';
       clone.style.width = `${CONTAINER_WIDTH}px`;
       clone.style.height = `${CONTAINER_HEIGHT}px`;
-      clone.style.padding = '10px'; // Add padding to prevent edge cropping
+      // Reset all margins, borders, and padding that might affect positioning
+      clone.style.margin = '0';
+      clone.style.padding = '0';
+      clone.style.border = 'none';
       tempContainer.appendChild(clone);
       
       // Hide panel numbers in the clone for export
@@ -326,28 +334,42 @@ const ComicPanelCreator: React.FC = () => {
       const canvas = await html2canvas(clone, {
         backgroundColor: 'white',
         scale: 2, // Higher resolution
-        width: CONTAINER_WIDTH + 20, // Add padding to prevent cropping
-        height: CONTAINER_HEIGHT + 20,
+        width: CONTAINER_WIDTH, // Exact width, no padding
+        height: CONTAINER_HEIGHT, // Exact height, no padding
         logging: false,
         removeContainer: true,
-        x: -10, // Offset to account for padding
-        y: -10
+        // Ensure we capture from the exact edge
+        x: 0,
+        y: 0,
+        // Ensure the full content is captured
+        windowWidth: CONTAINER_WIDTH,
+        windowHeight: CONTAINER_HEIGHT
       });
 
-      // Create PDF with correct aspect ratio
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (CONTAINER_HEIGHT * imgWidth) / CONTAINER_WIDTH;
-      const pdf = new jsPDF({
-        orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
-        unit: 'mm',
-      });
-
-      // Add the canvas image to PDF
+      // Get image data from canvas
       const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      
+      if (format === 'pdf') {
+        // Create PDF with correct aspect ratio
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (CONTAINER_HEIGHT * imgWidth) / CONTAINER_WIDTH;
+        const pdf = new jsPDF({
+          orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
+          unit: 'mm',
+        });
 
-      // Save the PDF
-      pdf.save('comic-panels.pdf');
+        // Add the canvas image to PDF
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+        // Save the PDF
+        pdf.save('comic-panels.pdf');
+      } else if (format === 'png') {
+        // For PNG export, create a download link
+        const link = document.createElement('a');
+        link.download = 'comic-panels.png';
+        link.href = imgData;
+        link.click();
+      }
 
       // Clean up
       document.body.removeChild(tempContainer);
@@ -438,7 +460,9 @@ const ComicPanelCreator: React.FC = () => {
             showControls={showControls}
             onShowControlsChange={setShowControls}
             onResetPanels={resetPanels}
-            onExportPDF={exportToPDF}
+            onExport={exportComic}
+            exportFormat={exportFormat}
+            onExportFormatChange={setExportFormat}
             selectedPanel={selectedPanel}
           />
         </div>
