@@ -20,6 +20,7 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
     - Character profiles with age, appearance, and emotions
     - Dynamic dialogue (speech, thoughts, captions, sound effects)
     - Visual direction covering shot types, angles, lighting, and symbolism
+  - View script details for individual panels with the "View Script" button
   - Optional custom Anthropic API key support with fallback to environment config
 
 - **Dynamic Panel Management**
@@ -37,7 +38,8 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
   - Reset layout option for quick iterations
 
 - **High-Quality Export**
-  - Export layouts to PDF format
+  - Export layouts to PDF or PNG format
+  - Select export format with convenient radio buttons
   - High-resolution panel capture
   - Maintains panel proportions and spacing
   - Clean export without UI elements
@@ -111,6 +113,9 @@ The app will open in your default browser at [http://localhost:3000](http://loca
      - Character profiles including age, appearance, and emotional states
      - Various dialogue types (speech, thoughts, captions, sound effects)
      - Detailed visual direction covering shot types, angles, lighting, and symbolism
+   - View panel-specific script details by clicking the "View Script" button on any panel
+     - Each panel's script shows its specific scene details, characters, dialogue, and visual direction
+     - Makes it easy to focus on individual panels while drawing or inking
    - The script is automatically structured to follow the natural flow of your panels (left-to-right, top-to-bottom)
 
 2. **Layout Customization**
