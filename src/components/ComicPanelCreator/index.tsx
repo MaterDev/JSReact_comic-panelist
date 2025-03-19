@@ -307,10 +307,9 @@ const ComicPanelCreator: React.FC = () => {
   const exportComic = useCallback(async (format: ExportFormat): Promise<void> => {
     if (!containerRef.current) return;
 
-    // Temporarily hide controls and guidelines
+    // Temporarily hide controls but keep guidelines
     setShowControls(false);
-    const previousGuideState = showGuides;
-    setShowGuides(false);
+    // We'll keep the guidelines but modify their color in the clone
 
     try {
       // Wait for the UI to update
@@ -346,10 +345,23 @@ const ComicPanelCreator: React.FC = () => {
         (element as HTMLElement).style.display = 'none';
       });
       
-      // Make sure any guidelines are hidden in the export
+      // Convert guidelines to non-photo blue for the export
       const guideLines = clone.querySelectorAll('[data-guide-element="true"]');
       guideLines.forEach((element) => {
+        (element as HTMLElement).style.border = '1px dashed #A4DDED'; // Non-photo blue color
+        (element as HTMLElement).style.opacity = '1';
+      });
+      
+      // Hide guideline labels in the export
+      const guideLabels = clone.querySelectorAll('[data-guide-element="true"] div');
+      guideLabels.forEach((element) => {
         (element as HTMLElement).style.display = 'none';
+      });
+      
+      // Add black borders to all panels
+      const panelElements = clone.querySelectorAll('.panel');
+      panelElements.forEach((element) => {
+        (element as HTMLElement).style.border = '1px solid #000000';
       });
 
       // Use html2canvas to capture the comic container
@@ -398,9 +410,8 @@ const ComicPanelCreator: React.FC = () => {
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
-      // Restore controls and guidelines to previous state
+      // Restore controls
       setShowControls(true);
-      setShowGuides(previousGuideState);
     }
   }, [containerRef]);
 

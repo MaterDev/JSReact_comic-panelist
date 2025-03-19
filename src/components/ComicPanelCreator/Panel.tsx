@@ -145,7 +145,7 @@ export const Panel: React.FC<PanelProps> = ({
 
   return (
     <div
-      className={`absolute border-2 ${isSelected ? 'border-blue-500' : 'border-gray-400'} bg-white hover:bg-gray-50 overflow-hidden`}
+      className={`panel absolute border-2 ${isSelected ? 'border-blue-500' : 'border-gray-400'} bg-white hover:bg-gray-50 overflow-hidden`}
       style={{
         left: pixelDims.x,
         top: pixelDims.y,
