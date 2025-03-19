@@ -21,6 +21,12 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
+:root.dark .script-modal {
+  background: #1f1f1f;
+  color: #d5d5d5;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
 .close-button {
   position: absolute;
   top: 10px;
@@ -39,9 +45,18 @@
   transition: background-color 0.2s;
 }
 
+:root.dark .close-button {
+  color: #a6a6a6;
+}
+
 .close-button:hover {
   background: #f0f0f0;
   color: #333;
+}
+
+:root.dark .close-button:hover {
+  background: #333333;
+  color: #d5d5d5;
 }
 
 .script-content {
@@ -56,11 +71,19 @@
   font-size: 24px;
 }
 
+:root.dark .script-content h2 {
+  color: #d5d5d5;
+}
+
 .synopsis {
   background: #f8f9fa;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 30px;
+}
+
+:root.dark .synopsis {
+  background: #292929;
 }
 
 .panel-script {
@@ -72,10 +95,20 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+:root.dark .panel-script {
+  background: #292929;
+  border: 1px solid #333333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 .panel-script h4 {
   color: #2c3e50;
   margin-bottom: 15px;
   font-size: 18px;
+}
+
+:root.dark .panel-script h4 {
+  color: #a6a6a6;
 }
 
 .scene, .characters, .dialogue, .visual-direction {
@@ -85,6 +118,13 @@
   border-radius: 6px;
 }
 
+:root.dark .scene, 
+:root.dark .characters, 
+:root.dark .dialogue, 
+:root.dark .visual-direction {
+  background: #1f1f1f;
+}
+
 .character, .dialogue-entry {
   margin: 10px 0;
   padding: 10px;
@@ -92,10 +132,19 @@
   background: white;
 }
 
+:root.dark .character, 
+:root.dark .dialogue-entry {
+  background: #292929;
+}
+
 .dialogue-text {
   font-style: italic;
   margin: 5px 0;
   color: #2c3e50;
+}
+
+:root.dark .dialogue-text {
+  color: #a6a6a6;
 }
 
 /* Scrollbar styling */

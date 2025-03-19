@@ -1,5 +1,13 @@
 import { PanelLayout, ComicPage } from '../../../shared/types/comic';
 
+export interface CreativeDirection {
+  genre?: string;
+  emotion?: string;
+  inspiration?: string;
+  inspirationText?: string;
+  exclusions?: string;
+}
+
 
 
 const FETCH_TIMEOUT = 110000; // 110 seconds, slightly less than server timeout
@@ -24,14 +32,14 @@ const fetchWithTimeout = async (url: string, options: RequestInit) => {
   }
 };
 
-export async function generateScript(layout: PanelLayout, apiKey?: string): Promise<ComicPage> {
+export async function generateScript(layout: PanelLayout, apiKey?: string, layoutImage?: string, creativeDirection?: CreativeDirection): Promise<ComicPage> {
   try {
     const response = await fetchWithTimeout('http://localhost:3001/api/generate-script', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ layout, apiKey })
+      body: JSON.stringify({ layout, apiKey, layoutImage, creativeDirection })
     });
 
     if (!response.ok) {

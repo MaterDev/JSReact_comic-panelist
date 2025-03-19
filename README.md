@@ -1,10 +1,23 @@
 # Comic Panel Creator
 
-A React-based tool for creating and managing comic panel layouts with an intuitive drag-and-drop interface. Create dynamic comic page layouts with customizable panels, generate AI-powered scripts based on your layout, export to PDF or PNG, and maintain precise control over your comic page design. The application uses industry-standard 5.25 x 7.75 inch proportions for comic book bleed size, with professional print guidelines for trim and safe areas.
+Comic Panel Creator is a practice tool designed for aspiring comic artists who want to improve their storytelling and drawing skills. This application helps you create single-page layouts and simple one-page stories with an intuitive drag-and-drop interface. 
 
-| Main Screenshot | Script Modal Screenshot |
+Designed specifically for practice purposes, the tool allows you to:
+- Create professional comic panel layouts with industry-standard dimensions
+- Generate AI-powered scripts based on your layouts to inspire your storytelling
+- Customize the creative direction of your stories with genre, tone, and inspiration inputs
+- Export your layouts to PDF or PNG for use in drawing software or for printing
+- Practice drawing within professional print guidelines with trim and safe areas
+
+The application uses industry-standard manga dimensions (5.25 x 7.75 inch proportions), making it perfect for artists who want to practice with authentic manga page layouts and proportions.
+
+### Main Application
+![Comic Panel Creator Screenshot](/images/full-dom-screenshot.png)
+
+### Script View and AI Image Preview
+| Script View | AI Image Preview |
 | --- | --- |
-| ![Comic Panel Creator Screenshot](screenshot.png) | ![Script Modal Screenshot](screenshot2.png) |
+| ![Script Modal Screenshot](/images/script-view-screenshot.png) | ![AI Image Preview](/images/ai-image-preview-screenshot.png) |
 
 ## Features
 
@@ -20,6 +33,12 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
     - Character profiles with age, appearance, and emotions
     - Dynamic dialogue (speech, thoughts, captions, sound effects)
     - Visual direction covering shot types, angles, lighting, and symbolism
+  - Creative direction controls for customizing script generation:
+    - Genre (e.g., Sci-fi, Fantasy, Noir)
+    - Emotional tone (e.g., Suspenseful, Humorous, Melancholic)
+    - Inspiration sources (e.g., Film noir, Miyazaki, Cyberpunk)
+    - Inspiration text for longer descriptions or excerpts
+    - Exclusions to specify content to avoid
   - View script details for individual panels with the "View Script" button
   - Optional custom Anthropic API key support with fallback to environment config
 
@@ -32,22 +51,22 @@ A React-based tool for creating and managing comic panel layouts with an intuiti
   - Panel numbers displayed in the center for easy reference (hidden in exports)
   - Initial panel automatically sized to the trim area
 
-- **Advanced Layout Tools**
+- **Advanced Manga Layout Tools**
   - Split panels horizontally or vertically
   - Automatic gutter spacing between panels
-  - Adjustable gutter size for precise layout control
+  - Adjustable gutter size for precise manga layout control
   - Reset layout option for quick iterations
-  - Professional print guidelines showing trim and safe areas
+  - Professional manga print guidelines showing trim and safe areas
   - Industry-standard color coding: cyan for trim, magenta for safe area
 
-- **Professional Export Options**
+- **Professional Manga Export Options**
   - Export layouts to PDF or PNG format
   - Select export format with convenient radio buttons
   - High-resolution panel capture
   - Panels exported with clean black borders
-  - Print guidelines included in non-photo blue for professional printing
+  - Print guidelines included in non-photo blue for professional manga printing
   - Trim and safe area guidelines visible in exports but won't interfere with artwork
-  - Maintains panel proportions and spacing
+  - Maintains authentic manga panel proportions and spacing
   - Clean export without UI elements
   - Panel numbers automatically hidden in exports
   - Improved edge handling to prevent panel cropping
@@ -111,7 +130,15 @@ The app will open in your default browser at [http://localhost:3000](http://loca
      - Add small panels for quick action sequences or rapid dialogue
    - (Optional) Enter your Anthropic API key in the input field
      - If not provided, the app will use the API key from your environment config
+   - (Optional) Provide creative direction to guide the script generation:
+     - Click the "Creative Direction" dropdown to reveal input fields
+     - Enter genre preferences (e.g., Sci-fi, Fantasy, Noir)
+     - Specify emotional tone (e.g., Suspenseful, Humorous, Melancholic)
+     - Suggest inspirations (e.g., Film noir, Miyazaki, Cyberpunk)
+     - Add longer inspiration text for more detailed guidance
+     - List any content you want to exclude from the script
    - Click "Generate Script" to create a complete comic script
+     - Preview the panel layout image that will be sent to the AI by clicking the "Preview" button
      - Please allow up to 2 minutes for the AI to analyze your layout and generate the script
    - View the generated script in a modal window, which includes:
      - Title and synopsis of the story
@@ -152,10 +179,15 @@ The app will open in your default browser at [http://localhost:3000](http://loca
 - `npm run build` - Creates a production build
 - `npm test` - Runs the test suite
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the Mater Development Dynamic Version License (MDDVL) Version 2.0.
+
+The MDDVL is a custom license that grants non-exclusive, non-transferable, royalty-free use for personal and educational purposes. Key provisions include:
+
+- Personal use only with restrictions on modification and redistribution
+- Commercial use requires express written permission from Mater Development
+- Proper attribution and links to original source material required
+- Subject to a Version Control and Selection Framework
+
+See the [LICENSE](LICENSE) file for the complete terms and conditions.

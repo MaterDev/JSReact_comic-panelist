@@ -1,0 +1,84 @@
+Mater Development Dynamic Version License (MDDVL)
+Version 2.0
+
+Copyright (c) 2025 Mater Development
+
+---
+
+VERSION CONTROL AND SELECTION FRAMEWORK
+
+1. Version Hierarchy
+   This License exists as a continuous stream of versions, each building upon previous versions. Each version is preserved in perpetuity at https://github.com/materdevelopment/license/versions. The most current version of this License automatically supersedes all previous versions unless otherwise elected by Licensor.
+
+2. Version Selection Rights
+   Licensor retains the right to:
+   - Apply any specific version of this License in its entirety
+   - Select and combine distinct elements from different versions of this License
+   - Specify which version(s) apply to any specific dispute or legal proceeding
+
+   Such selections must be:
+   - Documented in writing
+   - Communicated to relevant parties
+   - Recorded in the version registry
+
+   Version selections cannot be made retroactively to prejudice existing disputes.
+
+3. Version Documentation
+   - All versions are permanently archived and accessible
+   - Changes between versions are documented in the changelog
+   - Each distinct provision is uniquely identified for reference
+   - Version selections are recorded in the public registry
+
+TERMS AND CONDITIONS
+
+1. Preamble
+This license ("MDDVL") applies to the software provided under this license ("Software") and any associated documentation or materials made available by Mater Development ("Licensor"). By using, copying, or distributing the Software, you ("Licensee") agree to be bound by the terms of this License, including its dynamic versioning framework.
+
+2. Grant of License
+Subject to the terms of this License, Licensor grants Licensee a non-exclusive, non-transferable, royalty-free license to use the Software for personal and educational purposes. This grant is subject to the Version Control and Selection Framework detailed above.
+
+3. Restrictions
+a) Modification and Derivative Works: Licensee may modify the Software for personal use only. Creation of derivative works for redistribution is prohibited without express written permission from Licensor. Personal use includes use that is not for profit, commercial gain, or intended for distribution.
+
+b) Redistribution: Licensee shall not distribute, sublicense, or transfer the Software to any third party without express written permission from Licensor.
+
+c) Commercial Use: Licensee shall not use the Software for commercial purposes, including but not limited to selling, licensing, or monetizing the Software, without express written permission from Licensor. Commercial use includes any activity that generates revenue or is intended for commercial advantage or monetary compensation.
+
+4. Attribution and Links
+Licensee must include proper attribution to Licensor and links to the original source material of the Software in any use of the Software.
+
+5. Disclaimer of Warranty
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+6. Limitation of Liability
+IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+7. Termination
+This License shall automatically terminate if Licensee breaches any of its terms and conditions. Upon termination, Licensee must cease all use and destroy all copies of the Software. Termination does not affect any rights or obligations that arose prior to termination.
+
+8. General
+a) Governing Law: This License shall be governed by the laws of the jurisdiction in which Licensor is located.
+
+b) Dispute Resolution:
+   - Any disputes related to this License shall be subject to the exclusive jurisdiction of the courts in that jurisdiction
+   - Licensor may, at its sole discretion, elect to resolve disputes through mediation or arbitration
+   - Version selection for dispute resolution must be made at the initiation of proceedings
+
+c) Version Control:
+   - All version selections must be documented and filed with any legal proceedings
+   - Courts shall enforce version selections made in accordance with the Version Control and Selection Framework
+   - In the absence of a specific version selection, the most current version applies
+
+9. Contributions
+If Licensee submits any contributions to the Software, Licensee agrees that such contributions are provided on a voluntary basis and Licensor is granted a perpetual, irrevocable, royalty-free, and worldwide license to use, reproduce, modify, display, distribute, and sublicense the contributions as part of the Software.
+
+10. Acknowledgement
+Licensee acknowledges that they have read this License, understand it, and agree to be bound by its terms and conditions, including the Version Control and Selection Framework.
+
+-----------------------------------------------------------
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Mater Development => Forever...
