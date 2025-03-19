@@ -1,6 +1,6 @@
 # Comic Panel Creator
 
-A React-based tool for creating and managing comic panel layouts with an intuitive drag-and-drop interface. Create dynamic comic page layouts with customizable panels, generate AI-powered scripts based on your layout, export to PDF, and maintain precise control over your comic page design.
+A React-based tool for creating and managing comic panel layouts with an intuitive drag-and-drop interface. Create dynamic comic page layouts with customizable panels, generate AI-powered scripts based on your layout, export to PDF, and maintain precise control over your comic page design. The application uses industry-standard 5.25 x 7.75 inch proportions for comic book bleed size.
 
 | Main Screenshot | Script Modal Screenshot |
 | --- | --- |
