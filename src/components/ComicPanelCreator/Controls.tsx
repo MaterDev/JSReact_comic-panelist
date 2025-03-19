@@ -8,6 +8,8 @@ interface ControlsProps {
   onGutterSizeChange: (size: number) => void;
   showControls: boolean;
   onShowControlsChange: (show: boolean) => void;
+  showGuides: boolean;
+  onShowGuidesChange: (show: boolean) => void;
   onResetPanels: () => void;
   onExport: (format: ExportFormat) => void;
   exportFormat: ExportFormat;
@@ -20,6 +22,8 @@ export const Controls: React.FC<ControlsProps> = ({
   onGutterSizeChange,
   showControls,
   onShowControlsChange,
+  showGuides,
+  onShowGuidesChange,
   onResetPanels,
   onExport,
   exportFormat,
@@ -54,6 +58,14 @@ export const Controls: React.FC<ControlsProps> = ({
                 onChange={(e) => onShowControlsChange(e.target.checked)}
               />
               Show Controls
+            </label>
+            <label className="flex items-center gap-1 text-sm ml-4">
+              <input
+                type="checkbox"
+                checked={showGuides}
+                onChange={(e) => onShowGuidesChange(e.target.checked)}
+              />
+              Show Print Guides
             </label>
           </div>
         </div>

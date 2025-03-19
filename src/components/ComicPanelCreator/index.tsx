@@ -7,6 +7,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Panel as PanelComponent } from './Panel';
 import { Controls, ExportFormat } from './Controls';
+import { GuideLines } from './GuideLines';
 import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from './types';
 import { 
   CONTAINER_WIDTH, 
@@ -26,6 +27,7 @@ const ComicPanelCreator: React.FC = () => {
   const [resizingInfo, setResizingInfo] = useState<ResizingInfo | null>(null);
   const [draggingInfo, setDraggingInfo] = useState<DraggingInfo | null>(null);
   const [showControls, setShowControls] = useState(true);
+  const [showGuides, setShowGuides] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>('pdf');
   const [generatedScript, setGeneratedScript] = useState<ComicPage | null>(null);
   const [isGeneratingScript, setIsGeneratingScript] = useState(false);
@@ -295,8 +297,10 @@ const ComicPanelCreator: React.FC = () => {
   const exportComic = useCallback(async (format: ExportFormat): Promise<void> => {
     if (!containerRef.current) return;
 
-    // Temporarily hide controls
+    // Temporarily hide controls and guidelines
     setShowControls(false);
+    const previousGuideState = showGuides;
+    setShowGuides(false);
 
     try {
       // Wait for the UI to update
@@ -326,9 +330,15 @@ const ComicPanelCreator: React.FC = () => {
       clone.style.border = 'none';
       tempContainer.appendChild(clone);
       
-      // Hide panel numbers in the clone for export
+      // Hide panel numbers and guidelines in the clone for export
       const panelNumbers = clone.querySelectorAll('.panel-number');
       panelNumbers.forEach((element) => {
+        (element as HTMLElement).style.display = 'none';
+      });
+      
+      // Make sure any guidelines are hidden in the export
+      const guideLines = clone.querySelectorAll('[data-guide-element="true"]');
+      guideLines.forEach((element) => {
         (element as HTMLElement).style.display = 'none';
       });
 
@@ -378,8 +388,9 @@ const ComicPanelCreator: React.FC = () => {
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
-      // Restore controls
+      // Restore controls and guidelines to previous state
       setShowControls(true);
+      setShowGuides(previousGuideState);
     }
   }, [containerRef]);
 
@@ -476,6 +487,8 @@ const ComicPanelCreator: React.FC = () => {
             onGutterSizeChange={setGutterSize}
             showControls={showControls}
             onShowControlsChange={setShowControls}
+            showGuides={showGuides}
+            onShowGuidesChange={setShowGuides}
             onResetPanels={resetPanels}
             onExport={exportComic}
             exportFormat={exportFormat}
@@ -497,6 +510,7 @@ const ComicPanelCreator: React.FC = () => {
             }}
             onClick={() => setSelectedPanelId(null)}
           >
+            <GuideLines showGuides={showGuides} />
             {panels.map(panel => (
               <PanelComponent
                 key={panel.id}
