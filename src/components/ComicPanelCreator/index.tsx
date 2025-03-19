@@ -388,90 +388,90 @@ const ComicPanelCreator: React.FC = () => {
   const selectedPanel = panels.find((p: Panel) => p.id === selectedPanelId);
 
   return (
-    <div className="p-4 flex flex-col gap-6 max-w-4xl">
-      <h1 className="text-2xl font-bold">Independent Comic Panel Creator (5:7 Ratio)</h1>
+    <div className="p-4 flex flex-col gap-6 max-w-6xl mx-auto">
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Left side - Control Panel */}
+        <div className="md:w-1/3 flex flex-col gap-4">
+        <h1 className="text-2xl font-bold">Comic Panel Creator</h1>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <h2 className="text-lg font-semibold mb-3">Script Controls</h2>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={generatePanelScript}
+                disabled={isGeneratingScript}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 w-full"
+              >
+                {isGeneratingScript ? 'Generating...' : 'Generate Script'}
+              </button>
+              {generatedScript && (
+                <button
+                  onClick={() => setShowScriptModal(true)}
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 w-full"
+                >
+                  View Script
+                </button>
+              )}
+              <form className="relative w-full" onSubmit={(e) => e.preventDefault()}>
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  placeholder="Anthropic API Key (optional)"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md text-sm"
+                  name="apiKey"
+                  autoComplete="current-password"
+                />
+                <button
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm px-2 py-1"
+                  type="button"
+                >
+                  {showApiKey ? 'Hide' : 'Show'}
+                </button>
+              </form>
+            </div>
+          </div>
 
-      <div className="flex gap-4 mb-4 items-center justify-between">
-        <div className="flex gap-4">
-          <button
-            onClick={generatePanelScript}
-            disabled={isGeneratingScript}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-          >
-            {isGeneratingScript ? 'Generating...' : 'Generate Script'}
-          </button>
-          {generatedScript && (
-            <button
-              onClick={() => setShowScriptModal(true)}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              View Script
-            </button>
-          )}
-        </div>
-        <form className="relative flex-1 max-w-md" onSubmit={(e) => e.preventDefault()}>
-          <input
-            type={showApiKey ? 'text' : 'password'}
-            placeholder="Anthropic API Key (optional)"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="w-full px-3 py-2 border rounded-md text-sm"
-            name="apiKey"
-            autoComplete="current-password"
+          <Controls
+            gutterSize={gutterSize}
+            onGutterSizeChange={setGutterSize}
+            showControls={showControls}
+            onShowControlsChange={setShowControls}
+            onResetPanels={resetPanels}
+            onExportPDF={exportToPDF}
+            selectedPanel={selectedPanel}
           />
-          <button
-            onClick={() => setShowApiKey(!showApiKey)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-sm px-2 py-1"
-            type="button"
+        </div>
+
+        {/* Right side - Comic Page */}
+        <div className="md:w-2/3 flex justify-center items-start">
+          <div
+            ref={containerRef}
+            className="relative border border-gray-300 bg-gray-100 shadow-md"
+            style={{
+              width: CONTAINER_WIDTH,
+              height: CONTAINER_HEIGHT,
+              overflow: 'visible',
+              position: 'relative'
+            }}
+            onClick={() => setSelectedPanelId(null)}
           >
-            {showApiKey ? 'Hide' : 'Show'}
-          </button>
-        </form>
-        <button
-          onClick={exportToPDF}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          Export to PDF
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Controls
-          gutterSize={gutterSize}
-          onGutterSizeChange={setGutterSize}
-          showControls={showControls}
-          onShowControlsChange={setShowControls}
-          onResetPanels={resetPanels}
-          onExportPDF={exportToPDF}
-          selectedPanel={selectedPanel}
-        />
-
-        <div
-          ref={containerRef}
-          className="relative border border-gray-300 bg-gray-100"
-          style={{
-            width: CONTAINER_WIDTH,
-            height: CONTAINER_HEIGHT,
-            overflow: 'visible',
-            position: 'relative'
-          }}
-          onClick={() => setSelectedPanelId(null)}
-        >
-          {panels.map(panel => (
-            <PanelComponent
-              key={panel.id}
-              panel={panel}
-              isSelected={panel.id === selectedPanelId}
-              showControls={showControls}
-              onSelect={setSelectedPanelId}
-              onStartDrag={startDrag}
-              onStartResize={startResize}
-              onSplitHorizontally={splitPanelHorizontally}
-              onSplitVertically={splitPanelVertically}
-              onDelete={deletePanel}
-              canDelete={panels.length > 1}
-            />
-          ))}
+            {panels.map(panel => (
+              <PanelComponent
+                key={panel.id}
+                panel={panel}
+                isSelected={panel.id === selectedPanelId}
+                showControls={showControls}
+                onSelect={setSelectedPanelId}
+                onStartDrag={startDrag}
+                onStartResize={startResize}
+                onSplitHorizontally={splitPanelHorizontally}
+                onSplitVertically={splitPanelVertically}
+                onDelete={deletePanel}
+                canDelete={panels.length > 1}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
