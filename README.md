@@ -115,60 +115,14 @@ The app will open in your default browser at [http://localhost:3000](http://loca
 
 ## Usage
 
-1. **Collection Management**
-   - Create new collections (books) to organize your comic pages
-   - Add different page types: front covers, standard pages, and back covers
-   - View your pages in a visual library with thumbnails
-   - Load pages for editing with a single click
-   - Delete pages you no longer need with a confirmation dialog
-   - Pages automatically maintain sequential display order
+Comic Panel Creator includes comprehensive built-in instructions accessible from the application interface. Click the "Instructions" button in the top navigation bar to access a detailed guide covering:
 
-2. **Panel Creation and Management**
-   - Start with a default panel
-   - Use the resize handles to adjust panel dimensions
-   - Drag panels to reposition them on the page
-   - Click panel controls to split or delete panels
+- Collection management for organizing comic books
+- Panel creation and manipulation
+- AI script generation with creative direction controls
+- Layout customization and export options
 
-2. **Script Generation**
-   - Create your desired panel layout - the AI will interpret panel sizes and positions for storytelling:
-     - Use larger panels for important dramatic moments
-     - Create wide panels for establishing shots or panoramic views
-     - Design tall panels for character moments or vertical action
-     - Add small panels for quick action sequences or rapid dialogue
-   - (Optional) Enter your Anthropic API key in the input field
-     - If not provided, the app will use the API key from your environment config
-   - (Optional) Provide creative direction to guide the script generation:
-     - Click the "Creative Direction" dropdown to reveal input fields
-     - Enter genre preferences (e.g., Sci-fi, Fantasy, Noir)
-     - Specify emotional tone (e.g., Suspenseful, Humorous, Melancholic)
-     - Suggest inspirations (e.g., Film noir, Miyazaki, Cyberpunk)
-     - Add longer inspiration text for more detailed guidance
-     - List any content you want to exclude from the script
-   - Click "Generate Script" to create a complete comic script
-     - Preview the panel layout image that will be sent to the AI by clicking the "Preview" button
-     - Please allow up to 2 minutes for the AI to analyze your layout and generate the script
-   - View the generated script in a modal window, which includes:
-     - Title and synopsis of the story
-     - Scene descriptions with setting, time, and weather details
-     - Character profiles including age, appearance, and emotional states
-     - Various dialogue types (speech, thoughts, captions, sound effects)
-     - Detailed visual direction covering shot types, angles, lighting, and symbolism
-   - View panel-specific script details by clicking the "View Script" button on any panel
-     - Each panel's script shows its specific scene details, characters, dialogue, and visual direction
-     - Makes it easy to focus on individual panels while drawing or inking
-   - The script is automatically structured to follow the natural flow of your panels (left-to-right, top-to-bottom)
-
-3. **Layout Customization**
-   - Adjust gutter size using the controls
-   - Split panels horizontally or vertically for complex layouts
-   - Reset the layout to start fresh
-   - Drag panels to create dynamic arrangements
-
-4. **Exporting Your Work**
-   - Click the "Export to PDF" button
-   - The layout will be captured in high resolution
-   - A PDF will be generated with your panel layout
-   - Download and save your work
+The instructions are organized into easy-to-navigate sections with a dropdown menu for quick access to specific topics.
 
 ## Built With
 
