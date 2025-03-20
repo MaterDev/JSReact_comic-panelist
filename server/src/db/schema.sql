@@ -14,11 +14,8 @@ CREATE TABLE IF NOT EXISTS layouts (
   name VARCHAR(255) NOT NULL,
   display_order INTEGER NOT NULL, -- Explicit ordering field
   page_type VARCHAR(50) NOT NULL, -- 'front_cover', 'back_cover', 'standard'
-  is_full_page BOOLEAN DEFAULT FALSE, -- Flag for full-page panel layouts
   panel_data JSONB NOT NULL, -- Store the panel layout data as JSON
-  thumbnail_path VARCHAR(255), -- Path to the thumbnail image
   script_data JSONB, -- Store the generated script if available
-  creative_direction JSONB, -- Store creative direction parameters
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(collection_id, display_order) -- Ensure order is unique within a collection
