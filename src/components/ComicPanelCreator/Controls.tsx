@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Panel } from './types';
-import InstructionsModal from './InstructionsModal';
 
 export type ExportFormat = 'pdf' | 'png';
 
