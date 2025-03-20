@@ -14,10 +14,8 @@ The application uses industry-standard manga dimensions (5.25 x 7.75 inch propor
 ### Main Application
 ![Comic Panel Creator Screenshot](/images/full-dom-screenshot.png)
 
-### Script View and AI Image Preview
-| Script View | AI Image Preview |
-| --- | --- |
-| ![Script Modal Screenshot](/images/script-view-screenshot.png) | ![AI Image Preview](/images/ai-image-preview-screenshot.png) |
+### Collection Management
+The collection management system allows you to organize your comic pages into complete books with covers, standard pages, and back covers. Pages are displayed in a visual library that makes it easy to manage your comic projects.
 
 ## Features
 
@@ -41,6 +39,16 @@ The application uses industry-standard manga dimensions (5.25 x 7.75 inch propor
     - Exclusions to specify content to avoid
   - View script details for individual panels with the "View Script" button
   - Optional custom Anthropic API key support with fallback to environment config
+
+- **Complete Comic Book Management**
+  - Save and manage multiple comic layouts as part of complete books
+  - Organize layouts into named collections (books)
+  - Generate and store thumbnails for quick visual reference
+  - View layouts in a comic spread format similar to professional layout software
+  - Display paired pages side by side as they would appear in a physical book
+  - Designate special pages for front and back covers
+  - Browse through multiple books in a library-like interface
+  - Delete pages with confirmation to prevent accidental deletions
 
 - **Dynamic Panel Management**
   - Drag and drop panels to reposition
@@ -116,7 +124,15 @@ The app will open in your default browser at [http://localhost:3000](http://loca
 
 ## Usage
 
-1. **Panel Creation and Management**
+1. **Collection Management**
+   - Create new collections (books) to organize your comic pages
+   - Add different page types: front covers, standard pages, and back covers
+   - View your pages in a visual library with thumbnails
+   - Load pages for editing with a single click
+   - Delete pages you no longer need with a confirmation dialog
+   - Pages automatically maintain sequential display order
+
+2. **Panel Creation and Management**
    - Start with a default panel
    - Use the resize handles to adjust panel dimensions
    - Drag panels to reposition them on the page
@@ -151,13 +167,13 @@ The app will open in your default browser at [http://localhost:3000](http://loca
      - Makes it easy to focus on individual panels while drawing or inking
    - The script is automatically structured to follow the natural flow of your panels (left-to-right, top-to-bottom)
 
-2. **Layout Customization**
+3. **Layout Customization**
    - Adjust gutter size using the controls
    - Split panels horizontally or vertically for complex layouts
    - Reset the layout to start fresh
    - Drag panels to create dynamic arrangements
 
-3. **Exporting Your Work**
+4. **Exporting Your Work**
    - Click the "Export to PDF" button
    - The layout will be captured in high resolution
    - A PDF will be generated with your panel layout
