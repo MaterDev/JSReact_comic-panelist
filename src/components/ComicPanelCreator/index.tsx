@@ -26,6 +26,33 @@ import {
 // Import the CollectionManager component
 import CollectionManager from '../CollectionManager';
 
+// Import Layout type
+interface LayoutPanel {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  number: number;
+}
+
+interface Layout {
+  id: number;
+  collection_id: number;
+  name: string;
+  display_order: number;
+  page_type: 'front_cover' | 'back_cover' | 'standard';
+  is_full_page: boolean;
+  panel_data: {
+    panels: LayoutPanel[];
+  };
+  thumbnail_path?: string;
+  script_data?: any;
+  creative_direction?: any;
+  created_at: Date;
+  updated_at: Date;
+}
+
 const ComicPanelCreator: React.FC = () => {
   const [panels, setPanels] = useState<Panel[]>([
     { 
@@ -57,9 +84,15 @@ const ComicPanelCreator: React.FC = () => {
   const [genre, setGenre] = useState('');
   const [emotion, setEmotion] = useState('');
   const [inspiration, setInspiration] = useState('');
+  
+  // Layout loading state
+  const [loadedLayout, setLoadedLayout] = useState<Layout | null>(null);
   const [inspirationText, setInspirationText] = useState('');
   const [exclusions, setExclusions] = useState('');
   const [showCreativeInputs, setShowCreativeInputs] = useState(false);
+  
+  // Track unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const nextPanelId = useRef(2);
@@ -112,6 +145,9 @@ const ComicPanelCreator: React.FC = () => {
         topPanel,
         bottomPanel
       ];
+      if (loadedLayout) {
+        setHasUnsavedChanges(true);
+      }
       return updatePanelNumbers(updatedPanels);
     });
     setSelectedPanelId(null);
@@ -248,18 +284,25 @@ const ComicPanelCreator: React.FC = () => {
     }
 
     const newPercentDims = pixelsToPercent(newX, newY, newWidth, newHeight);
-    setPanels(prev => prev.map(p =>
-      p.id === panelId
-        ? {
-            ...p,
-            x: newPercentDims.x,
-            y: newPercentDims.y,
-            width: newPercentDims.width,
-            height: newPercentDims.height
-          }
-        : p
-    ));
-  }, [resizingInfo]);
+    setPanels(prev => {
+      // Mark as having unsaved changes if a layout is loaded
+      if (loadedLayout) {
+        setHasUnsavedChanges(true);
+      }
+      
+      return prev.map(p =>
+        p.id === panelId
+          ? {
+              ...p,
+              x: newPercentDims.x,
+              y: newPercentDims.y,
+              width: newPercentDims.width,
+              height: newPercentDims.height
+            }
+          : p
+      );
+    });
+  }, [resizingInfo, loadedLayout]);
 
   const handleDrag = useCallback((e: MouseEvent): void => {
     if (!draggingInfo || !containerRef.current) return;
@@ -280,12 +323,19 @@ const ComicPanelCreator: React.FC = () => {
     const newY = Math.max(0, Math.min(CONTAINER_HEIGHT - pixelDims.height, originalY + deltaY));
 
     const newPercentPos = pixelsToPercent(newX, newY, 0, 0);
-    setPanels(prev => prev.map(p =>
-      p.id === panelId
-        ? { ...p, x: newPercentPos.x, y: newPercentPos.y }
-        : p
-    ));
-  }, [draggingInfo, panels]);
+    setPanels(prev => {
+      // Mark as having unsaved changes if a layout is loaded
+      if (loadedLayout) {
+        setHasUnsavedChanges(true);
+      }
+      
+      return prev.map(p =>
+        p.id === panelId
+          ? { ...p, x: newPercentPos.x, y: newPercentPos.y }
+          : p
+      );
+    });
+  }, [draggingInfo, panels, loadedLayout]);
 
   const generatePreviewImage = useCallback(async (): Promise<string> => {
     // Check if container reference exists
@@ -584,22 +634,306 @@ const ComicPanelCreator: React.FC = () => {
     }
   }, [generatedScript, panels]);
 
+  // Function to handle loading a layout from the CollectionManager
+  const handleLoadLayout = useCallback((layout: Layout) => {
+    setLoadedLayout(layout);
+    
+    // Set panels from the loaded layout
+    if (layout.panel_data && Array.isArray(layout.panel_data.panels)) {
+      setPanels(layout.panel_data.panels);
+    }
+    
+    // Set script if available
+    if (layout.script_data) {
+      // Validate the script data to ensure it's a valid ComicPage
+      try {
+        const validatedScript = validateComicPage(layout.script_data);
+        setGeneratedScript(validatedScript);
+      } catch (error) {
+        console.error('Invalid script data in layout:', error);
+        setGeneratedScript(null);
+      }
+    } else {
+      setGeneratedScript(null);
+    }
+    
+    // Set creative direction if available
+    if (layout.creative_direction) {
+      const { genre, emotion, inspiration, inspirationText, exclusions } = layout.creative_direction;
+      if (genre) setGenre(genre);
+      if (emotion) setEmotion(emotion);
+      if (inspiration) setInspiration(inspiration);
+      if (inspirationText) setInspirationText(inspirationText);
+      if (exclusions) setExclusions(exclusions);
+    }
+  }, []);
+
   const [showInstructions, setShowInstructions] = useState(false);
+  const [isSavingLayout, setIsSavingLayout] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [currentCollection, setCurrentCollection] = useState<{ id: number; name: string; description?: string } | null>(null);
+  
+  // Function to save the current layout back to the database
+  const saveCurrentLayout = useCallback(async () => {
+    if (!loadedLayout) return;
+    
+    try {
+      setIsSavingLayout(true);
+      
+      // Create a copy of the loaded layout with updated panel data
+      // Convert Panel[] to LayoutPanel[] by ensuring all panels have a number property
+      const layoutPanels = panels.map(panel => ({
+        ...panel,
+        // Ensure number is always defined (use panel.number if defined, otherwise 0)
+        number: panel.number !== undefined ? panel.number : 0
+      }));
+      
+      const updatedLayout = {
+        ...loadedLayout,
+        panel_data: {
+          panels: layoutPanels
+        },
+        script_data: generatedScript,
+        creative_direction: {
+          genre,
+          emotion,
+          inspiration,
+          inspirationText,
+          exclusions
+        }
+      };
+      
+      // Generate a thumbnail for the updated layout
+      const thumbnailBase64 = await generatePreviewImage();
+      
+      // Send the update to the server
+      const response = await fetch(`http://localhost:3001/api/layouts/${loadedLayout.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: loadedLayout.name,
+          collection_id: loadedLayout.collection_id,
+          panel_data: updatedLayout.panel_data,
+          script_data: updatedLayout.script_data,
+          creative_direction: updatedLayout.creative_direction,
+          thumbnailBase64
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update layout');
+      }
+      
+      // Update the loaded layout with the new data
+      setLoadedLayout(updatedLayout as Layout);
+      
+      // Reset unsaved changes flag
+      setHasUnsavedChanges(false);
+      
+      // If the layout belongs to a collection, update the collection information
+      if (loadedLayout.collection_id) {
+        // Fetch the collection information
+        const fetchCollection = async () => {
+          try {
+            const response = await fetch(`http://localhost:3001/api/collections/${loadedLayout.collection_id}`);
+            if (response.ok) {
+              const collection = await response.json();
+              // Update the current collection state
+              setCurrentCollection({
+                id: collection.id,
+                name: collection.name,
+                description: collection.description
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching collection:', error);
+          }
+        };
+        fetchCollection();
+      }
+      
+      // Trigger a refresh of the collection manager layouts
+      setRefreshKey(prevKey => prevKey + 1);
+      
+      // Show success message
+      alert(`Layout "${loadedLayout.name}" has been updated successfully.`);
+    } catch (error) {
+      console.error('Error saving layout:', error);
+      alert(`Failed to save layout: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSavingLayout(false);
+    }
+  }, [loadedLayout, panels, generatedScript, genre, emotion, inspiration, inspirationText, exclusions, generatePreviewImage]);
+  
+  // Function to close the current layout
+  const closeCurrentLayout = useCallback(() => {
+    // Check if there are unsaved changes
+    if (hasUnsavedChanges) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to close this layout?')) {
+        // Reset layout
+        setLoadedLayout(null);
+        
+        // Reset panels to default
+        resetPanels();
+        
+        // Reset script
+        setGeneratedScript(null);
+        
+        // Reset creative direction
+        setGenre('');
+        setEmotion('');
+        setInspiration('');
+        setInspirationText('');
+        setExclusions('');
+        
+        // Reset unsaved changes flag
+        setHasUnsavedChanges(false);
+      }
+    } else {
+      // Reset layout
+      setLoadedLayout(null);
+      
+      // Reset panels to default
+      resetPanels();
+      
+      // Reset script
+      setGeneratedScript(null);
+      
+      // Reset creative direction
+      setGenre('');
+      setEmotion('');
+      setInspiration('');
+      setInspirationText('');
+      setExclusions('');
+    }
+  }, [hasUnsavedChanges, resetPanels]);
+  
+  // Function to close the collection and reset to a one-off default page
+  const closeCollection = useCallback(() => {
+    // Reset collection
+    setCurrentCollection(null);
+    
+    // Reset layout
+    setLoadedLayout(null);
+    
+    // Reset panels to default
+    resetPanels();
+    
+    // Reset script
+    setGeneratedScript(null);
+    
+    // Reset creative direction
+    setGenre('');
+    setEmotion('');
+    setInspiration('');
+    setInspirationText('');
+    setExclusions('');
+    
+    // Reset unsaved changes flag
+    setHasUnsavedChanges(false);
+    
+    // Increment refresh key to force CollectionManager to rerender with no selection
+    setRefreshKey(prevKey => prevKey + 1);
+  }, [resetPanels]);
 
   return (
     <div className="flex flex-col h-screen text-gray-900 dark:text-gray-100">
       <div className="p-4 border-b border-gray-200 dark:border-dark-600 flex items-center">
-        <h1 className="text-2xl font-bold">Comic Panel Creator</h1>
-        <button
-          onClick={() => setShowInstructions(true)}
-          className="ml-4 px-3 py-1 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded flex items-center justify-center text-sm"
-        >
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          Instructions
-        </button>
-        {showInstructions && <InstructionsModal onClose={() => setShowInstructions(false)} />}
+        <div className="flex items-center w-1/3">
+          <h1 className="text-2xl font-bold">Comic Panel Creator</h1>
+          <button
+            onClick={() => setShowInstructions(true)}
+            className="ml-4 px-3 py-1 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded flex items-center justify-center text-sm"
+          >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Instructions
+          </button>
+          {showInstructions && <InstructionsModal onClose={() => setShowInstructions(false)} />}
+        </div>
+        
+        {/* Breadcrumb for currently loaded layout and collection - centered */}
+        <div className="flex-1 flex justify-center">
+          <div className={`flex items-center px-3 py-2 rounded-md ${currentCollection ? 'bg-blue-50 dark:bg-blue-900' : 'bg-amber-100 dark:bg-amber-900 border border-amber-300 dark:border-amber-700'}`}>
+            {/* Collection information */}
+            {currentCollection ? (
+              <div className="flex items-center mr-3 pr-3 border-r border-gray-300 dark:border-gray-600">
+                <span className="text-gray-600 dark:text-gray-400 font-medium mr-1">
+                  Collection:
+                </span>
+                <span className="text-blue-500 font-medium">
+                  {currentCollection.name}
+                </span>
+                <button
+                  onClick={closeCollection}
+                  className="ml-2 p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                  title="Close collection and create one-off layout"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center mr-3 pr-3 border-r border-amber-300 dark:border-amber-700">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span className="text-amber-800 dark:text-amber-200 font-medium mr-1">
+                  Collection:
+                </span>
+                <span className="text-amber-800 dark:text-amber-200 font-bold">
+                  No-Collection
+                </span>
+              </div>
+            )}
+            
+            {/* Layout information */}
+            {loadedLayout && (
+              <>
+                <div className="flex items-center">
+                  <span className="text-gray-600 dark:text-gray-400 font-medium mr-1">
+                    Page:
+                  </span>
+                  <span className="text-blue-500 font-medium">
+                    {loadedLayout.name}
+                  </span>
+                </div>
+                
+                <div className="flex ml-4">
+                  <button
+                    onClick={saveCurrentLayout}
+                    disabled={isSavingLayout}
+                    className={`px-2 py-1 flex items-center ${isSavingLayout ? 'bg-gray-400' : hasUnsavedChanges ? 'bg-amber-500 hover:bg-amber-600' : 'bg-green-500 hover:bg-green-600'} text-white rounded text-xs mr-2`}
+                    title={hasUnsavedChanges ? 'You have unsaved changes!' : 'Save changes to this layout'}
+                  >
+                    {hasUnsavedChanges && !isSavingLayout && (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    )}
+                    {isSavingLayout ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={closeCurrentLayout}
+                    className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    title="Close this layout"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        
+        {/* Empty div to balance the layout */}
+        <div className="w-1/3"></div>
       </div>
       <div className="flex flex-1 overflow-hidden">
         {/* Column 1 - Control Panel - Fixed to left side */}
@@ -635,7 +969,15 @@ const ComicPanelCreator: React.FC = () => {
                   View Script
                 </button>
               )}
-              <form className="relative w-full" onSubmit={(e) => e.preventDefault()}>
+              <div className="relative w-full">
+                {/* Hidden username field for accessibility - improves password manager compatibility */}
+                <input 
+                  type="text" 
+                  autoComplete="username" 
+                  name="username"
+                  aria-hidden="true"
+                  style={{ display: 'none' }}
+                />
                 <input
                   type={showApiKey ? 'text' : 'password'}
                   placeholder="Anthropic API Key (optional)"
@@ -652,7 +994,7 @@ const ComicPanelCreator: React.FC = () => {
                 >
                   {showApiKey ? 'Hide' : 'Show'}
                 </button>
-              </form>
+              </div>
               
               <div className="mt-4">
                 <button
@@ -759,7 +1101,7 @@ const ComicPanelCreator: React.FC = () => {
         </div>
 
         {/* Column 2 - Comic Page - Center with most space */}
-        <div className="flex-1 flex flex-col items-center justify-center overflow-auto p-4">
+        <div className="flex-1 flex flex-col items-center justify-center overflow-auto p-4 bg-neutral-700 dark:bg-neutral-800 checkerboard-bg">
           <div
             ref={containerRef}
             className="relative border border-gray-300 bg-white shadow-md"
@@ -795,7 +1137,12 @@ const ComicPanelCreator: React.FC = () => {
         
         {/* Column 3 - Collection Management - Fixed to right side */}
         <div className="flex flex-col gap-4 w-96 p-3 overflow-y-auto border-l border-gray-200 dark:border-dark-600 bg-gray-50 dark:bg-dark-800">
-          <CollectionManager />
+          <CollectionManager 
+            onLoadLayout={handleLoadLayout} 
+            onCollectionChange={setCurrentCollection}
+            initialCollectionId={currentCollection?.id || null}
+            key={refreshKey} 
+          />
         </div>
       </div>
 

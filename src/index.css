@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Photoshop-like neutral gray background with subtle checkerboard */
+.checkerboard-bg {
+  background-color: #535353; /* Photoshop's neutral gray */
+  background-image: 
+    linear-gradient(45deg, #4a4a4a 25%, transparent 25%), 
+    linear-gradient(-45deg, #4a4a4a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #4a4a4a 75%),
+    linear-gradient(-45deg, transparent 75%, #4a4a4a 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}

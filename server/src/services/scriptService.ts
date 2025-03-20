@@ -136,26 +136,37 @@ export async function generateScript(
       });
     }
     
-    const message = await anthropic.messages.create({
-      model: 'claude-3-opus-20240229',
-      max_tokens: 4000,
-      messages: [{
-        role: 'user' as const,
-        content: messageContent
-      }],
-      system: 'You are a comic book scriptwriter. Always return valid JSON matching the specified TypeScript interface.'
-    });
-
-    if (!message.content || message.content.length === 0) {
-      throw new Error('No content received from Anthropic API');
-    }
-
     try {
-      const scriptData = JSON.parse(message.content[0].text);
-      return scriptData as ComicPage;
-    } catch (parseError) {
-      console.error('Error parsing script JSON:', parseError);
-      throw new Error('Failed to parse script data from API response');
+      const message = await anthropic.messages.create({
+        model: 'claude-3-opus-20240229',
+        max_tokens: 4000,
+        messages: [{
+          role: 'user' as const,
+          content: messageContent
+        }],
+        system: 'You are a comic book scriptwriter. Always return valid JSON matching the specified TypeScript interface.'
+      });
+
+      if (!message.content || message.content.length === 0) {
+        throw new Error('No content received from Anthropic API');
+      }
+
+      // Find the text content in the response
+      const textContent = message.content.find(item => item.type === 'text');
+      if (!textContent || !textContent.text) {
+        throw new Error('No text content found in Anthropic API response');
+      }
+
+      try {
+        const scriptData = JSON.parse(textContent.text);
+        return scriptData as ComicPage;
+      } catch (parseError) {
+        console.error('Error parsing script JSON:', parseError);
+        throw new Error('Failed to parse script data from API response');
+      }
+    } catch (apiError: any) {
+      console.error('Error calling Anthropic API:', apiError);
+      throw new Error(`Anthropic API error: ${apiError.message || 'Unknown error'}`);
     }
   } catch (error) {
     console.error('Error generating script:', error);

@@ -34,7 +34,7 @@ const fetchWithTimeout = async (url: string, options: RequestInit) => {
 
 export async function generateScript(layout: PanelLayout, apiKey?: string, layoutImage?: string, creativeDirection?: CreativeDirection): Promise<ComicPage> {
   try {
-    const response = await fetchWithTimeout('http://localhost:3001/api/generate-script', {
+    const response = await fetchWithTimeout('http://localhost:3001/api/script/generate-script', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -44,13 +44,19 @@ export async function generateScript(layout: PanelLayout, apiKey?: string, layou
 
     if (!response.ok) {
       let errorMessage = 'Failed to generate script';
+      const responseClone = response.clone();
+      
       try {
-        const error = await response.json();
+        const error = await responseClone.json();
         errorMessage = error.message || errorMessage;
       } catch {
         // If response isn't JSON, try to get text
-        const text = await response.text();
-        if (text) errorMessage = text;
+        try {
+          const text = await response.text();
+          if (text) errorMessage = text;
+        } catch (textError) {
+          console.error('Error reading response text:', textError);
+        }
       }
       throw new Error(`${errorMessage} (Status: ${response.status})`);
     }
@@ -63,13 +69,13 @@ export async function generateScript(layout: PanelLayout, apiKey?: string, layou
   }
 }
 
-export function validateComicPage(page: ComicPage): boolean {
+export function validateComicPage(page: any): ComicPage {
   // Basic validation of required fields
   if (!page.title || !page.synopsis || !Array.isArray(page.panels)) {
-    return false;
+    throw new Error('Invalid comic page structure: missing title, synopsis, or panels array');
   }
 
-  return page.panels.every(panel => {
+  const isValid = page.panels.every((panel: any) => {
     // Validate position
     if (!panel.position || 
         typeof panel.position.x !== 'number' ||
@@ -90,13 +96,13 @@ export function validateComicPage(page: ComicPage): boolean {
 
     // Validate characters array
     if (!Array.isArray(panel.characters) ||
-        !panel.characters.every(char => char.name && char.emotion)) {
+        !panel.characters.every((char: any) => char.name && char.emotion)) {
       return false;
     }
 
     // Validate dialogue array
     if (!Array.isArray(panel.dialogue) ||
-        !panel.dialogue.every(d => d.type && d.text)) {
+        !panel.dialogue.every((d: any) => d.type && d.text)) {
       return false;
     }
 
@@ -111,4 +117,10 @@ export function validateComicPage(page: ComicPage): boolean {
 
     return true;
   });
+  
+  if (!isValid) {
+    throw new Error('Invalid comic page structure: one or more panels have invalid data');
+  }
+  
+  return page as ComicPage;
 }
