@@ -1,9 +1,5 @@
--- Drop tables if they exist
-DROP TABLE IF EXISTS layouts;
-DROP TABLE IF EXISTS collections;
-
 -- Collections table
-CREATE TABLE collections (
+CREATE TABLE IF NOT EXISTS collections (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   description TEXT,
@@ -12,7 +8,7 @@ CREATE TABLE collections (
 );
 
 -- Layouts table
-CREATE TABLE layouts (
+CREATE TABLE IF NOT EXISTS layouts (
   id SERIAL PRIMARY KEY,
   collection_id INTEGER REFERENCES collections(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,

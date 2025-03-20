@@ -2,7 +2,35 @@ import { pool } from './index';
 import fs from 'fs';
 import path from 'path';
 
+async function checkTablesExist() {
+  const client = await pool.connect();
+  try {
+    // Check if the collections table exists
+    const result = await client.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'collections'
+      );
+    `);
+    return result.rows[0].exists;
+  } catch (error) {
+    console.error('Error checking if tables exist:', error);
+    return false;
+  } finally {
+    client.release();
+  }
+}
+
 async function initializeDatabase() {
+  // First check if tables already exist
+  const tablesExist = await checkTablesExist();
+  
+  if (tablesExist) {
+    console.log('Database tables already exist, skipping initialization');
+    return;
+  }
+  
   const client = await pool.connect();
   try {
     console.log('Initializing database schema...');
@@ -36,4 +64,4 @@ if (require.main === module) {
     });
 }
 
-export { initializeDatabase };
+export { initializeDatabase, checkTablesExist };

@@ -44,13 +44,16 @@ app.use('/api/collections', collectionsRouter);
 app.use('/api/layouts', layoutsRouter);
 
 // Initialize the database
+console.log('Checking database status...');
 initializeDatabase()
   .then(() => {
-    console.log('Database initialized successfully');
+    console.log('Database check completed');
     
     // Start the server after database initialization
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
+      console.log('Note: The database schema uses CREATE TABLE IF NOT EXISTS');
+      console.log('Your existing data will be preserved when restarting the server');
     });
   })
   .catch(err => {
