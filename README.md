@@ -109,7 +109,7 @@ npm install
    npm run dev:server
    ```
 
-The app will open in your default browser at [http://localhost:3000](http://localhost:3000). The server runs on port 3001 with a 120-second timeout for script generation requests.
+The app will open in your default browser at [http://localhost:5173](http://localhost:5173). The server runs on port 3001 with a 120-second timeout for script generation requests.
 
 ## Usage
 

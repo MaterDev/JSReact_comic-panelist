@@ -15,9 +15,7 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
-  server: {
-    port: 3000,
-  },
+  // Using Vite's default port (5173)
   // Vitest configuration
   define: {
     'import.meta.vitest': 'undefined',
