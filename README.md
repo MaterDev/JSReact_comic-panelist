@@ -105,13 +105,13 @@ npm install
 5. Start both the client and server:
    ```bash
    # Start the client
-   npm start
+   npm run dev
    
    # In a new terminal, start the server
    npm run server
    ```
 
-The app will open in your default browser at [http://localhost:3000](http://localhost:3000). The server runs on port 3001 with a 120-second timeout for script generation requests.
+The app will open in your default browser at [http://localhost:5173](http://localhost:5173). The server runs on port 3001 with a 120-second timeout for script generation requests.
 
 ## Usage
 
@@ -127,6 +127,8 @@ The instructions are organized into easy-to-navigate sections with a dropdown me
 ## Built With
 
 - **React + TypeScript** - For robust, type-safe components
+- **Vite** - For fast development and optimized builds
+- **Vitest** - For component and unit testing
 - **Tailwind CSS** - For modern, responsive styling
 - **Express** - For the backend server
 - **Anthropic Claude API** - For AI-powered script generation
@@ -135,10 +137,11 @@ The instructions are organized into easy-to-navigate sections with a dropdown me
 
 ## Available Scripts
 
-- `npm start` - Runs the development server
+- `npm run dev` - Runs the development server
 - `npm run server` - Runs the backend server
 - `npm run build` - Creates a production build
-- `npm test` - Runs the test suite
+- `npm run preview` - Previews the production build locally
+- `npm test` - Runs the test suite with Vitest
 
 ## License
 
