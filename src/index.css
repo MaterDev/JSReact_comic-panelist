@@ -1,5 +1,9 @@
+/* Tailwind CSS directives */
+/* @tailwind directive */
 @tailwind base;
+/* @tailwind directive */
 @tailwind components;
+/* @tailwind directive */
 @tailwind utilities;
 
 /* Photoshop-like neutral gray background with subtle checkerboard */
