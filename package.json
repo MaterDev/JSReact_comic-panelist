@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A React application for designing comic pages with panels",
   "private": true,
+  "type": "module",
   "author": "",
   "license": "MIT",
   "dependencies": {
