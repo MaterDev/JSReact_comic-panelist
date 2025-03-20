@@ -75,7 +75,6 @@ npm install
    - The application will automatically create the necessary tables on first run, including:
      - `collections` - For storing comic book collections
      - `layouts` - For storing individual comic pages and their panel data
-     - `thumbnails` - For managing page preview images
 
 4. Configure your environment variables:
    - Copy the `.env.example` file to create your own `.env` file:
@@ -97,8 +96,7 @@ npm install
    # Server Configuration
    PORT=3001
    
-   # File Storage
-   THUMBNAIL_STORAGE_PATH=./storage/thumbnails
+
    ```
    - You can also provide your Anthropic API key through the UI when generating scripts
 
