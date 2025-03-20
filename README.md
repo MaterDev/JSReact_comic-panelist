@@ -69,19 +69,47 @@ cd JSReact_comic-panelist
 npm install
 ```
 
-3. Configure your Anthropic API key:
-   - Create a `.env` file in the root directory
-   - Add your API key: `ANTHROPIC_API_KEY=your-key-here`
-   - Or provide it through the UI when generating scripts
+3. Set up the database:
+   - Install PostgreSQL if you don't have it already
+   - Create a new PostgreSQL database named `comic-panelist` (or update the name in your .env file)
+   - The application will automatically create the necessary tables on first run, including:
+     - `collections` - For storing comic book collections
+     - `layouts` - For storing individual comic pages and their panel data
+     - `thumbnails` - For managing page preview images
 
-4. Start both the client and server:
-```bash
-# Start the client
-npm start
+4. Configure your environment variables:
+   - Copy the `.env.example` file to create your own `.env` file:
+   ```bash
+   cp .env.example .env
+   ```
+   - Update the values in your `.env` file with your specific configuration:
+   ```
+   # Database Configuration
+   PGUSER=postgres
+   PGHOST=localhost
+   PGPASSWORD=postgres
+   PGDATABASE=comic-panelist
+   PGPORT=5432
+   
+   # Anthropic API Key
+   ANTHROPIC_API_KEY=your_api_key_here
+   
+   # Server Configuration
+   PORT=3001
+   
+   # File Storage
+   THUMBNAIL_STORAGE_PATH=./storage/thumbnails
+   ```
+   - You can also provide your Anthropic API key through the UI when generating scripts
 
-# In a new terminal, start the server
-npm run server
-```
+5. Start both the client and server:
+   ```bash
+   # Start the client
+   npm start
+   
+   # In a new terminal, start the server
+   npm run server
+   ```
 
 The app will open in your default browser at [http://localhost:3000](http://localhost:3000). The server runs on port 3001 with a 120-second timeout for script generation requests.
 
