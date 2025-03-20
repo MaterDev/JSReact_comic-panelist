@@ -108,10 +108,10 @@ npm install
    npm run dev
    
    # In a new terminal, start the server
-   npm run server
+   npm run dev:server
    ```
 
-The app will open in your default browser at [http://localhost:5173](http://localhost:5173). The server runs on port 3001 with a 120-second timeout for script generation requests.
+The app will open in your default browser at [http://localhost:3000](http://localhost:3000). The server runs on port 3001 with a 120-second timeout for script generation requests.
 
 ## Usage
 
@@ -138,10 +138,13 @@ The instructions are organized into easy-to-navigate sections with a dropdown me
 ## Available Scripts
 
 - `npm run dev` - Runs the development server
-- `npm run server` - Runs the backend server
+- `npm run start:server` - Runs the backend server in production mode
+- `npm run dev:server` - Runs the backend server in development mode
 - `npm run build` - Creates a production build
 - `npm run preview` - Previews the production build locally
 - `npm test` - Runs the test suite with Vitest
+- `npm run test:ui` - Runs tests with the Vitest UI
+- `npm run coverage` - Runs tests with coverage reporting
 
 ## License
 
