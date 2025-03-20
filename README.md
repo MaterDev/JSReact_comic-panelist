@@ -12,76 +12,39 @@ Designed specifically for practice purposes, the tool allows you to:
 The application uses industry-standard manga dimensions (5.25 x 7.75 inch proportions), making it perfect for artists who want to practice with authentic manga page layouts and proportions.
 
 ### Main Application
-![Comic Panel Creator Screenshot](/images/full-dom-screenshot.png)
+![Comic Panel Creator Screenshot](/images/full-app-screenshot.png)
 
 ### Collection Management
 The collection management system allows you to organize your comic pages into complete books with covers, standard pages, and back covers. Pages are displayed in a visual library that makes it easy to manage your comic projects.
 
 ## Features
 
-- **AI-Powered Script Generation with Claude 3**
-  - Generate complete comic scripts based on your panel layout using Anthropic's Claude 3 Opus
-  - Smart interpretation of panel sizes and positions for storytelling:
-    - Larger panels become dramatic moments
-    - Wide panels translate to establishing shots
-    - Tall panels emphasize character moments
-    - Small panels suggest quick action
-  - Rich script details including:
-    - Scene descriptions with setting, time, and weather
-    - Character profiles with age, appearance, and emotions
-    - Dynamic dialogue (speech, thoughts, captions, sound effects)
-    - Visual direction covering shot types, angles, lighting, and symbolism
-  - Creative direction controls for customizing script generation:
-    - Genre (e.g., Sci-fi, Fantasy, Noir)
-    - Emotional tone (e.g., Suspenseful, Humorous, Melancholic)
-    - Inspiration sources (e.g., Film noir, Miyazaki, Cyberpunk)
-    - Inspiration text for longer descriptions or excerpts
-    - Exclusions to specify content to avoid
-  - View script details for individual panels with the "View Script" button
-  - Optional custom Anthropic API key support with fallback to environment config
+- **AI-Powered Script Generation**
+  - Generate comic scripts based on your panel layout using Claude 3
+  - Smart interpretation of panel sizes and positions for storytelling
+  - Rich script details including scene descriptions, character profiles, and dialogue
+  - Customizable creative direction with genre, tone, and inspiration controls
 
-- **Complete Comic Book Management**
-  - Save and manage multiple comic layouts as part of complete books
-  - Organize layouts into named collections (books)
-  - Generate and store thumbnails for quick visual reference
-  - View layouts in a comic spread format similar to professional layout software
-  - Display paired pages side by side as they would appear in a physical book
-  - Designate special pages for front and back covers
-  - Browse through multiple books in a library-like interface
-  - Delete pages with confirmation to prevent accidental deletions
+- **Comic Book Management**
+  - Organize layouts into collections with front covers, standard pages, and back covers
+  - Generate thumbnails for visual reference
+  - View layouts in comic spread format
+  - Delete pages with confirmation dialog
 
-- **Dynamic Panel Management**
-  - Drag and drop panels to reposition
-  - Resize panels from any edge or corner
-  - Maintain aspect ratios during resizing
+- **Panel Management**
+  - Drag and drop panels with resize from any edge
   - Smart panel snapping and alignment
-  - Automatic panel numbering that updates when panels are deleted or rearranged
-  - Panel numbers displayed in the center for easy reference (hidden in exports)
-  - Initial panel automatically sized to the trim area
-
-- **Advanced Manga Layout Tools**
+  - Automatic panel numbering
   - Split panels horizontally or vertically
-  - Automatic gutter spacing between panels
-  - Adjustable gutter size for precise manga layout control
-  - Reset layout option for quick iterations
-  - Professional manga print guidelines showing trim and safe areas
-  - Industry-standard color coding: cyan for trim, magenta for safe area
 
-- **Professional Manga Export Options**
-  - Export layouts to PDF or PNG format
-  - Select export format with convenient radio buttons
-  - High-resolution panel capture
-  - Panels exported with clean black borders
-  - Print guidelines included in non-photo blue for professional manga printing
-  - Trim and safe area guidelines visible in exports but won't interfere with artwork
-  - Maintains authentic manga panel proportions and spacing
-  - Clean export without UI elements
-  - Panel numbers automatically hidden in exports
-  - Improved edge handling to prevent panel cropping
+- **Professional Layout Tools**
+  - Adjustable gutter spacing
+  - Industry-standard print guidelines (trim and safe areas)
+  - Export to PDF or PNG with clean borders
+  - High-resolution output without UI elements
 
 - **Modern Interface**
-  - Responsive design
-  - Intuitive panel controls
+  - Responsive design with intuitive controls
   - Real-time layout updates
   - Clean, minimalist UI
 
