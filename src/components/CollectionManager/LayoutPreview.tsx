@@ -125,7 +125,7 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({ layouts, onLayoutSelect, 
                     backgroundColor: 'rgba(200, 200, 200, 0.2)',
                   }}
                 >
-                  <span className="absolute top-1 left-1 text-xs font-bold">{panel.number}</span>
+                  <span className="absolute top-1 left-1 text-xs font-bold text-black">{panel.number}</span>
                 </div>
               ))}
             </div>

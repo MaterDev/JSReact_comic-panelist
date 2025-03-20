@@ -12,7 +12,7 @@ Designed specifically for practice purposes, the tool allows you to:
 The application uses industry-standard manga dimensions (5.25 x 7.75 inch proportions), making it perfect for artists who want to practice with authentic manga page layouts and proportions.
 
 ### Main Application
-![Comic Panel Creator Screenshot](/images/full-app-screenshot.png)
+![Comic Panel Creator Screenshot](/images/full-app.png)
 
 ### Collection Management
 The collection management system allows you to organize your comic pages into complete books with covers, standard pages, and back covers. Pages are displayed in a visual library that makes it easy to manage your comic projects.
