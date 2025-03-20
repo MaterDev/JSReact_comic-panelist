@@ -77,6 +77,29 @@ export async function saveThumbnail(
 }
 
 /**
+ * Reset display order for all layouts in a collection
+ * This ensures that pages are numbered sequentially without gaps
+ */
+export async function resetDisplayOrder(collectionId: number, client: any): Promise<void> {
+  // Reorder the layouts to ensure sequential ordering
+  await client.query(
+    `UPDATE layouts 
+     SET display_order = subquery.new_order 
+     FROM (
+       SELECT id, ROW_NUMBER() OVER (ORDER BY 
+         CASE WHEN page_type = 'front_cover' THEN 1
+              WHEN page_type = 'back_cover' THEN 999999
+              ELSE display_order END
+       ) as new_order
+       FROM layouts
+       WHERE collection_id = $1
+     ) as subquery
+     WHERE layouts.id = subquery.id`,
+    [collectionId]
+  );
+}
+
+/**
  * Add a new layout to a collection
  */
 export async function createLayout(params: CreateLayoutParams, thumbnailBase64?: string): Promise<number> {
@@ -143,6 +166,9 @@ export async function createLayout(params: CreateLayoutParams, thumbnailBase64?:
         [thumbnailPath, layoutId]
       );
     }
+    
+    // Reset display order for all layouts in the collection
+    await resetDisplayOrder(params.collection_id, client);
     
     await client.query('COMMIT');
     return layoutId;
@@ -295,22 +321,8 @@ export async function deleteLayout(id: number): Promise<boolean> {
       }
     }
     
-    // Reorder the remaining layouts to ensure sequential ordering
-    await client.query(
-      `UPDATE layouts 
-       SET display_order = subquery.new_order 
-       FROM (
-         SELECT id, ROW_NUMBER() OVER (ORDER BY 
-           CASE WHEN page_type = 'front_cover' THEN 1
-                WHEN page_type = 'back_cover' THEN 999999
-                ELSE display_order END
-         ) as new_order
-         FROM layouts
-         WHERE collection_id = $1
-       ) as subquery
-       WHERE layouts.id = subquery.id`,
-      [layout.collection_id]
-    );
+    // Reset display order for all layouts in the collection
+    await resetDisplayOrder(layout.collection_id, client);
     
     await client.query('COMMIT');
     return true;
