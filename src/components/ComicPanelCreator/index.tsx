@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ScriptModal } from './ScriptModal';
 import { PanelScriptModal } from './PanelScriptModal';
 import { PreviewModal } from './PreviewModal';
+import { InstructionsModal } from './InstructionsModal';
 import { ComicPage, PanelLayout, Panel as ScriptPanel } from './scriptTypes';
 import { generateScript, validateComicPage } from './scriptService';
 import html2canvas from 'html2canvas';
@@ -21,6 +22,9 @@ import {
   generatePanelId, 
   findPanelById 
 } from './utils';
+
+// Import the CollectionManager component
+import CollectionManager from '../CollectionManager';
 
 const ComicPanelCreator: React.FC = () => {
   const [panels, setPanels] = useState<Panel[]>([
@@ -424,7 +428,7 @@ const ComicPanelCreator: React.FC = () => {
     } finally {
       setIsGeneratingScript(false);
     }
-  }, [panels, apiKey, genre, emotion, inspiration, inspirationText, exclusions]);
+  }, [panels, apiKey, genre, emotion, inspiration, inspirationText, exclusions, generatePreviewImage]);
 
   const exportComic = useCallback(async (format: ExportFormat): Promise<void> => {
     if (!containerRef.current) return;
@@ -580,29 +584,43 @@ const ComicPanelCreator: React.FC = () => {
     }
   }, [generatedScript, panels]);
 
+  const [showInstructions, setShowInstructions] = useState(false);
+
   return (
-    <div className="p-4 flex flex-col gap-6 max-w-6xl mx-auto text-gray-900 dark:text-gray-100">
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Left side - Control Panel */}
-        <div className="md:w-1/3 flex flex-col gap-4">
+    <div className="flex flex-col h-screen text-gray-900 dark:text-gray-100">
+      <div className="p-4 border-b border-gray-200 dark:border-dark-600 flex items-center">
         <h1 className="text-2xl font-bold">Comic Panel Creator</h1>
-          <div className="p-4 bg-gray-50 dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600 shadow-sm">
-            <h2 className="text-lg font-semibold mb-3">Script Controls</h2>
+        <button
+          onClick={() => setShowInstructions(true)}
+          className="ml-4 px-3 py-1 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded flex items-center justify-center text-sm"
+        >
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Instructions
+        </button>
+        {showInstructions && <InstructionsModal onClose={() => setShowInstructions(false)} />}
+      </div>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Column 1 - Control Panel - Fixed to left side */}
+        <div className="flex flex-col gap-4 w-72 p-3 overflow-y-auto border-r border-gray-200 dark:border-dark-600 bg-gray-50 dark:bg-dark-800">
+          <div className="p-3 bg-gray-50 dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600 shadow-sm">
+            <h2 className="text-base font-semibold mb-2">Script Controls</h2>
             <div className="flex flex-col gap-3">
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 <button
                   onClick={generatePanelScript}
                   disabled={isGeneratingScript}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-dark-500 flex-1"
+                  className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-dark-500 text-sm"
                 >
                   {isGeneratingScript ? 'Generating...' : 'Generate Script'}
                 </button>
                 <button
                   onClick={handlePreviewClick}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded flex items-center justify-center"
+                  className="px-3 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded flex items-center justify-center text-sm"
                   title="Preview the panel layout image that will be sent to the AI"
                 >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                   </svg>
@@ -612,7 +630,7 @@ const ComicPanelCreator: React.FC = () => {
               {generatedScript && (
                 <button
                   onClick={() => setShowScriptModal(true)}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 w-full"
+                  className="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 w-full text-sm"
                 >
                   View Script
                 </button>
@@ -640,6 +658,8 @@ const ComicPanelCreator: React.FC = () => {
                 <button
                   onClick={() => setShowCreativeInputs(!showCreativeInputs)}
                   className="flex items-center justify-between w-full px-4 py-2 bg-gray-200 dark:bg-dark-600 rounded-md text-sm font-medium"
+                  aria-expanded={showCreativeInputs}
+                  aria-controls="creative-inputs-panel"
                 >
                   <span>Creative Direction {showCreativeInputs ? '(Hide)' : '(Show)'}</span>
                   <svg
@@ -653,7 +673,10 @@ const ComicPanelCreator: React.FC = () => {
                   </svg>
                 </button>
                 
-                {showCreativeInputs && (
+                <div 
+                  id="creative-inputs-panel"
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${showCreativeInputs ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
+                >
                   <div className="mt-3 space-y-3 p-3 bg-gray-100 dark:bg-dark-700 rounded-md">
                     <div>
                       <label htmlFor="genre" className="block text-xs font-medium mb-1 dark:text-gray-300">Genre</label>
@@ -715,7 +738,7 @@ const ComicPanelCreator: React.FC = () => {
                       />
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
@@ -735,8 +758,8 @@ const ComicPanelCreator: React.FC = () => {
           />
         </div>
 
-        {/* Right side - Comic Page */}
-        <div className="md:w-2/3 flex justify-center items-start">
+        {/* Column 2 - Comic Page - Center with most space */}
+        <div className="flex-1 flex flex-col items-center justify-center overflow-auto p-4">
           <div
             ref={containerRef}
             className="relative border border-gray-300 bg-white shadow-md"
@@ -744,7 +767,8 @@ const ComicPanelCreator: React.FC = () => {
               width: CONTAINER_WIDTH,
               height: CONTAINER_HEIGHT,
               overflow: 'visible',
-              position: 'relative'
+              position: 'relative',
+              maxWidth: '100%'
             }}
             onClick={() => setSelectedPanelId(null)}
           >
@@ -767,6 +791,11 @@ const ComicPanelCreator: React.FC = () => {
               />
             ))}
           </div>
+        </div>
+        
+        {/* Column 3 - Collection Management - Fixed to right side */}
+        <div className="flex flex-col gap-4 w-96 p-3 overflow-y-auto border-l border-gray-200 dark:border-dark-600 bg-gray-50 dark:bg-dark-800">
+          <CollectionManager />
         </div>
       </div>
 

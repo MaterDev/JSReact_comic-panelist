@@ -31,11 +31,11 @@ export const Controls: React.FC<ControlsProps> = ({
   onExportFormatChange,
   selectedPanel,
 }) => {
-  const [showInstructions, setShowInstructions] = useState(false);
   return (
-    <div className="space-y-4">
+    <div className="p-3 bg-gray-50 dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600 shadow-sm space-y-3">      
+      <h2 className="text-base font-semibold mb-2">Panel Controls</h2>
       <div>
-        <label className="block text-sm font-medium mb-1">
+        <label className="block text-xs font-medium mb-1">
           Gutter Size (px):
           <input
             type="range"
@@ -49,11 +49,11 @@ export const Controls: React.FC<ControlsProps> = ({
         </label>
       </div>
 
-      <div className="p-4 bg-gray-100 dark:bg-dark-700 rounded-lg">
-        <div className="flex justify-between items-center mb-3">
-          <p className="text-sm font-medium">Global Controls:</p>
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-1 text-sm">
+      <div className="p-3 bg-gray-100 dark:bg-dark-700 rounded-lg">
+        <div className="flex flex-col space-y-2 mb-2">
+          <p className="text-xs font-medium">Global Controls:</p>
+          <div className="flex flex-col space-y-1">
+            <label className="flex items-center gap-1 text-xs">
               <input
                 type="checkbox"
                 checked={showControls}
@@ -61,7 +61,7 @@ export const Controls: React.FC<ControlsProps> = ({
               />
               Show Controls
             </label>
-            <label className="flex items-center gap-1 text-sm ml-4">
+            <label className="flex items-center gap-1 text-xs">
               <input
                 type="checkbox"
                 checked={showGuides}
@@ -72,10 +72,10 @@ export const Controls: React.FC<ControlsProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-col gap-2 mb-2">
           <button
             onClick={onResetPanels}
-            className="bg-gray-500 hover:bg-gray-600 dark:bg-dark-600 dark:hover:bg-dark-500 text-white px-3 py-1 rounded text-sm"
+            className="bg-gray-500 hover:bg-gray-600 dark:bg-dark-600 dark:hover:bg-dark-500 text-white px-2 py-1 rounded text-xs"
           >
             Reset All Panels
           </button>
@@ -83,7 +83,7 @@ export const Controls: React.FC<ControlsProps> = ({
 
 
           <div className="flex flex-col space-y-2">
-            <div className="flex items-center space-x-4 text-sm">
+            <div className="flex items-center space-x-3 text-xs">
               <label className="flex items-center">
                 <input
                   type="radio"
@@ -109,7 +109,7 @@ export const Controls: React.FC<ControlsProps> = ({
             </div>
             <button
               onClick={() => onExport(exportFormat)}
-              className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 text-white px-3 py-1 rounded text-sm"
+              className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 text-white px-2 py-1 rounded text-xs"
             >
               Export as {exportFormat.toUpperCase()}
             </button>
@@ -125,18 +125,7 @@ export const Controls: React.FC<ControlsProps> = ({
         )}
       </div>
 
-      <div className="p-4 bg-gray-100 dark:bg-dark-700 rounded-lg">
-        <button
-          onClick={() => setShowInstructions(true)}
-          className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded flex items-center justify-center"
-        >
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          View Instructions
-        </button>
-        {showInstructions && <InstructionsModal onClose={() => setShowInstructions(false)} />}
-      </div>
+
     </div>
   );
 };

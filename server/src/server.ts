@@ -1,7 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
 import scriptRouter from './routes/script';
+import collectionsRouter from './routes/collections';
+import layoutsRouter from './routes/layouts';
+import { initializeDatabase } from './db/init-db';
 
 // Load environment variables
 dotenv.config({ path: '../.env' });
@@ -20,11 +25,35 @@ app.use((req, res, next) => {
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Increased limit for base64 images
+
+// Create thumbnail storage directory
+const thumbnailStoragePath = process.env.THUMBNAIL_STORAGE_PATH || './storage/thumbnails';
+const absoluteThumbnailPath = path.resolve(thumbnailStoragePath);
+if (!fs.existsSync(absoluteThumbnailPath)) {
+  fs.mkdirSync(absoluteThumbnailPath, { recursive: true });
+  console.log(`Created thumbnail storage directory: ${absoluteThumbnailPath}`);
+}
+
+// Serve static files from the thumbnail directory
+app.use('/thumbnails', express.static(absoluteThumbnailPath));
 
 // Routes
-app.use('/api', scriptRouter);
+app.use('/api/script', scriptRouter);
+app.use('/api/collections', collectionsRouter);
+app.use('/api/layouts', layoutsRouter);
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+// Initialize the database
+initializeDatabase()
+  .then(() => {
+    console.log('Database initialized successfully');
+    
+    // Start the server after database initialization
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  })
+  .catch(err => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
+  });
