@@ -95,9 +95,9 @@ const createLayout: RequestHandler = (req, res) => {
       name, 
       panel_data, 
       page_type, 
-      is_full_page, 
+
       script_data, 
-      creative_direction,
+
       thumbnail_base64
     } = req.body;
     
@@ -110,10 +110,8 @@ const createLayout: RequestHandler = (req, res) => {
         collection_id, 
         name, 
         panel_data, 
-        page_type, 
-        is_full_page, 
-        script_data, 
-        creative_direction 
+        page_type,
+        script_data
       }, 
       thumbnail_base64
     )
@@ -141,15 +139,15 @@ const updateLayout: RequestHandler = (req, res) => {
     const { 
       name, 
       panel_data, 
-      is_full_page, 
+
       script_data, 
-      creative_direction,
+
       thumbnail_base64
     } = req.body;
     
     layoutService.updateLayout(
       id, 
-      { name, panel_data, is_full_page, script_data, creative_direction },
+      { name, panel_data, script_data },
       thumbnail_base64
     )
     .then(success => {

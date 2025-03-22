@@ -16,7 +16,7 @@ interface Layout {
   name: string;
   display_order: number;
   page_type: 'front_cover' | 'back_cover' | 'standard';
-  is_full_page: boolean;
+
   panel_data: {
     panels: Panel[];
   };
@@ -202,7 +202,7 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
           name: `Page ${nextDisplayOrder}`,
           panel_data: defaultPanelData,
           page_type: 'standard',
-          is_full_page: true,
+
           display_order: nextDisplayOrder
         }),
       });

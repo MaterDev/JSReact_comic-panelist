@@ -9,7 +9,7 @@ interface Layout {
   name: string;
   display_order: number;
   page_type: 'front_cover' | 'back_cover' | 'standard';
-  is_full_page: boolean;
+
   panel_data: any;
   thumbnail_path?: string;
   script_data?: any;
@@ -23,7 +23,7 @@ interface CreateLayoutParams {
   name: string;
   panel_data: any;
   page_type?: 'standard';
-  is_full_page?: boolean;
+
   script_data?: any;
   creative_direction?: any;
 }
@@ -31,7 +31,7 @@ interface CreateLayoutParams {
 interface UpdateLayoutParams {
   name?: string;
   panel_data?: any;
-  is_full_page?: boolean;
+
   script_data?: any;
   creative_direction?: any;
 }
@@ -140,17 +140,17 @@ export async function createLayout(params: CreateLayoutParams, thumbnailBase64?:
     // Insert the new layout
     const layoutResult = await client.query(
       `INSERT INTO layouts(
-        collection_id, name, display_order, page_type, is_full_page, panel_data, script_data, creative_direction
-      ) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+        collection_id, name, display_order, page_type, panel_data, script_data
+      ) VALUES($1, $2, $3, $4, $5, $6) RETURNING id`,
       [
         params.collection_id,
         params.name,
         maxOrder,
         params.page_type || 'standard',
-        params.is_full_page || false,
+
         JSON.stringify(params.panel_data),
         params.script_data ? JSON.stringify(params.script_data) : null,
-        params.creative_direction ? JSON.stringify(params.creative_direction) : null
+
       ]
     );
     
@@ -238,10 +238,7 @@ export async function updateLayout(
       values.push(JSON.stringify(params.panel_data));
     }
     
-    if (params.is_full_page !== undefined) {
-      setClauses.push(`is_full_page = $${paramIndex++}`);
-      values.push(params.is_full_page);
-    }
+
     
     if (params.script_data !== undefined) {
       setClauses.push(`script_data = $${paramIndex++}`);

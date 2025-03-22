@@ -44,14 +44,14 @@ export async function createCollection(params: CreateCollectionParams): Promise<
     
     // Create front cover (always display_order = 1)
     await client.query(
-      'INSERT INTO layouts(collection_id, name, display_order, page_type, is_full_page, panel_data) VALUES($1, $2, $3, $4, $5, $6)',
-      [collectionId, 'Front Cover', 1, 'front_cover', true, JSON.stringify(createFullPagePanel())]
+      'INSERT INTO layouts(collection_id, name, display_order, page_type, panel_data) VALUES($1, $2, $3, $4, $5)',
+      [collectionId, 'Front Cover', 1, 'front_cover', JSON.stringify(createFullPagePanel())]
     );
     
     // Create back cover (display_order = 2 initially, will be adjusted as pages are added)
     await client.query(
-      'INSERT INTO layouts(collection_id, name, display_order, page_type, is_full_page, panel_data) VALUES($1, $2, $3, $4, $5, $6)',
-      [collectionId, 'Back Cover', 2, 'back_cover', true, JSON.stringify(createFullPagePanel())]
+      'INSERT INTO layouts(collection_id, name, display_order, page_type, panel_data) VALUES($1, $2, $3, $4, $5)',
+      [collectionId, 'Back Cover', 2, 'back_cover', JSON.stringify(createFullPagePanel())]
     );
     
     await client.query('COMMIT');

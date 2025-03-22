@@ -15,7 +15,7 @@ interface Layout {
   name: string;
   display_order: number;
   page_type: 'front_cover' | 'back_cover' | 'standard';
-  is_full_page: boolean;
+
   panel_data: {
     panels: Panel[];
   };
