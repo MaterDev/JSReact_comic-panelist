@@ -1,10 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ScriptModal } from './ScriptModal';
-import { PanelScriptModal } from './PanelScriptModal';
+import { 
+  ScriptModal, 
+  PanelScriptModal, 
+  ComicPage, 
+  PanelLayout, 
+  Panel as ScriptPanel,
+  generateScript, 
+  validateComicPage 
+} from '../ScriptGenerator';
 import { PreviewModal } from './PreviewModal';
 import { InstructionsModal } from './InstructionsModal';
-import { ComicPage, PanelLayout, Panel as ScriptPanel } from './scriptTypes';
-import { generateScript, validateComicPage } from './scriptService';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Panel as PanelComponent } from './Panel';

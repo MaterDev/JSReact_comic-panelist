@@ -1,5 +1,5 @@
 import React from 'react';
-import { ComicPage } from '../../../shared/types/comic';
+import { ComicPage } from './scriptTypes';
 import './ScriptDisplay.css';
 
 interface ScriptDisplayProps {
