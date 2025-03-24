@@ -1,11 +1,11 @@
 import React from 'react';
 
-interface PreviewModalProps {
+interface AIPreviewModalProps {
   imageUrl: string;
   onClose: () => void;
 }
 
-export const PreviewModal: React.FC<PreviewModalProps> = ({ imageUrl, onClose }) => {
+export const AIPreviewModal: React.FC<AIPreviewModalProps> = ({ imageUrl, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-dark-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col text-gray-900 dark:text-gray-100">
