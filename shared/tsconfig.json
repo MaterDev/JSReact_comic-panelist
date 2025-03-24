@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "composite": true
   },
-  "include": ["**/*"]
+  "include": ["**/*", "../src/components/Panel/types.ts"]
 }
