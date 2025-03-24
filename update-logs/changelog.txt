@@ -1,0 +1,29 @@
+2025-03-24 03:46 | Modularize script generation components | Separated script generation functionality into dedicated components to improve code organization and maintainability. This makes it easier to extend AI script generation features in the future.
+
+2025-03-24 03:49 | Relocate the instructions modal | Moved the instructions modal to its own directory for better code organization and to follow the component-based architecture pattern.
+
+2025-03-24 03:52 | Refactor preview modal | Restructured the preview modal code to prepare for the upcoming split between AI preview and export preview functionality.
+
+2025-03-24 03:53 | Refactor controls | Improved the organization of control components, making the UI more intuitive and preparing for additional export options.
+
+2025-03-24 04:01 | Refactor comic panel creator components | Reorganized the main comic panel creator components to improve code readability and maintainability.
+
+2025-03-24 04:05 | Update logs directory structure | Expanded the logs directory to be more inclusive of different types of documentation, making it easier to track project changes and updates.
+
+2025-03-24 04:05 | Move types and utils to shared directories | Relocated common types and utility functions to shared directories to reduce code duplication and improve consistency across the application.
+
+2025-03-24 04:10 | Update panels to have square corners | Changed panel styling from rounded to square corners for a cleaner, more professional comic layout appearance. Square corners provide better alignment with traditional comic panel aesthetics.
+
+2025-03-24 04:34 | Enhance panel styling with transparent backgrounds | Updated the Panel component with a medium-dark gray transparent background (rgba(150, 150, 150, 0.5)) in the UI for better visibility, while ensuring panels remain completely transparent in exports. This allows guidelines to be visible beneath panels in the editor while maintaining a clean export.
+
+2025-03-24 04:35 | Rename Preview to AIPreview for clarity | Renamed the Preview component to AIPreview to better reflect its purpose in generating AI scripts, improving the clarity of the codebase and UI.
+
+2025-03-24 04:35 | Update ComicPanelCreator with AIPreviewModal | Integrated the newly named AIPreviewModal into the ComicPanelCreator and added a dedicated Controls component for better user interaction.
+
+2025-03-24 04:35 | Update tsconfig.json files | Updated configuration files to reference the correct Panel types path after the reorganization, ensuring proper TypeScript type checking.
+
+2025-03-24 04:38 | Change default export format from PDF to PNG | Updated the default export format to PNG for better compatibility and easier sharing of comic panels across different platforms.
+
+2025-03-24 05:01 | Enhance preview functionality with separate AI and Export previews | Implemented distinct preview modes for different purposes: AI Preview shows panel numbers prominently (32px font size) while hiding guidelines for script generation; Export Preview displays panels with transparent backgrounds and no panel numbers, exactly as they will appear when exported, with guidelines in non-photo blue for printing reference.
+
+2025-03-24 05:03 | Update additional tsconfig.json files | Further configuration updates to maintain consistency across the project after the component restructuring.
