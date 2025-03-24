@@ -47,7 +47,7 @@ export const Panel: React.FC<PanelProps> = ({
             e.stopPropagation();
             onSplitHorizontally(panel.id);
           }}
-          className="bg-blue-500 hover:bg-blue-600 text-white p-1 rounded w-6 h-6 flex items-center justify-center text-xs"
+          className="bg-blue-500 hover:bg-blue-600 text-white p-1 rounded-none w-6 h-6 flex items-center justify-center text-xs"
           title="Split Horizontally"
         >
           ⬍
@@ -57,7 +57,7 @@ export const Panel: React.FC<PanelProps> = ({
             e.stopPropagation();
             onSplitVertically(panel.id);
           }}
-          className="bg-green-500 hover:bg-green-600 text-white p-1 rounded w-6 h-6 flex items-center justify-center text-xs"
+          className="bg-green-500 hover:bg-green-600 text-white p-1 rounded-none w-6 h-6 flex items-center justify-center text-xs"
           title="Split Vertically"
         >
           ⬌
@@ -68,7 +68,7 @@ export const Panel: React.FC<PanelProps> = ({
               e.stopPropagation();
               onDelete(panel.id);
             }}
-            className="bg-red-500 hover:bg-red-600 text-white p-1 rounded w-6 h-6 flex items-center justify-center text-xs"
+            className="bg-red-500 hover:bg-red-600 text-white p-1 rounded-none w-6 h-6 flex items-center justify-center text-xs"
             title="Delete Panel"
           >
             ×
@@ -80,7 +80,7 @@ export const Panel: React.FC<PanelProps> = ({
               e.stopPropagation();
               onViewScript(panel.id);
             }}
-            className="bg-purple-500 hover:bg-purple-600 text-white p-1 rounded w-6 h-6 flex items-center justify-center text-xs"
+            className="bg-purple-500 hover:bg-purple-600 text-white p-1 rounded-none w-6 h-6 flex items-center justify-center text-xs"
             title="View Script"
           >
             📝
@@ -92,7 +92,7 @@ export const Panel: React.FC<PanelProps> = ({
     if (!isLargeEnough) {
       return (
         <div className="absolute inset-0 flex items-center justify-center panel-controls">
-          <div className="bg-black bg-opacity-60 rounded p-1 flex gap-1">
+          <div className="bg-black bg-opacity-60 rounded-none p-1 flex gap-1">
             {controls}
           </div>
         </div>
@@ -145,14 +145,15 @@ export const Panel: React.FC<PanelProps> = ({
 
   return (
     <div
-      className={`panel absolute border-2 ${isSelected ? 'border-blue-500' : 'border-gray-400'} bg-white hover:bg-gray-50 overflow-hidden`}
+      className={`panel absolute border-2 ${isSelected ? 'border-blue-500' : 'border-gray-400'} bg-white hover:bg-gray-50 overflow-hidden rounded-none`}
       style={{
         left: pixelDims.x,
         top: pixelDims.y,
         width: pixelDims.width,
         height: pixelDims.height,
         cursor: 'grab',
-        zIndex: isSelected ? 2 : 1
+        zIndex: isSelected ? 2 : 1,
+        borderRadius: 0
       }}
       onClick={handleClick}
       onMouseDown={(e) => onStartDrag(e, panel.id)}
