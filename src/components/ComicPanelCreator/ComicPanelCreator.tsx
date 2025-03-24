@@ -15,7 +15,7 @@ import jsPDF from 'jspdf';
 import { Panel as PanelComponent } from '../Panel';
 import { Controls, ExportFormat } from '../Controls';
 import { GuideLines } from '../GuideLines';
-import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from './types';
+import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from '../../types/panelTypes';
 import { 
   CONTAINER_WIDTH, 
   CONTAINER_HEIGHT, 
@@ -26,7 +26,7 @@ import {
   pixelsToPercent, 
   generatePanelId, 
   findPanelById 
-} from './utils';
+} from '../../utils/panelUtils';
 
 // Import the CollectionManager component
 import CollectionManager from '../CollectionManager';

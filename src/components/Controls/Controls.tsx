@@ -1,5 +1,5 @@
 import React from 'react';
-import { Panel } from '../ComicPanelCreator/types';
+import { Panel } from '../../types/panelTypes';
 
 export type ExportFormat = 'pdf' | 'png';
 

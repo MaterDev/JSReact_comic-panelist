@@ -9,7 +9,7 @@ import {
   OUTER_MARGIN_PERCENT,
   TOP_MARGIN_PERCENT,
   BOTTOM_MARGIN_PERCENT
-} from './utils';
+} from '../../utils/panelUtils';
 
 interface GuideLinesProps {
   showGuides: boolean;

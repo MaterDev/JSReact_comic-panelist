@@ -1,4 +1,4 @@
-import { Panel } from './types';
+import { Panel } from '../types/panelTypes';
 
 // Bleed size (full container): 5.25" × 7.75"
 export const CONTAINER_WIDTH = 600;

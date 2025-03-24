@@ -1,6 +1,6 @@
 import React from 'react';
-import { Panel as PanelType, ResizeDirection } from './types';
-import { percentToPixels } from './utils';
+import { Panel as PanelType, ResizeDirection } from '../../types/panelTypes';
+import { percentToPixels } from '../../utils/panelUtils';
 
 interface PanelProps {
   panel: PanelType;
