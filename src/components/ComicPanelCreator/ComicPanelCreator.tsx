@@ -8,7 +8,7 @@ import {
   generateScript, 
   validateComicPage 
 } from '../ScriptGenerator';
-import { PreviewModal } from '../PreviewModal';
+import { AIPreviewModal } from '../PreviewModal';
 import { InstructionsModal } from '../InstructionsModal';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -379,10 +379,11 @@ const ComicPanelCreator: React.FC = () => {
       (element as HTMLElement).style.color = '#000000';
     });
     
-    // Make panel outlines black
+    // Make panel outlines black and backgrounds transparent
     const panels = clone.querySelectorAll('.panel');
     panels.forEach((element) => {
       (element as HTMLElement).style.border = '2px solid #000000';
+      (element as HTMLElement).style.backgroundColor = 'transparent';
     });
     
     // Hide panel controls in the preview
@@ -539,10 +540,11 @@ const ComicPanelCreator: React.FC = () => {
         (element as HTMLElement).style.display = 'none';
       });
       
-      // Add black borders to all panels
+      // Add black borders to all panels and make backgrounds transparent
       const panelElements = clone.querySelectorAll('.panel');
       panelElements.forEach((element) => {
         (element as HTMLElement).style.border = '1px solid #000000';
+        (element as HTMLElement).style.backgroundColor = 'transparent';
       });
 
       // Use html2canvas to capture the comic container
@@ -963,7 +965,7 @@ const ComicPanelCreator: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                   </svg>
-                  Preview
+                  AI Preview
                 </button>
               </div>
               {generatedScript && (
@@ -1109,13 +1111,14 @@ const ComicPanelCreator: React.FC = () => {
         <div className="flex-1 flex flex-col items-center justify-center overflow-auto p-4 bg-neutral-700 dark:bg-neutral-800 checkerboard-bg">
           <div
             ref={containerRef}
-            className="relative border border-gray-300 bg-white shadow-md"
+            className="relative border border-gray-300 bg-white shadow-md comic-container"
             style={{
               width: CONTAINER_WIDTH,
               height: CONTAINER_HEIGHT,
               overflow: 'visible',
               position: 'relative',
-              maxWidth: '100%'
+              maxWidth: '100%',
+              isolation: 'isolate'
             }}
             onClick={() => setSelectedPanelId(null)}
           >
@@ -1166,7 +1169,7 @@ const ComicPanelCreator: React.FC = () => {
       )}
       
       {showPreviewModal && previewImage && (
-        <PreviewModal
+        <AIPreviewModal
           imageUrl={previewImage}
           onClose={() => setShowPreviewModal(false)}
         />
