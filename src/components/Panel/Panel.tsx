@@ -145,14 +145,20 @@ export const Panel: React.FC<PanelProps> = ({
 
   return (
     <div
-      className={`panel absolute border-2 ${isSelected ? 'border-blue-500' : 'border-gray-400'} bg-white hover:bg-gray-50 overflow-hidden rounded-none`}
+      className={`panel absolute border-2 ${isSelected ? 'border-blue-500' : 'border-gray-400'} overflow-visible rounded-none`}
       style={{
+        backgroundColor: 'rgba(150, 150, 150, 0.5)',
+        background: 'rgba(150, 150, 150, 0.5)',
+        mixBlendMode: 'normal',
+        opacity: 1,
         left: pixelDims.x,
         top: pixelDims.y,
         width: pixelDims.width,
         height: pixelDims.height,
         cursor: 'grab',
-        zIndex: isSelected ? 2 : 1,
+        zIndex: isSelected ? 3 : 2,
+        pointerEvents: 'auto',
+        boxShadow: 'none',
         borderRadius: 0
       }}
       onClick={handleClick}
@@ -160,7 +166,7 @@ export const Panel: React.FC<PanelProps> = ({
     >
       {panel.number !== undefined && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="text-gray-300 text-5xl font-bold panel-number">
+          <div className="text-gray-800 text-5xl font-bold panel-number" style={{ textShadow: '0px 0px 3px white' }}>
             {panel.number}
           </div>
         </div>

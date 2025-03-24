@@ -33,16 +33,16 @@ export const GuideLines: React.FC<GuideLinesProps> = ({ showGuides }) => {
     <>
       {/* Trim lines (cyan) */}
       <div 
-        className="absolute pointer-events-none"
+        className="absolute"
         data-guide-element="true"
         style={{
           left: `${trimInsetPx}px`,
           top: `${(CONTAINER_HEIGHT - trimHeightPx) / 2}px`,
           width: `${trimWidthPx}px`,
           height: `${trimHeightPx}px`,
-          border: '1px dashed #00AACC',
-          opacity: 0.8,
-          zIndex: 5
+          border: '1px solid #00AACC',
+          opacity: 0.5,
+          zIndex: 1
         }}
       >
         {/* Label for trim line */}
@@ -56,16 +56,16 @@ export const GuideLines: React.FC<GuideLinesProps> = ({ showGuides }) => {
 
       {/* Margin lines (magenta) */}
       <div 
-        className="absolute pointer-events-none"
+        className="absolute"
         data-guide-element="true"
         style={{
           left: `${trimInsetPx + innerMarginPx}px`,
           top: `${(CONTAINER_HEIGHT - trimHeightPx) / 2 + topMarginPx}px`,
           width: `${trimWidthPx - innerMarginPx - outerMarginPx}px`,
           height: `${trimHeightPx - topMarginPx - bottomMarginPx}px`,
-          border: '1px dashed #CC0099',
-          opacity: 0.8,
-          zIndex: 5
+          border: '1px solid #CC0099',
+          opacity: 0.5,
+          zIndex: 1
         }}
       >
         {/* Label for margin line */}
