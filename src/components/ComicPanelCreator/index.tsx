@@ -8,12 +8,12 @@ import {
   generateScript, 
   validateComicPage 
 } from '../ScriptGenerator';
-import { PreviewModal } from './PreviewModal';
+import { PreviewModal } from '../PreviewModal';
 import { InstructionsModal } from '../InstructionsModal';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Panel as PanelComponent } from './Panel';
-import { Controls, ExportFormat } from './Controls';
+import { Controls, ExportFormat } from '../Controls';
 import { GuideLines } from './GuideLines';
 import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from './types';
 import { 
