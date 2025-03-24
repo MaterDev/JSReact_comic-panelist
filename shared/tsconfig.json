@@ -9,6 +9,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "composite": true
-  },
-  "include": ["**/*", "../src/components/Panel/types.ts"]
+  }
 }

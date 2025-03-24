@@ -14,7 +14,7 @@
       "@shared/*": ["shared/*"]
     }
   },
-  "include": ["src/**/*", "../shared/**/*", "../src/components/Panel/types.ts"],
+  "include": ["src/**/*", "../shared/**/*", "../src/components/Panel/panelTypes.ts"],
   "exclude": ["node_modules"],
   "references": [
     { "path": "../shared" }
