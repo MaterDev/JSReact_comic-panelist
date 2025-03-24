@@ -24,21 +24,21 @@ export const AIPreviewModal: React.FC<AIPreviewModalProps> = ({ imageUrl, onClos
         <div className="p-4 overflow-auto flex-grow">
           <div className="flex flex-row items-start gap-6">
             <div className="w-1/3">
-              <h3 className="text-lg font-medium mb-3">AI Layout Preview</h3>
-              <div className="text-sm text-gray-600 dark:text-gray-300 space-y-3">
+              <h3 className="text-lg font-medium mb-3 text-gray-900 dark:text-white">AI Layout Preview</h3>
+              <div className="text-sm text-gray-700 dark:text-gray-200 space-y-3">
                 <p>
                   This is the panel layout image that will be sent to the AI for script generation.
                 </p>
                 <p>
-                  <strong>Panel Numbers:</strong> Shown to help the AI understand the reading order.
+                  <strong className="text-gray-900 dark:text-white">Panel Numbers:</strong> Shown to help the AI understand the reading order.
                 </p>
                 <p>
-                  <strong>Controls:</strong> Hidden to provide a clean view for the AI.
+                  <strong className="text-gray-900 dark:text-white">Controls:</strong> Hidden to provide a clean view for the AI.
                 </p>
                 <p>
-                  <strong>Guidelines:</strong> Hidden as they're not relevant to the script content.
+                  <strong className="text-gray-900 dark:text-white">Guidelines:</strong> Hidden as they're not relevant to the script content.
                 </p>
-                <p className="italic mt-4 dark:text-gray-300">
+                <p className="italic mt-4 text-gray-700 dark:text-gray-200">
                   The AI will use this visual representation along with the panel coordinates to generate a script that matches your layout.
                 </p>
               </div>

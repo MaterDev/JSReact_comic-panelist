@@ -8,12 +8,12 @@ import {
   generateScript, 
   validateComicPage 
 } from '../ScriptGenerator';
-import { AIPreviewModal } from '../PreviewModal';
+import { AIPreviewModal } from '../AIPreviewModal';
+import { ExportPreviewModal } from '../ExportPreviewModal';
 import { InstructionsModal } from '../InstructionsModal';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { exportComic as exportComicUtil, generateAIPreviewImage as generateAIPreviewImageUtil } from '../ExportUtils';
 import { Panel as PanelComponent } from '../Panel';
-import { Controls, ExportFormat } from '../Controls';
+import { Controls, ExportFormat } from './Controls';
 import { GuideLines } from '../GuideLines';
 import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from '../../types/panelTypes';
 import { 
@@ -84,6 +84,7 @@ const ComicPanelCreator: React.FC = () => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showExportPreviewModal, setShowExportPreviewModal] = useState(false);
   
   // Creative direction states
   const [genre, setGenre] = useState('');
@@ -342,107 +343,32 @@ const ComicPanelCreator: React.FC = () => {
     });
   }, [draggingInfo, panels, loadedLayout]);
 
-  const generatePreviewImage = useCallback(async (): Promise<string> => {
-    // Check if container reference exists
-    if (!containerRef.current) {
-      throw new Error('Comic container reference is not available');
-    }
-    
-    // Create a temporary container with white background for capturing
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.left = '-9999px';
-    tempContainer.style.backgroundColor = 'white';
-    tempContainer.style.margin = '0';
-    tempContainer.style.padding = '0';
-    tempContainer.style.border = 'none';
-    document.body.appendChild(tempContainer);
-    
-    // Clone the comic container
-    const clone = containerRef.current.cloneNode(true) as HTMLElement;
-    clone.style.backgroundColor = 'white';
-    clone.style.overflow = 'visible';
-    clone.style.position = 'relative';
-    clone.style.width = `${CONTAINER_WIDTH}px`;
-    clone.style.height = `${CONTAINER_HEIGHT}px`;
-    clone.style.margin = '0';
-    clone.style.padding = '0';
-    clone.style.border = 'none';
-    tempContainer.appendChild(clone);
-    
-    // Make sure panel numbers are visible in the clone and set to black
-    const panelNumbers = clone.querySelectorAll('.panel-number');
-    panelNumbers.forEach((element) => {
-      (element as HTMLElement).style.display = 'block';
-      (element as HTMLElement).style.fontSize = '24px';
-      (element as HTMLElement).style.fontWeight = 'bold';
-      (element as HTMLElement).style.color = '#000000';
-    });
-    
-    // Make panel outlines black and backgrounds transparent
-    const panels = clone.querySelectorAll('.panel');
-    panels.forEach((element) => {
-      (element as HTMLElement).style.border = '2px solid #000000';
-      (element as HTMLElement).style.backgroundColor = 'transparent';
-    });
-    
-    // Hide panel controls in the preview
-    const panelControls = clone.querySelectorAll('.panel-controls');
-    panelControls.forEach((element) => {
-      (element as HTMLElement).style.display = 'none';
-    });
-    
-    // Hide resize handles in the preview
-    const resizeHandles = clone.querySelectorAll('.resize-handle');
-    resizeHandles.forEach((element) => {
-      (element as HTMLElement).style.display = 'none';
-    });
-    
-    // Hide guidelines in the screenshot
-    const guideLines = clone.querySelectorAll('[data-guide-element="true"]');
-    guideLines.forEach((element) => {
-      (element as HTMLElement).style.display = 'none';
-    });
-    
-    // Use html2canvas to capture the comic container
-    const canvas = await html2canvas(clone, {
-      backgroundColor: 'white',
-      scale: 2, // Higher resolution
-      width: CONTAINER_WIDTH,
-      height: CONTAINER_HEIGHT,
-      logging: false,
-      removeContainer: true,
-      x: 0,
-      y: 0,
-      windowWidth: CONTAINER_WIDTH,
-      windowHeight: CONTAINER_HEIGHT
-    });
-    
-    // Get image data as base64 string
-    const layoutImageBase64 = canvas.toDataURL('image/png');
-    
-    // Clean up the temporary container
-    document.body.removeChild(tempContainer);
-    
-    return layoutImageBase64;
+  const generateAIPreviewImage = useCallback(async (): Promise<string> => {
+    // Use the imported generateAIPreviewImage function from ExportUtils
+    const imgData = await generateAIPreviewImageUtil(containerRef);
+    return imgData || '';
   }, [containerRef]);
 
   const handlePreviewClick = useCallback(async () => {
     try {
-      const previewImageData = await generatePreviewImage();
+      const previewImageData = await generateAIPreviewImage();
       setPreviewImage(previewImageData);
       setShowPreviewModal(true);
     } catch (error) {
       console.error('Error generating preview:', error);
     }
-  }, [generatePreviewImage]);
+  }, [generateAIPreviewImage]);
+
+  const handleExportPreviewClick = useCallback(() => {
+    setShowExportPreviewModal(true);
+  }, []);
 
   const generatePanelScript = useCallback(async (): Promise<void> => {
     try {
       setIsGeneratingScript(true);
       
       // Generate the preview image
-      const layoutImageBase64 = await generatePreviewImage();
+      const layoutImageBase64 = await generateAIPreviewImage();
       
       // Convert current panels to layout format
       const layout: PanelLayout = {
@@ -484,118 +410,16 @@ const ComicPanelCreator: React.FC = () => {
     } finally {
       setIsGeneratingScript(false);
     }
-  }, [panels, apiKey, genre, emotion, inspiration, inspirationText, exclusions, generatePreviewImage]);
+  }, [panels, apiKey, genre, emotion, inspiration, inspirationText, exclusions, generateAIPreviewImage]);
 
-  const exportComic = useCallback(async (format: ExportFormat): Promise<void> => {
-    if (!containerRef.current) return;
-
-    // Temporarily hide controls but keep guidelines
-    setShowControls(false);
-    // We'll keep the guidelines but modify their color in the clone
-
-    try {
-      // Wait for the UI to update
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Create a temporary container with white background
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.backgroundColor = 'white';
-      // Set explicit dimensions and reset any potential margins/borders
-      tempContainer.style.margin = '0';
-      tempContainer.style.padding = '0';
-      tempContainer.style.border = 'none';
-      document.body.appendChild(tempContainer);
-
-      // Clone the comic container
-      const clone = containerRef.current.cloneNode(true) as HTMLElement;
-      clone.style.backgroundColor = 'white';
-      clone.style.overflow = 'visible';
-      clone.style.position = 'relative';
-      clone.style.width = `${CONTAINER_WIDTH}px`;
-      clone.style.height = `${CONTAINER_HEIGHT}px`;
-      // Reset all margins, borders, and padding that might affect positioning
-      clone.style.margin = '0';
-      clone.style.padding = '0';
-      clone.style.border = 'none';
-      tempContainer.appendChild(clone);
-      
-      // Hide panel numbers and guidelines in the clone for export
-      const panelNumbers = clone.querySelectorAll('.panel-number');
-      panelNumbers.forEach((element) => {
-        (element as HTMLElement).style.display = 'none';
-      });
-      
-      // Convert guidelines to non-photo blue for the export
-      const guideLines = clone.querySelectorAll('[data-guide-element="true"]');
-      guideLines.forEach((element) => {
-        (element as HTMLElement).style.border = '1px dashed #A4DDED'; // Non-photo blue color
-        (element as HTMLElement).style.opacity = '1';
-      });
-      
-      // Hide guideline labels in the export
-      const guideLabels = clone.querySelectorAll('[data-guide-element="true"] div');
-      guideLabels.forEach((element) => {
-        (element as HTMLElement).style.display = 'none';
-      });
-      
-      // Add black borders to all panels and make backgrounds transparent
-      const panelElements = clone.querySelectorAll('.panel');
-      panelElements.forEach((element) => {
-        (element as HTMLElement).style.border = '1px solid #000000';
-        (element as HTMLElement).style.backgroundColor = 'transparent';
-      });
-
-      // Use html2canvas to capture the comic container
-      const canvas = await html2canvas(clone, {
-        backgroundColor: 'white',
-        scale: 2, // Higher resolution
-        width: CONTAINER_WIDTH, // Exact width, no padding
-        height: CONTAINER_HEIGHT, // Exact height, no padding
-        logging: false,
-        removeContainer: true,
-        // Ensure we capture from the exact edge
-        x: 0,
-        y: 0,
-        // Ensure the full content is captured
-        windowWidth: CONTAINER_WIDTH,
-        windowHeight: CONTAINER_HEIGHT
-      });
-
-      // Get image data from canvas
-      const imgData = canvas.toDataURL('image/png');
-      
-      if (format === 'pdf') {
-        // Create PDF with correct aspect ratio
-        const imgWidth = 210; // A4 width in mm
-        const imgHeight = (CONTAINER_HEIGHT * imgWidth) / CONTAINER_WIDTH;
-        const pdf = new jsPDF({
-          orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
-          unit: 'mm',
-        });
-
-        // Add the canvas image to PDF
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-
-        // Save the PDF
-        pdf.save('comic-panels.pdf');
-      } else if (format === 'png') {
-        // For PNG export, create a download link
-        const link = document.createElement('a');
-        link.download = 'comic-panels.png';
-        link.href = imgData;
-        link.click();
-      }
-
-      // Clean up
-      document.body.removeChild(tempContainer);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    } finally {
-      // Restore controls
-      setShowControls(true);
-    }
+  const handleExportComic = useCallback(async (format: ExportFormat): Promise<void> => {
+    // Use the imported exportComic function with callbacks for UI state management
+    await exportComicUtil({
+      containerRef, 
+      format, 
+      onBeforeExport: () => setShowControls(false),
+      onAfterExport: () => setShowControls(true)
+    });
   }, [containerRef]);
 
   useEffect(() => {
@@ -711,7 +535,7 @@ const ComicPanelCreator: React.FC = () => {
       };
       
       // Generate a thumbnail for the updated layout
-      const thumbnailBase64 = await generatePreviewImage();
+      const thumbnailBase64 = await generateAIPreviewImage();
       
       // Send the update to the server
       const response = await fetch(`http://localhost:3001/api/layouts/${loadedLayout.id}`, {
@@ -772,7 +596,7 @@ const ComicPanelCreator: React.FC = () => {
     } finally {
       setIsSavingLayout(false);
     }
-  }, [loadedLayout, panels, generatedScript, genre, emotion, inspiration, inspirationText, exclusions, generatePreviewImage]);
+  }, [loadedLayout, panels, generatedScript, genre, emotion, inspiration, inspirationText, exclusions, generateAIPreviewImage]);
   
   // Function to close the current layout
   const closeCurrentLayout = useCallback(() => {
@@ -1100,7 +924,8 @@ const ComicPanelCreator: React.FC = () => {
             showGuides={showGuides}
             onShowGuidesChange={setShowGuides}
             onResetPanels={resetPanels}
-            onExport={exportComic}
+            onExport={handleExportComic}
+            onShowExportPreview={handleExportPreviewClick}
             exportFormat={exportFormat}
             onExportFormatChange={setExportFormat}
             selectedPanel={selectedPanel}
@@ -1172,6 +997,14 @@ const ComicPanelCreator: React.FC = () => {
         <AIPreviewModal
           imageUrl={previewImage}
           onClose={() => setShowPreviewModal(false)}
+        />
+      )}
+
+      {showExportPreviewModal && (
+        <ExportPreviewModal
+          containerRef={containerRef}
+          exportFormat={exportFormat}
+          onClose={() => setShowExportPreviewModal(false)}
         />
       )}
     </div>
