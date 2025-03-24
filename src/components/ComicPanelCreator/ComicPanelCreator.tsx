@@ -75,7 +75,7 @@ const ComicPanelCreator: React.FC = () => {
   const [draggingInfo, setDraggingInfo] = useState<DraggingInfo | null>(null);
   const [showControls, setShowControls] = useState(true);
   const [showGuides, setShowGuides] = useState(true);
-  const [exportFormat, setExportFormat] = useState<ExportFormat>('pdf');
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
   const [generatedScript, setGeneratedScript] = useState<ComicPage | null>(null);
   const [isGeneratingScript, setIsGeneratingScript] = useState(false);
   const [showScriptModal, setShowScriptModal] = useState(false);
