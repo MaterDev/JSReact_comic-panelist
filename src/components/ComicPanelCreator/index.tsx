@@ -9,7 +9,7 @@ import {
   validateComicPage 
 } from '../ScriptGenerator';
 import { PreviewModal } from './PreviewModal';
-import { InstructionsModal } from './InstructionsModal';
+import { InstructionsModal } from '../InstructionsModal';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Panel as PanelComponent } from './Panel';
