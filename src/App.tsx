@@ -1,6 +1,6 @@
 import React from 'react';
 import ComicPanelCreator from './components/ComicPanelCreator';
-import DarkModeToggle from './components/DarkModeToggle';
+import DarkModeToggle from './components/DarkModeToggle/index';
 
 const App: React.FC = () => {
   return (
