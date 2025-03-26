@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ExportFormat } from '../Controls';
+import { ExportFormat } from '../ComicPanelCreator/Controls/Controls';
 import { generatePreviewImage } from '../ExportUtils';
 
 

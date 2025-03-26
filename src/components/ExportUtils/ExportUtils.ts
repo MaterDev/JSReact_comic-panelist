@@ -1,10 +1,10 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { ExportFormat } from '../Controls';
+import { ExportFormat } from '../ComicPanelCreator/Controls/Controls';
 import { 
   CONTAINER_WIDTH, 
   CONTAINER_HEIGHT 
-} from '../../utils/panelUtils';
+} from '../../../shared/utils/panelUtils';
 
 /**
  * Prepares a clone of the comic container for export

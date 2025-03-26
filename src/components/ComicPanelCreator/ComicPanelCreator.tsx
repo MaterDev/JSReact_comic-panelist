@@ -13,9 +13,9 @@ import { ExportPreviewModal } from '../ExportPreviewModal';
 import { InstructionsModal } from '../InstructionsModal';
 import { exportComic as exportComicUtil, generateAIPreviewImage as generateAIPreviewImageUtil } from '../ExportUtils';
 import { Panel as PanelComponent } from '../Panel';
-import { Controls, ExportFormat } from './Controls';
+import { Controls, ExportFormat } from './Controls/Controls';
 import { GuideLines } from '../GuideLines';
-import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from '../../types/panelTypes';
+import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from '../../../shared/types/panelTypes';
 import { 
   CONTAINER_WIDTH, 
   CONTAINER_HEIGHT, 
@@ -26,7 +26,7 @@ import {
   pixelsToPercent, 
   generatePanelId, 
   findPanelById 
-} from '../../utils/panelUtils';
+} from '../../../shared/utils/panelUtils';
 
 // Import the CollectionManager component
 import CollectionManager from '../CollectionManager';
