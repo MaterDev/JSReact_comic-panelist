@@ -14,6 +14,8 @@ import { InstructionsModal } from '../InstructionsModal';
 import { exportComic as exportComicUtil, generateAIPreviewImage as generateAIPreviewImageUtil } from '../ExportUtils';
 import { Panel as PanelComponent } from '../Panel';
 import { Controls, ExportFormat } from './Controls/Controls';
+import { CreativeDirectionForm } from './CreativeDirectionForm';
+import { ScriptGenerationPanel } from './ScriptGenerationPanel';
 import { GuideLines } from '../GuideLines';
 import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from '../../../shared/types/panelTypes';
 import { 
@@ -81,7 +83,6 @@ const ComicPanelCreator: React.FC = () => {
   const [showScriptModal, setShowScriptModal] = useState(false);
   const [selectedScriptPanel, setSelectedScriptPanel] = useState<ScriptPanel | null>(null);
   const [apiKey, setApiKey] = useState('');
-  const [showApiKey, setShowApiKey] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showExportPreviewModal, setShowExportPreviewModal] = useState(false);
@@ -95,7 +96,7 @@ const ComicPanelCreator: React.FC = () => {
   const [loadedLayout, setLoadedLayout] = useState<Layout | null>(null);
   const [inspirationText, setInspirationText] = useState('');
   const [exclusions, setExclusions] = useState('');
-  const [showCreativeInputs, setShowCreativeInputs] = useState(false);
+  // Creative direction state is now managed by the CreativeDirectionForm component
   
   // Track unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -769,153 +770,33 @@ const ComicPanelCreator: React.FC = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Column 1 - Control Panel - Fixed to left side */}
         <div className="flex flex-col gap-4 w-72 p-3 overflow-y-auto border-r border-gray-200 dark:border-dark-600 bg-gray-50 dark:bg-dark-800">
-          <div className="p-3 bg-gray-50 dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600 shadow-sm">
-            <h2 className="text-base font-semibold mb-2">Script Controls</h2>
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={generatePanelScript}
-                  disabled={isGeneratingScript}
-                  className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-dark-500 text-sm"
-                >
-                  {isGeneratingScript ? 'Generating...' : 'Generate Script'}
-                </button>
-                <button
-                  onClick={handlePreviewClick}
-                  className="px-3 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded flex items-center justify-center text-sm"
-                  title="Preview the panel layout image that will be sent to the AI"
-                >
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                  AI Preview
-                </button>
-              </div>
-              {generatedScript && (
-                <button
-                  onClick={() => setShowScriptModal(true)}
-                  className="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 w-full text-sm"
-                >
-                  View Script
-                </button>
-              )}
-              <div className="relative w-full">
-                {/* Hidden username field for accessibility - improves password manager compatibility */}
-                <input 
-                  type="text" 
-                  autoComplete="username" 
-                  name="username"
-                  aria-hidden="true"
-                  style={{ display: 'none' }}
-                />
-                <input
-                  type={showApiKey ? 'text' : 'password'}
-                  placeholder="Anthropic API Key (optional)"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md text-sm dark:bg-dark-600 dark:border-dark-500 dark:text-gray-100 dark:placeholder-gray-400"
-                  name="apiKey"
-                  autoComplete="current-password"
-                />
-                <button
-                  onClick={() => setShowApiKey(!showApiKey)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm px-2 py-1 dark:text-gray-300"
-                  type="button"
-                >
-                  {showApiKey ? 'Hide' : 'Show'}
-                </button>
-              </div>
-              
-              <div className="mt-4">
-                <button
-                  onClick={() => setShowCreativeInputs(!showCreativeInputs)}
-                  className="flex items-center justify-between w-full px-4 py-2 bg-gray-200 dark:bg-dark-600 rounded-md text-sm font-medium"
-                  aria-expanded={showCreativeInputs}
-                  aria-controls="creative-inputs-panel"
-                >
-                  <span>Creative Direction {showCreativeInputs ? '(Hide)' : '(Show)'}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${showCreativeInputs ? 'transform rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </button>
-                
-                <div 
-                  id="creative-inputs-panel"
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${showCreativeInputs ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
-                >
-                  <div className="mt-3 space-y-3 p-3 bg-gray-100 dark:bg-dark-700 rounded-md">
-                    <div>
-                      <label htmlFor="genre" className="block text-xs font-medium mb-1 dark:text-gray-300">Genre</label>
-                      <input
-                        id="genre"
-                        type="text"
-                        placeholder="e.g., Sci-fi, Fantasy, Noir"
-                        value={genre}
-                        onChange={(e) => setGenre(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md text-sm dark:bg-dark-600 dark:border-dark-500 dark:text-gray-100"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="emotion" className="block text-xs font-medium mb-1 dark:text-gray-300">Emotional Tone</label>
-                      <input
-                        id="emotion"
-                        type="text"
-                        placeholder="e.g., Suspenseful, Humorous, Melancholic"
-                        value={emotion}
-                        onChange={(e) => setEmotion(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md text-sm dark:bg-dark-600 dark:border-dark-500 dark:text-gray-100"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="inspiration" className="block text-xs font-medium mb-1 dark:text-gray-300">Inspiration</label>
-                      <input
-                        id="inspiration"
-                        type="text"
-                        placeholder="e.g., Film noir, Miyazaki, Cyberpunk"
-                        value={inspiration}
-                        onChange={(e) => setInspiration(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md text-sm dark:bg-dark-600 dark:border-dark-500 dark:text-gray-100"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="inspirationText" className="block text-xs font-medium mb-1 dark:text-gray-300">Inspiration Text</label>
-                      <textarea
-                        id="inspirationText"
-                        placeholder="Enter a longer description or excerpt"
-                        value={inspirationText}
-                        onChange={(e) => setInspirationText(e.target.value)}
-                        rows={3}
-                        className="w-full px-3 py-2 border rounded-md text-sm dark:bg-dark-600 dark:border-dark-500 dark:text-gray-100"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="exclusions" className="block text-xs font-medium mb-1 dark:text-gray-300">Exclusions</label>
-                      <input
-                        id="exclusions"
-                        type="text"
-                        placeholder="e.g., Violence, Romance, Politics"
-                        value={exclusions}
-                        onChange={(e) => setExclusions(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md text-sm dark:bg-dark-600 dark:border-dark-500 dark:text-gray-100"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          <ScriptGenerationPanel
+            apiKey={apiKey}
+            onApiKeyChange={setApiKey}
+            isGeneratingScript={isGeneratingScript}
+            onGenerateScript={generatePanelScript}
+            hasGeneratedScript={!!generatedScript}
+            onViewScript={() => setShowScriptModal(true)}
+            onPreviewClick={handlePreviewClick}
+          />
+          
+          <CreativeDirectionForm
+            creativeDirection={{
+              genre,
+              emotion,
+              inspiration,
+              inspirationText,
+              exclusions
+            }}
+            onCreativeDirectionChange={(direction) => {
+              setGenre(direction.genre);
+              setEmotion(direction.emotion);
+              setInspiration(direction.inspiration);
+              setInspirationText(direction.inspirationText);
+              setExclusions(direction.exclusions);
+            }}
+          />
+          
           <Controls
             gutterSize={gutterSize}
             onGutterSizeChange={setGutterSize}
@@ -930,6 +811,7 @@ const ComicPanelCreator: React.FC = () => {
             onExportFormatChange={setExportFormat}
             selectedPanel={selectedPanel}
           />
+
         </div>
 
         {/* Column 2 - Comic Page - Center with most space */}
