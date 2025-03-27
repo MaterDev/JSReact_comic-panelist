@@ -16,6 +16,7 @@ import { Panel as PanelComponent } from '../Panel';
 import { Controls, ExportFormat } from './Controls/Controls';
 import { CreativeDirectionForm } from './CreativeDirectionForm';
 import { ScriptGenerationPanel } from './ScriptGenerationPanel';
+import { PanelOperationsToolbar } from './PanelOperationsToolbar';
 import { GuideLines } from '../GuideLines';
 import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from '../../../shared/types/panelTypes';
 import { 
@@ -795,6 +796,16 @@ const ComicPanelCreator: React.FC = () => {
               setInspirationText(direction.inspirationText);
               setExclusions(direction.exclusions);
             }}
+          />
+          
+          <PanelOperationsToolbar
+            selectedPanel={selectedPanel}
+            canDelete={panels.length > 1}
+            hasScript={!!generatedScript}
+            onSplitHorizontally={splitPanelHorizontally}
+            onSplitVertically={splitPanelVertically}
+            onDelete={deletePanel}
+            onViewScript={handleViewPanelScript}
           />
           
           <Controls
