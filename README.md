@@ -142,6 +142,7 @@ This project uses GitHub Projects for roadmap tracking and task management. The 
 - **Structured Roadmap**: Located at `docs/ROADMAP_STRUCTURED.md`
 - **GitHub Projects**: Tasks are synchronized to GitHub Projects for visual tracking
 - **Automated Sync**: Custom scripts automate the creation of issues from the roadmap
+- **Project Board**: [Comic Panelist - App](https://github.com/users/MaterDev/projects/11)
 
 For more information on the roadmap sync process, see the [Scripts README](scripts/README.md).
 
