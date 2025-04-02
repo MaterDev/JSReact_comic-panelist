@@ -133,7 +133,21 @@ The instructions are organized into easy-to-navigate sections with a dropdown me
 - **html2canvas** - For high-quality panel capture
 - **jsPDF** - For PDF generation and export
 
+## Project Management
+
+This project uses GitHub Projects for roadmap tracking and task management. The roadmap is maintained in a structured markdown format and synchronized with GitHub issues using custom scripts.
+
+### Roadmap Integration
+
+- **Structured Roadmap**: Located at `docs/ROADMAP_STRUCTURED.md`
+- **GitHub Projects**: Tasks are synchronized to GitHub Projects for visual tracking
+- **Automated Sync**: Custom scripts automate the creation of issues from the roadmap
+
+For more information on the roadmap sync process, see the [Scripts README](scripts/README.md).
+
 ## Available Scripts
+
+### Application Scripts
 
 - `npm run dev` - Runs the development server
 - `npm run start:server` - Runs the backend server in production mode
@@ -143,6 +157,11 @@ The instructions are organized into easy-to-navigate sections with a dropdown me
 - `npm test` - Runs the test suite with Vitest
 - `npm run test:ui` - Runs tests with the Vitest UI
 - `npm run coverage` - Runs tests with coverage reporting
+
+### Utility Scripts
+
+- `node scripts/sync-roadmap.js` - Synchronizes the roadmap with GitHub Projects
+- `node scripts/get-project-fields.js` - Retrieves field IDs from GitHub Projects
 
 ## License
 
