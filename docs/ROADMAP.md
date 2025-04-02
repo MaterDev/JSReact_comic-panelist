@@ -7,8 +7,21 @@ This document outlines the development roadmap for transforming the Comic Panel 
 ### Task 1.1: Code Restructuring
 - [ ] Separate UI components from business logic
   - [ ] Create dedicated view components from existing `src/components/ComicPanelCreator/*.tsx` files
-  - [ ] Move business logic from `index.tsx` into separate service classes
+    - [ ] Move UI-only components into their own directories following the established pattern (component file, test file, index.ts)
+    - [ ] Ensure each component has a single responsibility and clear interface
+    - [ ] Follow the naming convention established with CreativeDirectionForm, PanelOperationsToolbar, etc.
+  - [ ] Move business logic from `ComicPanelCreator.tsx` into separate service classes
+    - [ ] Extract panel manipulation functions (split, resize, drag, etc.) into a PanelService
+    - [ ] Move layout management functions (save, load, close) into a LayoutService
+    - [ ] Create a ScriptService for script generation and management
   - [ ] Refactor the large `ComicPanelCreator` component into smaller, focused components
+    - [ ] Extract `PanelCanvas` component for the central panel display area
+    - [ ] Create `HeaderToolbar` component for the top navigation bar
+    - [ ] Implement `BreadcrumbNavigation` component for collection/layout navigation
+    - [ ] Build `LayoutManager` component to handle layout operations
+    - [ ] Create `PanelInteractionHook` to manage panel resize and drag logic
+    - [ ] Implement `ModalManager` component to centralize modal handling
+    - [ ] Add `PerspectiveGrid` component for perspective drawing guides
   - [ ] **Implementation Guidance**: Create a `src/services` directory and move panel manipulation logic from `index.tsx` into a `PanelService.ts` file
 - [ ] Create a proper service layer for script generation and APIs
   - [ ] Abstract Anthropic API integration from `scriptService.ts` into a more robust API client
