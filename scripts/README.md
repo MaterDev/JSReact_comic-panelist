@@ -18,12 +18,6 @@ These scripts require certain environment variables to function properly. Create
 # GitHub Personal Access Token (required for GitHub API access)
 # Needs 'repo' and 'project' scopes
 GITHUB_TOKEN=your_github_token_here
-
-# Anthropic API Key (for AI integration)
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-
-# Server port configuration
-PORT=3000
 ```
 
 ### Creating a GitHub Personal Access Token
