@@ -7,7 +7,7 @@
  * @module hooks/useCollectionForm
  */
 import { useState } from 'react';
-import { Collection } from '../types';
+import { Collection } from '../../../../shared/types/layoutTypes';
 import { 
   createCollectionCreationHandler
 } from '../utils/eventHandlers';

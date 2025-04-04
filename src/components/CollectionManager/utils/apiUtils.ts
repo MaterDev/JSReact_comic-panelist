@@ -5,7 +5,7 @@
  * 
  * @module apiUtils
  */
-import { Collection, Layout } from '../types';
+import { Collection, Layout } from '../../../../shared/types/layoutTypes';
 import { API_URL } from '../../../constants';
 
 /**

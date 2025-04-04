@@ -6,7 +6,7 @@
  * @module eventHandlers
  */
 import { Dispatch, SetStateAction } from 'react';
-import { Collection, Layout } from '../types';
+import { Collection, Layout } from '../../../../shared/types/layoutTypes';
 import { 
   fetchCollectionsApi,
   fetchLayoutsApi, 

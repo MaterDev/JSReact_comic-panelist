@@ -12,7 +12,7 @@ import CoverSection from './CoverSection';
 import PagePairSection from './PagePairSection';
 import EmptyState from './EmptyState';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
-import { Layout } from '../types';
+import { Layout } from '../../../../shared/types/layoutTypes';
 import { 
   categorizeLayouts, 
   groupPagesIntoPairs, 

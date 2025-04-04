@@ -7,7 +7,7 @@
  * @module hooks/useCollections
  */
 import { useState, useEffect } from 'react';
-import { Collection } from '../types';
+import { Collection } from '../../../../shared/types/layoutTypes';
 import { 
   createFetchCollectionsHandler,
   createCollectionSelectHandler,

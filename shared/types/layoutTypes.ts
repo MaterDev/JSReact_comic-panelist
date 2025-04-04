@@ -11,25 +11,41 @@ export interface LayoutPanel {
 }
 
 /**
- * Represents a saved layout configuration.
+ * Represents a single panel within a comic layout
+ */
+export interface Panel {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  number: number;
+}
+
+/**
+ * Represents a comic layout within a collection
  */
 export interface Layout {
-  id: string;
-  collection_id?: number; // Add collection_id (optional based on errors)
+  id: number;
+  collection_id: number;
   name: string;
-  description: string;
-  display_order?: number; // Add display_order (optional based on errors)
-  page_type?: 'front_cover' | 'back_cover' | 'standard'; // Add page_type (optional based on errors)
-  created_at: string;
-  updated_at: string;
-  thumbnail_url?: string; // Optional thumbnail
+  display_order: number;
+  page_type: 'front_cover' | 'back_cover' | 'standard';
   panel_data: {
-    panels: LayoutPanel[];
-    gutterSize: number;
+    panels: Panel[];
   };
-  script_data?: any; // Add script_data (optional, type any for now)
-  creative_direction?: any; // Add creative_direction (optional, type any for now)
-  user_id?: string; // Optional user ID if applicable
-  shared_with?: string[]; // Optional list of users shared with
-  tags?: string[]; // Optional tags for categorization
+  thumbnail_path?: string;
+  script_data?: any;
+  creative_direction?: any;
+  created_at: Date;
+  updated_at: Date;
+}
+
+/**
+ * Represents a collection of comic layouts
+ */
+export interface Collection {
+  id: number;
+  name: string;
+  description?: string;
 }

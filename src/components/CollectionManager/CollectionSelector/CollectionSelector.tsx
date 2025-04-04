@@ -6,7 +6,7 @@
  * @module CollectionManager/CollectionSelector
  */
 import React from 'react';
-import { Collection } from '../types';
+import { Collection } from '../../../../shared/types/layoutTypes';
 
 /**
  * Props for the CollectionSelector component that handles collection selection

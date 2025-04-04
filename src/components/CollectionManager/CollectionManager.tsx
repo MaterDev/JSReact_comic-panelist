@@ -15,7 +15,7 @@ import CreateForm from './CreateForm';
 import EditForm from './EditForm';
 import CollectionSelector from './CollectionSelector';
 import CollectionDetails from './CollectionDetails';
-import { Collection, Layout } from './types';
+import { Collection, Layout } from '../../../shared/types/layoutTypes';
 
 // Import custom hooks
 import { useCollections, useLayouts, useCollectionForm } from './hooks';

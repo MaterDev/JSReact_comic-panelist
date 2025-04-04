@@ -7,7 +7,7 @@
  * @module hooks/useLayouts
  */
 import React, { useState, useEffect } from 'react';
-import { Layout } from '../types';
+import { Layout } from '../../../../shared/types/layoutTypes';
 import { 
   createLayoutSelectHandler,
   createLayoutLoadHandler,

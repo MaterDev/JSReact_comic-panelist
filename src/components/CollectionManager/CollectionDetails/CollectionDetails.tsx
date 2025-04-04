@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import LayoutPreview from '../LayoutPreview';
-import { Collection, Layout } from '../types';
+import { Collection, Layout } from '../../../../shared/types/layoutTypes';
 
 /**
  * Props for the CollectionDetails component that displays collection information and layouts

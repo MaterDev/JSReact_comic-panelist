@@ -5,7 +5,7 @@
  * 
  * @module collectionUtils
  */
-import { Collection, Layout } from '../types';
+import { Collection, Layout } from '../../../../shared/types/layoutTypes';
 
 /**
  * Filters collections based on a search term
