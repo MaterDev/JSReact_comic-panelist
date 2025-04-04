@@ -58,8 +58,6 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({ layouts, onLayoutSelect, 
   const confirmDelete = createConfirmDeleteHandler(onDeleteLayout, setShowDeleteConfirm, setLayoutToDelete, layoutToDelete);
   const cancelDelete = createCancelDeleteHandler(setShowDeleteConfirm, setLayoutToDelete);
   
-  // Function to handle opening the rename modal
-  
   return (
     <div 
       id="layout-preview-container" 
