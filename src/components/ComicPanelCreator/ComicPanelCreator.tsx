@@ -1,58 +1,49 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { 
-  ScriptModal, 
-  PanelScriptModal, 
-  ComicPage, 
-  PanelLayout, 
+/**
+ * ComicPanelCreator Component
+ *
+ * This is the main component for the comic panel layout and script generation tool.
+ * It provides the primary user interface for:
+ * - Designing comic page layouts by adding, resizing, splitting, and deleting panels.
+ * - Visualizing the layout on a fixed-size canvas with a checkerboard background.
+ * - Managing panel selections and interactions (dragging, resizing).
+ * - Inputting creative direction and API keys for script generation.
+ * - Generating AI-powered scripts for the defined panel layout.
+ * - Viewing generated scripts per panel or for the entire page.
+ * - Exporting the comic layout to various formats (JSON, PNG).
+ * - Saving and loading panel layouts to/from collections.
+ *
+ * It orchestrates various sub-components and hooks to manage state and functionality,
+ * including panel operations, script generation, modal dialogs, and layout persistence.
+ */
+import React, { useState, useRef, useCallback } from 'react';
+import {
+  ComicPage,
+  PanelLayout,
   Panel as ScriptPanel,
-  generateScript, 
-  validateComicPage 
+  generateScript,
+  validateComicPage
 } from '../ScriptGenerator';
-import { AIPreviewModal } from '../AIPreviewModal';
-import { ExportPreviewModal } from '../ExportPreviewModal';
-import { InstructionsModal } from '../InstructionsModal';
 import { exportComic as exportComicUtil, generateAIPreviewImage as generateAIPreviewImageUtil } from '../ExportUtils';
 import { Panel as PanelComponent } from '../Panel';
 import { Controls, ExportFormat } from './Controls/Controls';
 import { CreativeDirectionForm } from './CreativeDirectionForm';
 import { ScriptGenerationPanel } from './ScriptGenerationPanel';
 import { PanelOperationsToolbar } from './PanelOperationsToolbar';
+import HeaderToolbar from './HeaderToolbar';
 import { GuideLines } from '../GuideLines';
-import { Panel, ResizingInfo, DraggingInfo, ResizeDirection } from '../../../shared/types/panelTypes';
-import { 
-  CONTAINER_WIDTH, 
-  CONTAINER_HEIGHT, 
-  TRIM_INSET_PERCENT,
-  TRIM_WIDTH_PERCENT,
-  TRIM_HEIGHT_PERCENT,
-  percentToPixels, 
-  pixelsToPercent, 
-  generatePanelId, 
-  findPanelById 
-} from '../../../shared/utils/panelUtils';
+import { Panel } from '../../../shared/types/panelTypes';
 
-// Import the CollectionManager component
-import CollectionManager from '../CollectionManager';
-
-// Import Layout type
-interface LayoutPanel {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  number: number;
-}
-
+// Define a local Layout type that matches the HeaderToolbar and LayoutManager components
 interface Layout {
   id: number;
-  collection_id: number;
   name: string;
-  display_order: number;
-  page_type: 'front_cover' | 'back_cover' | 'standard';
-
+  collection_id: number;
+  description?: string;
+  display_order?: number;
+  page_type?: 'front_cover' | 'back_cover' | 'standard';
   panel_data: {
-    panels: LayoutPanel[];
+    panels: Panel[];
+    gutterSize: number;
   };
   thumbnail_path?: string;
   script_data?: any;
@@ -61,21 +52,54 @@ interface Layout {
   updated_at: Date;
 }
 
+// Import new components
+import { usePanelInteraction } from './hooks';
+import { ModalManager } from './ModalManager';
+import { LayoutManager } from './LayoutManager';
+import {
+  CONTAINER_WIDTH,
+  CONTAINER_HEIGHT,
+  TRIM_INSET_PERCENT,
+  TRIM_WIDTH_PERCENT,
+  TRIM_HEIGHT_PERCENT,
+  percentToPixels,
+  pixelsToPercent,
+  generatePanelId,
+  findPanelById
+} from '../../../shared/utils/panelUtils';
+
+// Import the CollectionManager component
+import CollectionManager from '../CollectionManager';
+
 const ComicPanelCreator: React.FC = () => {
   const [panels, setPanels] = useState<Panel[]>([
-    { 
-      id: 'panel-1', 
-      x: TRIM_INSET_PERCENT, 
-      y: (100 - TRIM_HEIGHT_PERCENT) / 2, 
-      width: TRIM_WIDTH_PERCENT, 
-      height: TRIM_HEIGHT_PERCENT, 
-      number: 1 
+    {
+      id: 'panel-1',
+      x: TRIM_INSET_PERCENT,
+      y: (100 - TRIM_HEIGHT_PERCENT) / 2,
+      width: TRIM_WIDTH_PERCENT,
+      height: TRIM_HEIGHT_PERCENT,
+      panelNumber: 1
     }
   ]);
   const [gutterSize, setGutterSize] = useState(10);
-  const [selectedPanelId, setSelectedPanelId] = useState<string | null>(null);
-  const [resizingInfo, setResizingInfo] = useState<ResizingInfo | null>(null);
-  const [draggingInfo, setDraggingInfo] = useState<DraggingInfo | null>(null);
+  // Use the panel interaction hook
+  const containerRef = useRef<HTMLDivElement>(null);
+  const {
+    selectedPanelId,
+    setSelectedPanelId,
+    startResize,
+    startDrag
+  } = usePanelInteraction({
+    panels,
+    setPanels,
+    containerRef,
+    onPanelChange: () => {
+      if (loadedLayout) {
+        setHasUnsavedChanges(true);
+      }
+    }
+  });
   const [showControls, setShowControls] = useState(true);
   const [showGuides, setShowGuides] = useState(true);
   const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
@@ -87,22 +111,25 @@ const ComicPanelCreator: React.FC = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showExportPreviewModal, setShowExportPreviewModal] = useState(false);
-  
+
   // Creative direction states
   const [genre, setGenre] = useState('');
   const [emotion, setEmotion] = useState('');
   const [inspiration, setInspiration] = useState('');
-  
+
   // Layout loading state
   const [loadedLayout, setLoadedLayout] = useState<Layout | null>(null);
+  // These state variables are used in the handleLoadLayout function
+  // They're not directly used in the UI but are needed for state management
+  const [_layoutName, setLayoutName] = useState('');
+  const [_layoutDescription, setLayoutDescription] = useState('');
   const [inspirationText, setInspirationText] = useState('');
   const [exclusions, setExclusions] = useState('');
   // Creative direction state is now managed by the CreativeDirectionForm component
-  
+
   // Track unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const nextPanelId = useRef(2);
 
   // Helper function to update panel numbers
@@ -122,10 +149,14 @@ const ComicPanelCreator: React.FC = () => {
     // Assign numbers sequentially
     return sortedPanels.map((panel, index) => ({
       ...panel,
-      number: index + 1
+      panelNumber: index + 1
     }));
   }, []);
 
+  /**
+   * Splits the target panel horizontally into two equal halves.
+   * @param panelId The ID of the panel to split.
+   */
   const splitPanelHorizontally = useCallback((panelId: string): void => {
     const panel = findPanelById(panels, panelId);
     if (!panel) return;
@@ -161,6 +192,10 @@ const ComicPanelCreator: React.FC = () => {
     setSelectedPanelId(null);
   }, [panels, gutterSize, updatePanelNumbers]);
 
+  /**
+   * Splits the target panel vertically into two equal halves.
+   * @param panelId The ID of the panel to split.
+   */
   const splitPanelVertically = useCallback((panelId: string): void => {
     const panel = findPanelById(panels, panelId);
     if (!panel) return;
@@ -193,6 +228,11 @@ const ComicPanelCreator: React.FC = () => {
     setSelectedPanelId(null);
   }, [panels, gutterSize, updatePanelNumbers]);
 
+  /**
+   * Deletes the target panel from the layout.
+   * Ensures at least one panel always remains.
+   * @param panelId The ID of the panel to delete.
+   */
   const deletePanel = useCallback((panelId: string): void => {
     if (panels.length <= 1) return;
     setPanels(prev => {
@@ -204,6 +244,10 @@ const ComicPanelCreator: React.FC = () => {
     }
   }, [panels.length, selectedPanelId, updatePanelNumbers]);
 
+  /**
+   * Resets the panel layout to a single default panel.
+   * Also clears any existing generated script.
+   */
   const resetPanels = useCallback((): void => {
     setPanels([
       {
@@ -212,145 +256,27 @@ const ComicPanelCreator: React.FC = () => {
         y: (100 - TRIM_HEIGHT_PERCENT) / 2,
         width: TRIM_WIDTH_PERCENT,
         height: TRIM_HEIGHT_PERCENT,
-        number: 1
+        panelNumber: 1
       }
     ]);
     nextPanelId.current = 2;
     setSelectedPanelId(null);
   }, []);
 
-  const startResize = useCallback((e: React.MouseEvent, panelId: string, direction: ResizeDirection): void => {
-    e.stopPropagation();
-    if (!containerRef.current) return;
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    setResizingInfo({
-      panelId,
-      direction,
-      startX: e.clientX - containerRect.left,
-      startY: e.clientY - containerRect.top,
-      originalPanels: [...panels]
-    });
-  }, [panels]);
-
-  const startDrag = useCallback((e: React.MouseEvent, panelId: string): void => {
-    e.stopPropagation();
-    if (e.target instanceof Element && 
-        (e.target.classList.contains('handle') || e.target.closest('.panel-controls'))) return;
-
-    const panel = findPanelById(panels, panelId);
-    if (!panel || !containerRef.current) return;
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const pixelDims = percentToPixels(panel);
-
-    setDraggingInfo({
-      panelId,
-      startX: e.clientX - containerRect.left,
-      startY: e.clientY - containerRect.top,
-      originalX: pixelDims.x,
-      originalY: pixelDims.y,
-      originalPanels: [...panels]
-    });
-    setSelectedPanelId(panelId);
-  }, [panels]);
-
-  const handleResize = useCallback((e: MouseEvent): void => {
-    if (!resizingInfo || !containerRef.current) return;
-
-    const { panelId, direction, startX, startY, originalPanels } = resizingInfo;
-    const panel = originalPanels.find(p => p.id === panelId);
-    if (!panel) return;
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const currentX = e.clientX - containerRect.left;
-    const currentY = e.clientY - containerRect.top;
-
-    const pixelDims = percentToPixels(panel);
-    let newX = pixelDims.x;
-    let newY = pixelDims.y;
-    let newWidth = pixelDims.width;
-    let newHeight = pixelDims.height;
-
-    if (direction.includes('n')) {
-      const deltaY = currentY - startY;
-      newY = Math.max(0, Math.min(pixelDims.y + pixelDims.height - 20, pixelDims.y + deltaY));
-      newHeight = pixelDims.y + pixelDims.height - newY;
-    }
-    if (direction.includes('s')) {
-      const deltaY = currentY - startY;
-      newHeight = Math.max(20, Math.min(CONTAINER_HEIGHT - pixelDims.y, pixelDims.height + deltaY));
-    }
-    if (direction.includes('w')) {
-      const deltaX = currentX - startX;
-      newX = Math.max(0, Math.min(pixelDims.x + pixelDims.width - 20, pixelDims.x + deltaX));
-      newWidth = pixelDims.x + pixelDims.width - newX;
-    }
-    if (direction.includes('e')) {
-      const deltaX = currentX - startX;
-      newWidth = Math.max(20, Math.min(CONTAINER_WIDTH - pixelDims.x, pixelDims.width + deltaX));
-    }
-
-    const newPercentDims = pixelsToPercent(newX, newY, newWidth, newHeight);
-    setPanels(prev => {
-      // Mark as having unsaved changes if a layout is loaded
-      if (loadedLayout) {
-        setHasUnsavedChanges(true);
-      }
-      
-      return prev.map(p =>
-        p.id === panelId
-          ? {
-              ...p,
-              x: newPercentDims.x,
-              y: newPercentDims.y,
-              width: newPercentDims.width,
-              height: newPercentDims.height
-            }
-          : p
-      );
-    });
-  }, [resizingInfo, loadedLayout]);
-
-  const handleDrag = useCallback((e: MouseEvent): void => {
-    if (!draggingInfo || !containerRef.current) return;
-
-    const { panelId, startX, startY, originalX, originalY } = draggingInfo;
-    const panel = findPanelById(panels, panelId);
-    if (!panel) return;
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const currentX = e.clientX - containerRect.left;
-    const currentY = e.clientY - containerRect.top;
-
-    const deltaX = currentX - startX;
-    const deltaY = currentY - startY;
-
-    const pixelDims = percentToPixels(panel);
-    const newX = Math.max(0, Math.min(CONTAINER_WIDTH - pixelDims.width, originalX + deltaX));
-    const newY = Math.max(0, Math.min(CONTAINER_HEIGHT - pixelDims.height, originalY + deltaY));
-
-    const newPercentPos = pixelsToPercent(newX, newY, 0, 0);
-    setPanels(prev => {
-      // Mark as having unsaved changes if a layout is loaded
-      if (loadedLayout) {
-        setHasUnsavedChanges(true);
-      }
-      
-      return prev.map(p =>
-        p.id === panelId
-          ? { ...p, x: newPercentPos.x, y: newPercentPos.y }
-          : p
-      );
-    });
-  }, [draggingInfo, panels, loadedLayout]);
-
+  /**
+   * Generates a preview image of the current layout for AI context.
+   * Displays the image in a modal.
+   */
   const generateAIPreviewImage = useCallback(async (): Promise<string> => {
     // Use the imported generateAIPreviewImage function from ExportUtils
     const imgData = await generateAIPreviewImageUtil(containerRef);
     return imgData || '';
   }, [containerRef]);
 
+  /**
+   * Handles the preview click event.
+   * Generates a preview image and displays it in a modal.
+   */
   const handlePreviewClick = useCallback(async () => {
     try {
       const previewImageData = await generateAIPreviewImage();
@@ -361,17 +287,26 @@ const ComicPanelCreator: React.FC = () => {
     }
   }, [generateAIPreviewImage]);
 
+  /**
+   * Handles the export preview click event.
+   * Displays the export preview modal.
+   */
   const handleExportPreviewClick = useCallback(() => {
     setShowExportPreviewModal(true);
   }, []);
 
+  /**
+   * Generates a script for the current panel layout.
+   * Validates the layout and API key before proceeding.
+   * Displays modals for loading state and results/errors.
+   */
   const generatePanelScript = useCallback(async (): Promise<void> => {
     try {
       setIsGeneratingScript(true);
-      
+
       // Generate the preview image
       const layoutImageBase64 = await generateAIPreviewImage();
-      
+
       // Convert current panels to layout format
       const layout: PanelLayout = {
         panels: panels.map(panel => ({
@@ -391,11 +326,11 @@ const ComicPanelCreator: React.FC = () => {
         ...(inspirationText && { inspirationText }),
         ...(exclusions && { exclusions })
       };
-      
+
       // Generate script using AI with optional API key, layout image, and creative direction
       const script = await generateScript(
-        layout, 
-        apiKey || undefined, 
+        layout,
+        apiKey || undefined,
         layoutImageBase64,
         Object.keys(creativeDirection).length > 0 ? creativeDirection : undefined
       );
@@ -414,117 +349,120 @@ const ComicPanelCreator: React.FC = () => {
     }
   }, [panels, apiKey, genre, emotion, inspiration, inspirationText, exclusions, generateAIPreviewImage]);
 
+  /**
+   * Handles the export action based on the selected format.
+   * @param format The desired export format ('json', 'png').
+   */
   const handleExportComic = useCallback(async (format: ExportFormat): Promise<void> => {
     // Use the imported exportComic function with callbacks for UI state management
     await exportComicUtil({
-      containerRef, 
-      format, 
+      containerRef,
+      format,
       onBeforeExport: () => setShowControls(false),
       onAfterExport: () => setShowControls(true)
     });
   }, [containerRef]);
 
-  useEffect(() => {
-    if (!resizingInfo && !draggingInfo) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (resizingInfo) {
-        handleResize(e);
-      }
-      if (draggingInfo) {
-        handleDrag(e);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setResizingInfo(null);
-      setDraggingInfo(null);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [resizingInfo, draggingInfo, handleResize, handleDrag]);
-
-  const selectedPanel = panels.find((p: Panel) => p.id === selectedPanelId);
-
-  // Function to handle viewing script for a specific panel
+  /**
+   * Handles viewing the script for a specific panel.
+   * Finds the corresponding script data based on the panel ID.
+   * @param panelId The ID of the panel to view the script for.
+   */
   const handleViewPanelScript = useCallback((panelId: string) => {
     if (!generatedScript) return;
-    
+
     // Find the panel number from the canvas panel id
-    const canvasPanel = panels.find(p => p.id === panelId);
-    if (!canvasPanel || canvasPanel.number === undefined) return;
-    
+    const panel = panels.find(p => p.id === panelId);
+    if (!panel || typeof panel.panelNumber === 'undefined') {
+      console.warn(`Could not find panel or panel number for ID ${panelId}`);
+      alert(`Could not find panel data for ID ${panelId}`);
+      return;
+    }
+
     // Find the corresponding script panel by matching position
-    const scriptPanel = generatedScript.panels.find(p => p.id === canvasPanel.number);
+    const scriptPanel = generatedScript?.panels.find(p => p.id === panel.panelNumber);
     if (scriptPanel) {
       setSelectedScriptPanel(scriptPanel);
     }
   }, [generatedScript, panels]);
 
-  // Function to handle loading a layout from the CollectionManager
-  const handleLoadLayout = useCallback((layout: Layout) => {
-    setLoadedLayout(layout);
-    
-    // Set panels from the loaded layout
-    if (layout.panel_data && Array.isArray(layout.panel_data.panels)) {
-      setPanels(layout.panel_data.panels);
-    }
-    
-    // Set script if available
-    if (layout.script_data) {
-      // Validate the script data to ensure it's a valid ComicPage
-      try {
-        const validatedScript = validateComicPage(layout.script_data);
-        setGeneratedScript(validatedScript);
-      } catch (error) {
-        console.error('Invalid script data in layout:', error);
-        setGeneratedScript(null);
-      }
-    } else {
-      setGeneratedScript(null);
-    }
-    
-    // Set creative direction if available
-    if (layout.creative_direction) {
-      const { genre, emotion, inspiration, inspirationText, exclusions } = layout.creative_direction;
-      if (genre) setGenre(genre);
-      if (emotion) setEmotion(emotion);
-      if (inspiration) setInspiration(inspiration);
-      if (inspirationText) setInspirationText(inspirationText);
-      if (exclusions) setExclusions(exclusions);
-    }
-  }, []);
+  /**
+   * Handles loading a layout from the CollectionManager.
+   * Updates the panel layout and script data accordingly.
+   * @param layout The loaded layout object.
+   */
+  const handleLoadLayout = useCallback((layout: any) => { // Use 'any' temporarily to bypass strict checks on incoming object
+    console.log("Loading layout:", layout);
+    if (layout && layout.panel_data) {
+      // Convert incoming numeric ID to string and ensure description exists
+      const loadedLayout: Layout = {
+        ...layout,
+        id: String(layout.id), // Convert potential number ID to string
+        description: layout.description || '', // Provide default description
+        panel_data: {
+          ...layout.panel_data,
+          // Ensure panels array exists and map panel numbers
+          panels: (layout.panel_data.panels || []).map((p: any, index: number) => ({
+            ...p,
+            panelNumber: p.panelNumber || index + 1 // Assign panel number if missing
+          })),
+          gutterSize: layout.panel_data.gutterSize ?? 1, // Use nullish coalescing for gutterSize
+        }
+      };
 
-  const [showInstructions, setShowInstructions] = useState(false);
-  const [isSavingLayout, setIsSavingLayout] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [currentCollection, setCurrentCollection] = useState<{ id: number; name: string; description?: string } | null>(null);
-  
-  // Function to save the current layout back to the database
+      console.log("Processed loadedLayout:", loadedLayout);
+
+      setLoadedLayout(loadedLayout); // Now conforms to Layout type
+      setPanels(loadedLayout.panel_data.panels.map(p => ({ ...p, panelNumber: p.panelNumber })));
+      setGutterSize(loadedLayout.panel_data.gutterSize);
+      setLayoutName(loadedLayout.name);
+      setLayoutDescription(loadedLayout.description || '');
+
+      // Set creative direction state if available
+      if (loadedLayout.creative_direction) {
+        setGenre(loadedLayout.creative_direction.genre || '');
+        setEmotion(loadedLayout.creative_direction.emotion || '');
+        setInspiration(loadedLayout.creative_direction.inspiration || '');
+        setInspirationText(loadedLayout.creative_direction.inspirationText || '');
+        setExclusions(loadedLayout.creative_direction.exclusions || '');
+      }
+      // Set generated script if available
+      if (loadedLayout.script_data) {
+        setGeneratedScript(loadedLayout.script_data);
+      }
+
+      setHasUnsavedChanges(false); // Reset unsaved changes flag
+      setSelectedPanelId(null); // Deselect any panel
+      setRefreshKey(prev => prev + 1); // Force CollectionManager refresh if needed
+
+    } else {
+      console.error("Attempted to load invalid layout data:", layout);
+    }
+  }, [setPanels, setGutterSize, setLayoutName, setLayoutDescription, setGenre, setEmotion, setInspiration, setInspirationText, setExclusions, setGeneratedScript, setHasUnsavedChanges, setSelectedPanelId]);
+
+  /**
+   * Saves the current layout back to the database.
+   * Updates the layout object with the current panel data and script.
+   */
   const saveCurrentLayout = useCallback(async () => {
     if (!loadedLayout) return;
-    
+
     try {
       setIsSavingLayout(true);
-      
+
       // Create a copy of the loaded layout with updated panel data
-      // Convert Panel[] to LayoutPanel[] by ensuring all panels have a number property
+      // Convert Panel[] to LayoutPanel[] by ensuring all panels have a panelNumber property
       const layoutPanels = panels.map(panel => ({
         ...panel,
-        // Ensure number is always defined (use panel.number if defined, otherwise 0)
-        number: panel.number !== undefined ? panel.number : 0
+        // Ensure panelNumber is always defined (use panel.panelNumber if defined, otherwise 0)
+        panelNumber: panel.panelNumber !== undefined ? panel.panelNumber : 0
       }));
-      
+
       const updatedLayout = {
         ...loadedLayout,
         panel_data: {
-          panels: layoutPanels
+          panels: layoutPanels,
+          gutterSize: gutterSize // Include gutterSize in panel_data
         },
         script_data: generatedScript,
         creative_direction: {
@@ -535,10 +473,10 @@ const ComicPanelCreator: React.FC = () => {
           exclusions
         }
       };
-      
+
       // Generate a thumbnail for the updated layout
       const thumbnailBase64 = await generateAIPreviewImage();
-      
+
       // Send the update to the server
       const response = await fetch(`http://localhost:3001/api/layouts/${loadedLayout.id}`, {
         method: 'PUT',
@@ -554,17 +492,17 @@ const ComicPanelCreator: React.FC = () => {
           thumbnailBase64
         })
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to update layout');
       }
-      
+
       // Update the loaded layout with the new data
       setLoadedLayout(updatedLayout as Layout);
-      
+
       // Reset unsaved changes flag
       setHasUnsavedChanges(false);
-      
+
       // If the layout belongs to a collection, update the collection information
       if (loadedLayout.collection_id) {
         // Fetch the collection information
@@ -586,10 +524,10 @@ const ComicPanelCreator: React.FC = () => {
         };
         fetchCollection();
       }
-      
+
       // Trigger a refresh of the collection manager layouts
       setRefreshKey(prevKey => prevKey + 1);
-      
+
       // Show success message
       alert(`Layout "${loadedLayout.name}" has been updated successfully.`);
     } catch (error) {
@@ -598,42 +536,45 @@ const ComicPanelCreator: React.FC = () => {
     } finally {
       setIsSavingLayout(false);
     }
-  }, [loadedLayout, panels, generatedScript, genre, emotion, inspiration, inspirationText, exclusions, generateAIPreviewImage]);
-  
-  // Function to close the current layout
+  }, [loadedLayout, panels, generatedScript, genre, emotion, inspiration, inspirationText, exclusions, generateAIPreviewImage, gutterSize]);
+
+  /**
+   * Closes the current layout.
+   * Resets the panel layout and script data.
+   */
   const closeCurrentLayout = useCallback(() => {
     // Check if there are unsaved changes
     if (hasUnsavedChanges) {
       if (window.confirm('You have unsaved changes. Are you sure you want to close this layout?')) {
         // Reset layout
         setLoadedLayout(null);
-        
+
         // Reset panels to default
         resetPanels();
-        
+
         // Reset script
         setGeneratedScript(null);
-        
+
         // Reset creative direction
         setGenre('');
         setEmotion('');
         setInspiration('');
         setInspirationText('');
         setExclusions('');
-        
+
         // Reset unsaved changes flag
         setHasUnsavedChanges(false);
       }
     } else {
       // Reset layout
       setLoadedLayout(null);
-      
+
       // Reset panels to default
       resetPanels();
-      
+
       // Reset script
       setGeneratedScript(null);
-      
+
       // Reset creative direction
       setGenre('');
       setEmotion('');
@@ -642,135 +583,59 @@ const ComicPanelCreator: React.FC = () => {
       setExclusions('');
     }
   }, [hasUnsavedChanges, resetPanels]);
-  
-  // Function to close the collection and reset to a one-off default page
+
+  /**
+   * Closes the collection and resets to a one-off default page.
+   * Resets the panel layout and script data.
+   */
   const closeCollection = useCallback(() => {
     // Reset collection
     setCurrentCollection(null);
-    
+
     // Reset layout
     setLoadedLayout(null);
-    
+
     // Reset panels to default
     resetPanels();
-    
+
     // Reset script
     setGeneratedScript(null);
-    
+
     // Reset creative direction
     setGenre('');
     setEmotion('');
     setInspiration('');
     setInspirationText('');
     setExclusions('');
-    
+
     // Reset unsaved changes flag
     setHasUnsavedChanges(false);
-    
+
     // Increment refresh key to force CollectionManager to rerender with no selection
     setRefreshKey(prevKey => prevKey + 1);
   }, [resetPanels]);
 
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [isSavingLayout, setIsSavingLayout] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [currentCollection, setCurrentCollection] = useState<{ id: number; name: string; description?: string } | null>(null);
+
   return (
     <div className="flex flex-col h-screen text-gray-900 dark:text-gray-100">
-      <div className="p-4 border-b border-gray-200 dark:border-dark-600 flex items-center">
-        <div className="flex items-center w-1/3">
-          <h1 className="text-2xl font-bold">Comic Panel Creator</h1>
-          <button
-            onClick={() => setShowInstructions(true)}
-            className="ml-4 px-3 py-1 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded flex items-center justify-center text-sm"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            Instructions
-          </button>
-          {showInstructions && <InstructionsModal onClose={() => setShowInstructions(false)} />}
-        </div>
-        
-        {/* Breadcrumb for currently loaded layout and collection - centered */}
-        <div className="flex-1 flex justify-center">
-          <div className={`flex items-center px-3 py-2 rounded-md ${currentCollection ? 'bg-blue-50 dark:bg-blue-900' : 'bg-amber-100 dark:bg-amber-900 border border-amber-300 dark:border-amber-700'}`}>
-            {/* Collection information */}
-            {currentCollection ? (
-              <div className="flex items-center mr-3 pr-3 border-r border-gray-300 dark:border-gray-600">
-                <span className="text-gray-600 dark:text-gray-400 font-medium mr-1">
-                  Collection:
-                </span>
-                <span className="text-blue-500 font-medium">
-                  {currentCollection.name}
-                </span>
-                <button
-                  onClick={closeCollection}
-                  className="ml-2 p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-                  title="Close collection and create one-off layout"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center mr-3 pr-3 border-r border-amber-300 dark:border-amber-700">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span className="text-amber-800 dark:text-amber-200 font-medium mr-1">
-                  Collection:
-                </span>
-                <span className="text-amber-800 dark:text-amber-200 font-bold">
-                  No-Collection
-                </span>
-              </div>
-            )}
-            
-            {/* Layout information */}
-            {loadedLayout && (
-              <>
-                <div className="flex items-center">
-                  <span className="text-gray-600 dark:text-gray-400 font-medium mr-1">
-                    Page:
-                  </span>
-                  <span className="text-blue-500 font-medium">
-                    {loadedLayout.name}
-                  </span>
-                </div>
-                
-                <div className="flex ml-4">
-                  <button
-                    onClick={saveCurrentLayout}
-                    disabled={isSavingLayout}
-                    className={`px-2 py-1 flex items-center ${isSavingLayout ? 'bg-gray-400' : hasUnsavedChanges ? 'bg-amber-500 hover:bg-amber-600' : 'bg-green-500 hover:bg-green-600'} text-white rounded text-xs mr-2`}
-                    title={hasUnsavedChanges ? 'You have unsaved changes!' : 'Save changes to this layout'}
-                  >
-                    {hasUnsavedChanges && !isSavingLayout && (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                    )}
-                    {isSavingLayout ? 'Saving...' : 'Save'}
-                  </button>
-                  <button
-                    onClick={closeCurrentLayout}
-                    className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                    title="Close this layout"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-        
-        {/* Empty div to balance the layout */}
-        <div className="w-1/3"></div>
-      </div>
-      <div className="flex flex-1 overflow-hidden">
+      <HeaderToolbar
+        currentCollection={currentCollection}
+        loadedLayout={loadedLayout as any} // Type cast to avoid type conflicts
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSavingLayout={isSavingLayout}
+        showInstructions={showInstructions}
+        onShowInstructions={setShowInstructions}
+        onCloseCollection={closeCollection}
+        onSaveLayout={saveCurrentLayout}
+        onCloseLayout={closeCurrentLayout}
+      />
+      <div id="main-layout-container" className="flex flex-1 overflow-hidden">
         {/* Column 1 - Control Panel - Fixed to left side */}
-        <div className="flex flex-col gap-4 w-72 p-3 overflow-y-auto border-r border-gray-200 dark:border-dark-600 bg-gray-50 dark:bg-dark-800">
+        <div id="control-panel-column" className="flex flex-col gap-4 w-72 p-3 overflow-y-auto border-r border-gray-200 dark:border-dark-600 bg-gray-50 dark:bg-dark-800">
           <ScriptGenerationPanel
             apiKey={apiKey}
             onApiKeyChange={setApiKey}
@@ -780,7 +645,7 @@ const ComicPanelCreator: React.FC = () => {
             onViewScript={() => setShowScriptModal(true)}
             onPreviewClick={handlePreviewClick}
           />
-          
+
           <CreativeDirectionForm
             creativeDirection={{
               genre,
@@ -797,9 +662,10 @@ const ComicPanelCreator: React.FC = () => {
               setExclusions(direction.exclusions);
             }}
           />
-          
+
           <PanelOperationsToolbar
-            selectedPanel={selectedPanel}
+            panels={panels} // FIX: Pass the panels array
+            selectedPanelId={selectedPanelId}
             canDelete={panels.length > 1}
             hasScript={!!generatedScript}
             onSplitHorizontally={splitPanelHorizontally}
@@ -807,7 +673,7 @@ const ComicPanelCreator: React.FC = () => {
             onDelete={deletePanel}
             onViewScript={handleViewPanelScript}
           />
-          
+
           <Controls
             gutterSize={gutterSize}
             onGutterSizeChange={setGutterSize}
@@ -820,86 +686,99 @@ const ComicPanelCreator: React.FC = () => {
             onShowExportPreview={handleExportPreviewClick}
             exportFormat={exportFormat}
             onExportFormatChange={setExportFormat}
-            selectedPanel={selectedPanel}
+            panels={panels}
+            selectedPanelId={selectedPanelId}
           />
+
+
 
         </div>
 
         {/* Column 2 - Comic Page - Center with most space */}
-        <div className="flex-1 flex flex-col items-center justify-center overflow-auto p-4 bg-neutral-700 dark:bg-neutral-800 checkerboard-bg">
+        <div id="comic-page-viewport" className="flex-1 flex justify-center overflow-auto p-4 bg-neutral-700 dark:bg-neutral-800">
+          {/* Intermediate div for fixed size and checkerboard background */}
           <div
-            ref={containerRef}
-            className="relative border border-gray-300 bg-white shadow-md comic-container"
-            style={{
-              width: CONTAINER_WIDTH,
-              height: CONTAINER_HEIGHT,
-              overflow: 'visible',
-              position: 'relative',
-              maxWidth: '100%',
-              isolation: 'isolate'
-            }}
-            onClick={() => setSelectedPanelId(null)}
+            id="fixed-checkerboard-container"
+            className="relative checkerboard-bg"
+            style={{ width: CONTAINER_WIDTH, height: CONTAINER_HEIGHT }}
           >
-            <GuideLines showGuides={showGuides} />
-            {panels.map(panel => (
-              <PanelComponent
-                key={panel.id}
-                panel={panel}
-                isSelected={panel.id === selectedPanelId}
-                showControls={showControls}
-                onSelect={setSelectedPanelId}
-                onStartDrag={startDrag}
-                onStartResize={startResize}
-                onSplitHorizontally={splitPanelHorizontally}
-                onSplitVertically={splitPanelVertically}
-                onDelete={deletePanel}
-                canDelete={panels.length > 1}
-                hasScript={!!generatedScript}
-                onViewScript={handleViewPanelScript}
-              />
-            ))}
+            {/* Actual white page container - ref attaches here */}
+            <div
+              ref={containerRef}
+              id="comic-page-container"
+              className="absolute inset-0 border border-gray-300 bg-white shadow-md comic-container"
+              onClick={() => setSelectedPanelId(null)}
+            >
+              <GuideLines showGuides={showGuides} />
+
+              {panels.map(panel => (
+                <PanelComponent
+                  key={panel.id}
+                  panel={panel}
+                  isSelected={panel.id === selectedPanelId}
+                  showControls={showControls}
+                  onSelect={setSelectedPanelId}
+                  onStartDrag={startDrag}
+                  onStartResize={startResize}
+                  onSplitHorizontally={splitPanelHorizontally}
+                  onSplitVertically={splitPanelVertically}
+                  onDelete={deletePanel}
+                  canDelete={panels.length > 1}
+                  hasScript={!!generatedScript}
+                  onViewScript={handleViewPanelScript}
+                />
+              ))}
+            </div>
           </div>
         </div>
-        
+
         {/* Column 3 - Collection Management - Fixed to right side */}
-        <div className="flex flex-col gap-4 w-96 p-3 overflow-y-auto border-l border-gray-200 dark:border-dark-600 bg-gray-50 dark:bg-dark-800">
-          <CollectionManager 
-            onLoadLayout={handleLoadLayout} 
+        <div id="collection-manager-column" className="flex flex-col gap-4 w-96 p-3 overflow-y-auto border-l border-gray-200 dark:border-dark-600 bg-gray-50 dark:bg-dark-800">
+          <LayoutManager
+            currentLayout={loadedLayout as any} // Type cast to avoid type conflicts
+            currentCollection={currentCollection}
+            panels={panels}
+            generatedScript={generatedScript}
+            creativeDirection={{
+              genre,
+              emotion,
+              inspiration,
+              inspirationText,
+              exclusions
+            }}
+            hasUnsavedChanges={hasUnsavedChanges}
+            isSavingLayout={isSavingLayout}
+            onSaveLayout={saveCurrentLayout}
+            onCloseLayout={closeCurrentLayout}
+            onCloseCollection={closeCollection}
+            generateThumbnail={generateAIPreviewImage}
+          />
+
+          <CollectionManager
+            onLoadLayout={handleLoadLayout}
             onCollectionChange={setCurrentCollection}
             initialCollectionId={currentCollection?.id || null}
-            key={refreshKey} 
+            key={refreshKey}
           />
         </div>
       </div>
 
-      {showScriptModal && generatedScript && (
-        <ScriptModal
-          script={generatedScript}
-          onClose={() => setShowScriptModal(false)}
-        />
-      )}
-      
-      {selectedScriptPanel && (
-        <PanelScriptModal
-          panel={selectedScriptPanel}
-          onClose={() => setSelectedScriptPanel(null)}
-        />
-      )}
-      
-      {showPreviewModal && previewImage && (
-        <AIPreviewModal
-          imageUrl={previewImage}
-          onClose={() => setShowPreviewModal(false)}
-        />
-      )}
-
-      {showExportPreviewModal && (
-        <ExportPreviewModal
-          containerRef={containerRef}
-          exportFormat={exportFormat}
-          onClose={() => setShowExportPreviewModal(false)}
-        />
-      )}
+      <ModalManager
+        showScriptModal={showScriptModal}
+        showPanelScriptModal={!!selectedScriptPanel}
+        showPreviewModal={showPreviewModal}
+        showExportPreviewModal={showExportPreviewModal}
+        showInstructionsModal={showInstructions}
+        generatedScript={generatedScript}
+        selectedScriptPanel={selectedScriptPanel}
+        previewImage={previewImage}
+        exportPreviewImage={null}
+        onCloseScriptModal={() => setShowScriptModal(false)}
+        onClosePanelScriptModal={() => setSelectedScriptPanel(null)}
+        onClosePreviewModal={() => setShowPreviewModal(false)}
+        onCloseExportPreviewModal={() => setShowExportPreviewModal(false)}
+        onCloseInstructionsModal={() => setShowInstructions(false)}
+      />
     </div>
   );
 };
