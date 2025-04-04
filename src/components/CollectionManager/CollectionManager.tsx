@@ -397,60 +397,135 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-dark-700 rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200">Collection Manager</h2>
+    <div 
+      id="collection-manager-container" 
+      data-testid="collection-manager-container"
+      className="p-4 bg-white dark:bg-dark-700 rounded-lg shadow-md"
+    >
+      <div 
+        id="collection-manager-header" 
+        data-testid="collection-manager-header"
+        className="flex justify-between items-center mb-4"
+      >
+        <h2 
+          id="collection-manager-title" 
+          data-testid="collection-manager-title"
+          className="text-xl font-bold text-gray-800 dark:text-gray-200"
+        >
+          Collection Manager
+        </h2>
         <button
+          id="collection-manager-new-button"
+          data-testid="collection-manager-new-button"
           onClick={() => setIsCreating(true)}
           className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm"
           disabled={isEditing || isCreating}
+          aria-label="Create new collection"
         >
           New Collection
         </button>
       </div>
       
       {actionMessage && (
-        <div className={`p-2 mb-3 rounded text-sm ${actionMessage.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
+        <div 
+          id="collection-manager-message" 
+          data-testid="collection-manager-message"
+          className={`p-2 mb-3 rounded text-sm ${actionMessage.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}
+          role="alert"
+          aria-live="polite"
+        >
           {actionMessage.text}
         </div>
       )}
       
       {loading ? (
-        <p className="text-gray-600 dark:text-gray-400">Loading collections...</p>
+        <p 
+          id="collection-manager-loading" 
+          data-testid="collection-manager-loading"
+          className="text-gray-600 dark:text-gray-400"
+        >
+          Loading collections...
+        </p>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
+        <p 
+          id="collection-manager-error" 
+          data-testid="collection-manager-error"
+          className="text-red-500"
+          role="alert"
+        >
+          {error}
+        </p>
       ) : isCreating ? (
-        <div className="bg-gray-50 dark:bg-dark-600 p-3 rounded-md border border-gray-200 dark:border-dark-500">
-          <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Create New Collection</h3>
-          <div className="mb-3">
-            <label htmlFor="new-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <div 
+          id="collection-manager-create-form" 
+          data-testid="collection-manager-create-form"
+          className="bg-gray-50 dark:bg-dark-600 p-3 rounded-md border border-gray-200 dark:border-dark-500"
+        >
+          <h3 
+            id="collection-manager-create-title" 
+            data-testid="collection-manager-create-title"
+            className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+          >
+            Create New Collection
+          </h3>
+          <div 
+            id="collection-manager-create-name-container" 
+            data-testid="collection-manager-create-name-container"
+            className="mb-3"
+          >
+            <label 
+              id="collection-manager-create-name-label" 
+              data-testid="collection-manager-create-name-label"
+              htmlFor="new-name" 
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               Collection Name *
             </label>
             <input
               id="new-name"
+              data-testid="collection-manager-create-name-input"
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
               placeholder="Enter collection name"
               required
+              aria-required="true"
+              aria-label="New collection name"
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="new-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <div 
+            id="collection-manager-create-description-container" 
+            data-testid="collection-manager-create-description-container"
+            className="mb-4"
+          >
+            <label 
+              id="collection-manager-create-description-label" 
+              data-testid="collection-manager-create-description-label"
+              htmlFor="new-description" 
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               Description (optional)
             </label>
             <textarea
               id="new-description"
+              data-testid="collection-manager-create-description-input"
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
               placeholder="Enter collection description"
               rows={3}
+              aria-label="New collection description"
             />
           </div>
-          <div className="flex justify-end space-x-2">
+          <div 
+            id="collection-manager-create-actions" 
+            data-testid="collection-manager-create-actions"
+            className="flex justify-end space-x-2"
+          >
             <button
+              id="collection-manager-create-cancel-button"
+              data-testid="collection-manager-create-cancel-button"
               onClick={() => {
                 setIsCreating(false);
                 setNewName('');
@@ -458,86 +533,139 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
               }}
               className="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded text-sm"
               disabled={actionLoading}
+              aria-label="Cancel creating collection"
             >
               Cancel
             </button>
             <button
+              id="collection-manager-create-submit-button"
+              data-testid="collection-manager-create-submit-button"
               onClick={createNewCollection}
               className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm"
               disabled={!newName.trim() || actionLoading}
+              aria-label="Create new collection"
             >
               {actionLoading ? 'Creating...' : 'Create Collection'}
             </button>
           </div>
         </div>
       ) : collections.length === 0 ? (
-        <p className="text-gray-600 dark:text-gray-400">No collections found. Create your first collection!</p>
+        <p 
+          id="collection-manager-no-collections" 
+          data-testid="collection-manager-no-collections"
+          className="text-gray-600 dark:text-gray-400"
+        >
+          No collections found. Create your first collection!
+        </p>
       ) : (
-        <div>
-          <div className="mb-4 relative">
-            <label htmlFor="collection-search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <div id="collection-manager-content" data-testid="collection-manager-content">
+          <div id="collection-manager-selector-container" data-testid="collection-manager-selector-container" className="mb-4 relative">
+            <label 
+              id="collection-manager-selector-label" 
+              data-testid="collection-manager-selector-label"
+              htmlFor="collection-search" 
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               Select Collection
             </label>
             
             {/* Collection Selector Button */}
             <div 
+              id="collection-manager-selector-button"
+              data-testid="collection-manager-selector-button"
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200 flex justify-between items-center cursor-pointer"
               onClick={() => !isEditing && setIsCollectionDropdownOpen(!isCollectionDropdownOpen)}
+              role="button"
+              aria-haspopup="listbox"
+              aria-expanded={isCollectionDropdownOpen}
+              aria-label="Select collection"
             >
-              <div className="flex items-center">
+              <div id="collection-manager-selected-collection" data-testid="collection-manager-selected-collection" className="flex items-center">
                 {selectedCollection ? (
                   <>
-                    <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                    <span>{collections.find(c => c.id === selectedCollection)?.name}</span>
+                    <div id="collection-manager-selected-indicator" className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                    <span id="collection-manager-selected-name" data-testid="collection-manager-selected-name">{collections.find(c => c.id === selectedCollection)?.name}</span>
                   </>
                 ) : (
                   <>
-                    <div className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
-                    <span>No-Collection</span>
+                    <div id="collection-manager-no-selection-indicator" className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
+                    <span id="collection-manager-no-selection-text" data-testid="collection-manager-no-selection-text">No-Collection</span>
                   </>
                 )}
               </div>
-              <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform ${isCollectionDropdownOpen ? 'transform rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg 
+                id="collection-manager-dropdown-icon" 
+                data-testid="collection-manager-dropdown-icon"
+                xmlns="http://www.w3.org/2000/svg" 
+                className={`h-4 w-4 transition-transform ${isCollectionDropdownOpen ? 'transform rotate-180' : ''}`} 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </div>
             
             {/* Dropdown Menu */}
             {isCollectionDropdownOpen && !isEditing && (
-              <div className="absolute z-10 mt-1 w-full bg-white dark:bg-dark-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+              <div 
+                id="collection-manager-dropdown" 
+                data-testid="collection-manager-dropdown"
+                className="absolute z-10 mt-1 w-full bg-white dark:bg-dark-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto"
+                role="listbox"
+                aria-labelledby="collection-manager-selector-label"
+              >
                 {/* Search Input */}
-                <div className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-dark-700">
+                <div 
+                  id="collection-manager-search-container" 
+                  data-testid="collection-manager-search-container"
+                  className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-dark-700"
+                >
                   <input
+                    id="collection-search"
+                    data-testid="collection-manager-search-input"
                     type="text"
                     placeholder="Search collections..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
                     onClick={(e) => e.stopPropagation()}
+                    aria-label="Search collections"
                   />
                 </div>
                 
                 {/* No-Collection Option */}
                 <div 
+                  id="collection-manager-no-collection-option" 
+                  data-testid="collection-manager-no-collection-option"
                   className={`p-2 hover:bg-gray-100 dark:hover:bg-dark-600 cursor-pointer flex items-center ${!selectedCollection ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
                   onClick={() => {
                     const e = { target: { value: '' } } as React.ChangeEvent<HTMLSelectElement>;
                     handleCollectionChange(e);
                     setIsCollectionDropdownOpen(false);
                   }}
+                  role="option"
+                  aria-selected={!selectedCollection}
                 >
-                  <div className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
-                  <span>No-Collection</span>
+                  <div id="collection-manager-no-collection-indicator" className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
+                  <span id="collection-manager-no-collection-label" data-testid="collection-manager-no-collection-label">No-Collection</span>
                 </div>
                 
                 {/* Collection Options */}
-                <div className="max-h-40 overflow-y-auto">
+                <div 
+                  id="collection-manager-options-container" 
+                  data-testid="collection-manager-options-container"
+                  className="max-h-40 overflow-y-auto"
+                >
                   {collections
                     .filter(collection => 
                       collection.name.toLowerCase().includes(searchTerm.toLowerCase())
                     )
                     .map(collection => (
                       <div 
+                        id={`collection-option-${collection.id}`} 
+                        data-testid={`collection-option-${collection.id}`}
                         key={collection.id} 
                         className={`p-2 hover:bg-gray-100 dark:hover:bg-dark-600 cursor-pointer flex items-center ${selectedCollection === collection.id ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
                         onClick={() => {
@@ -545,9 +673,11 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
                           handleCollectionChange(e);
                           setIsCollectionDropdownOpen(false);
                         }}
+                        role="option"
+                        aria-selected={selectedCollection === collection.id}
                       >
-                        <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                        <span>{collection.name}</span>
+                        <div id={`collection-indicator-${collection.id}`} className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                        <span id={`collection-name-${collection.id}`} data-testid={`collection-name-${collection.id}`}>{collection.name}</span>
                       </div>
                     ))
                   }
@@ -615,47 +745,90 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
               )}
             </div>
           ) : selectedCollection && isEditing ? (
-            <div className="mt-4 bg-gray-50 dark:bg-dark-600 p-3 rounded-md border border-gray-200 dark:border-dark-500">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Edit Collection</h3>
-              <div className="mb-3">
-                <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <div 
+              id="collection-manager-edit-form" 
+              data-testid="collection-manager-edit-form"
+              className="mt-4 bg-gray-50 dark:bg-dark-600 p-3 rounded-md border border-gray-200 dark:border-dark-500"
+            >
+              <h3 
+                id="collection-manager-edit-title" 
+                data-testid="collection-manager-edit-title"
+                className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+              >
+                Edit Collection
+              </h3>
+              <div 
+                id="collection-manager-edit-name-container" 
+                data-testid="collection-manager-edit-name-container"
+                className="mb-3"
+              >
+                <label 
+                  id="collection-manager-edit-name-label" 
+                  data-testid="collection-manager-edit-name-label"
+                  htmlFor="edit-name" 
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Collection Name *
                 </label>
                 <input
                   id="edit-name"
+                  data-testid="collection-manager-edit-name-input"
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
                   placeholder="Enter collection name"
                   required
+                  aria-required="true"
+                  aria-label="Collection name"
                 />
               </div>
-              <div className="mb-4">
-                <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <div 
+                id="collection-manager-edit-description-container" 
+                data-testid="collection-manager-edit-description-container"
+                className="mb-4"
+              >
+                <label 
+                  id="collection-manager-edit-description-label" 
+                  data-testid="collection-manager-edit-description-label"
+                  htmlFor="edit-description" 
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Description (optional)
                 </label>
                 <textarea
                   id="edit-description"
+                  data-testid="collection-manager-edit-description-input"
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
                   placeholder="Enter collection description"
                   rows={3}
+                  aria-label="Collection description"
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+              <div 
+                id="collection-manager-edit-actions" 
+                data-testid="collection-manager-edit-actions"
+                className="flex justify-end space-x-2"
+              >
                 <button
+                  id="collection-manager-edit-cancel-button"
+                  data-testid="collection-manager-edit-cancel-button"
                   onClick={cancelEditing}
                   className="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded text-sm"
                   disabled={actionLoading}
+                  aria-label="Cancel editing collection"
                 >
                   Cancel
                 </button>
                 <button
+                  id="collection-manager-edit-save-button"
+                  data-testid="collection-manager-edit-save-button"
                   onClick={saveCollectionChanges}
                   className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm"
                   disabled={!editName.trim() || actionLoading}
+                  aria-label="Save collection changes"
                 >
                   {actionLoading ? 'Saving...' : 'Save Changes'}
                 </button>
