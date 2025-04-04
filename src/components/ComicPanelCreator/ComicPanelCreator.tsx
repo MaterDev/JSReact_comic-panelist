@@ -54,36 +54,34 @@ interface Layout {
 }
 
 // Import new components
-import { usePanelInteraction } from './hooks';
+import { usePanelInteraction, usePanelState, usePanelOperations } from './hooks';
 import { ModalManager } from './ModalManager';
 import { LayoutManager } from './LayoutManager';
 import {
   CONTAINER_WIDTH,
-  CONTAINER_HEIGHT,
-  TRIM_INSET_PERCENT,
-  TRIM_WIDTH_PERCENT,
-  TRIM_HEIGHT_PERCENT,
-  percentToPixels,
-  pixelsToPercent,
-  generatePanelId,
-  findPanelById
+  CONTAINER_HEIGHT
 } from '../../../shared/utils/panelUtils';
 
 // Import the CollectionManager component
 import CollectionManager from '../CollectionManager';
 
 const ComicPanelCreator: React.FC = () => {
-  const [panels, setPanels] = useState<Panel[]>([
-    {
-      id: 'panel-1',
-      x: TRIM_INSET_PERCENT,
-      y: (100 - TRIM_HEIGHT_PERCENT) / 2,
-      width: TRIM_WIDTH_PERCENT,
-      height: TRIM_HEIGHT_PERCENT,
-      panelNumber: 1
+  // Use the panel state hook to manage panels and gutter size
+  const {
+    panels,
+    setPanels,
+    gutterSize,
+    setGutterSize,
+    nextPanelIdRef,
+    updatePanelNumbers,
+    resetPanels
+  } = usePanelState({
+    onPanelChange: () => {
+      if (loadedLayout) {
+        setHasUnsavedChanges(true);
+      }
     }
-  ]);
-  const [gutterSize, setGutterSize] = useState(10);
+  });
   // Use the panel interaction hook
   const containerRef = useRef<HTMLDivElement>(null);
   const {
@@ -131,138 +129,28 @@ const ComicPanelCreator: React.FC = () => {
   // Track unsaved changes
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const nextPanelId = useRef(2);
+  // Panel selection and interaction state
 
-  // Helper function to update panel numbers
-  const updatePanelNumbers = useCallback((updatedPanels: Panel[]): Panel[] => {
-    // Sort panels by position (top to bottom, left to right)
-    const sortedPanels = [...updatedPanels].sort((a, b) => {
-      const aPixels = percentToPixels(a);
-      const bPixels = percentToPixels(b);
-      // First sort by y (top to bottom)
-      if (Math.abs(aPixels.y - bPixels.y) > 20) { // Use a threshold to group panels in roughly the same row
-        return aPixels.y - bPixels.y;
-      }
-      // If y is similar, sort by x (left to right)
-      return aPixels.x - bPixels.x;
-    });
+  // Panel operations using the panel operations hook
 
-    // Assign numbers sequentially
-    return sortedPanels.map((panel, index) => ({
-      ...panel,
-      panelNumber: index + 1
-    }));
-  }, []);
+  const {
+    splitPanelHorizontally,
+    splitPanelVertically,
+    deletePanel
+  } = usePanelOperations({
+    panels,
+    setPanels,
+    gutterSize,
+    nextPanelIdRef,
+    updatePanelNumbers,
+    setSelectedPanelId
+  });
 
-  /**
-   * Splits the target panel horizontally into two equal halves.
-   * @param panelId The ID of the panel to split.
-   */
-  const splitPanelHorizontally = useCallback((panelId: string): void => {
-    const panel = findPanelById(panels, panelId);
-    if (!panel) return;
 
-    const pixelDims = percentToPixels(panel);
-    const halfHeight = pixelDims.height / 2;
-    const gapHeight = gutterSize / 2;
 
-    const topPanel = {
-      ...panel,
-      id: generatePanelId(nextPanelId.current++),
-      height: pixelsToPercent(0, 0, 0, halfHeight - gapHeight).height
-    };
 
-    const bottomPanel = {
-      ...panel,
-      id: generatePanelId(nextPanelId.current++),
-      y: pixelsToPercent(0, pixelDims.y + halfHeight + gapHeight, 0, 0).y,
-      height: pixelsToPercent(0, 0, 0, halfHeight - gapHeight).height
-    };
 
-    setPanels(prev => {
-      const updatedPanels = [
-        ...prev.filter(p => p.id !== panelId),
-        topPanel,
-        bottomPanel
-      ];
-      if (loadedLayout) {
-        setHasUnsavedChanges(true);
-      }
-      return updatePanelNumbers(updatedPanels);
-    });
-    setSelectedPanelId(null);
-  }, [panels, gutterSize, updatePanelNumbers]);
 
-  /**
-   * Splits the target panel vertically into two equal halves.
-   * @param panelId The ID of the panel to split.
-   */
-  const splitPanelVertically = useCallback((panelId: string): void => {
-    const panel = findPanelById(panels, panelId);
-    if (!panel) return;
-
-    const pixelDims = percentToPixels(panel);
-    const halfWidth = pixelDims.width / 2;
-    const gapWidth = gutterSize / 2;
-
-    const leftPanel = {
-      ...panel,
-      id: generatePanelId(nextPanelId.current++),
-      width: pixelsToPercent(0, 0, halfWidth - gapWidth, 0).width
-    };
-
-    const rightPanel = {
-      ...panel,
-      id: generatePanelId(nextPanelId.current++),
-      x: pixelsToPercent(pixelDims.x + halfWidth + gapWidth, 0, 0, 0).x,
-      width: pixelsToPercent(0, 0, halfWidth - gapWidth, 0).width
-    };
-
-    setPanels(prev => {
-      const updatedPanels = [
-        ...prev.filter(p => p.id !== panelId),
-        leftPanel,
-        rightPanel
-      ];
-      return updatePanelNumbers(updatedPanels);
-    });
-    setSelectedPanelId(null);
-  }, [panels, gutterSize, updatePanelNumbers]);
-
-  /**
-   * Deletes the target panel from the layout.
-   * Ensures at least one panel always remains.
-   * @param panelId The ID of the panel to delete.
-   */
-  const deletePanel = useCallback((panelId: string): void => {
-    if (panels.length <= 1) return;
-    setPanels(prev => {
-      const filteredPanels = prev.filter(p => p.id !== panelId);
-      return updatePanelNumbers(filteredPanels);
-    });
-    if (selectedPanelId === panelId) {
-      setSelectedPanelId(null);
-    }
-  }, [panels.length, selectedPanelId, updatePanelNumbers]);
-
-  /**
-   * Resets the panel layout to a single default panel.
-   * Also clears any existing generated script.
-   */
-  const resetPanels = useCallback((): void => {
-    setPanels([
-      {
-        id: 'panel-1',
-        x: TRIM_INSET_PERCENT,
-        y: (100 - TRIM_HEIGHT_PERCENT) / 2,
-        width: TRIM_WIDTH_PERCENT,
-        height: TRIM_HEIGHT_PERCENT,
-        panelNumber: 1
-      }
-    ]);
-    nextPanelId.current = 2;
-    setSelectedPanelId(null);
-  }, []);
 
   /**
    * Generates a preview image of the current layout for AI context.
