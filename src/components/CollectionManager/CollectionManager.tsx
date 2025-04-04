@@ -12,6 +12,7 @@
 import React, { useState, useEffect } from 'react';
 import LayoutPreview from './LayoutPreview';
 import Header from './Header';
+import CreateForm from './CreateForm';
 
 /**
  * Represents a single panel within a comic layout
@@ -86,7 +87,7 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
-  const [actionMessage, setActionMessage] = useState<{text: string, type: 'success' | 'error'} | null>(null);
+  const [actionMessage, setActionMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
 
   const API_URL = 'http://localhost:3001/api';
@@ -111,22 +112,22 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
       setLoading(false);
     }
   };
-  
+
   const fetchLayouts = async (collectionId: number) => {
     if (!collectionId) return;
-    
+
     try {
       setLayoutsLoading(true);
       setLayoutsError(null);
       const response = await fetch(`${API_URL}/layouts/collection/${collectionId}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch layouts');
       }
-      
+
       const data = await response.json();
       setLayouts(data);
-      
+
       // Select the first layout if available
       if (data.length > 0 && !selectedLayout) {
         setSelectedLayout(data[0].id);
@@ -144,19 +145,19 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
   useEffect(() => {
     fetchCollections();
   }, []);
-  
+
   // Update selected collection when initialCollectionId changes
   useEffect(() => {
     if (initialCollectionId !== undefined && initialCollectionId !== null) {
       setSelectedCollection(initialCollectionId);
-      
+
       // If we have a valid collection ID, fetch its layouts
       if (initialCollectionId > 0) {
         fetchLayouts(initialCollectionId);
       }
     }
   }, [initialCollectionId]);
-  
+
   // Notify parent component when collections are loaded
   useEffect(() => {
     if (selectedCollection && onCollectionChange && collections.length > 0) {
@@ -166,7 +167,7 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
       onCollectionChange(null);
     }
   }, [selectedCollection, collections, onCollectionChange]);
-  
+
   // Fetch layouts when selected collection changes
   useEffect(() => {
     if (selectedCollection) {
@@ -183,18 +184,18 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
     setSelectedCollection(collectionId);
     setIsEditing(false);
     setSelectedLayout(null); // Reset selected layout when collection changes
-    
+
     // Notify parent component about collection change
     if (onCollectionChange) {
       const selectedCollectionData = collectionId ? collections.find(c => c.id === collectionId) || null : null;
       onCollectionChange(selectedCollectionData);
     }
   };
-  
+
   const handleLayoutSelect = (layoutId: number) => {
     setSelectedLayout(layoutId);
   };
-  
+
   const handleLoadLayout = (layoutId: number) => {
     const layoutToLoad = layouts.find(layout => layout.id === layoutId);
     if (layoutToLoad && onLoadLayout) {
@@ -205,22 +206,22 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
   // Function to create a new page with default panel layout
   const createNewPage = async (collectionId: number) => {
     if (!collectionId) return;
-    
+
     try {
       setLayoutsLoading(true);
-      
+
       // Default panel layout with a single full-page panel
       const defaultPanelData = {
         panels: [
           { id: '1', x: 0, y: 0, width: 100, height: 100, number: 1 }
         ]
       };
-      
+
       // Calculate the next display order
-      const nextDisplayOrder = layouts.length > 0 
-        ? Math.max(...layouts.map(l => l.display_order)) + 1 
+      const nextDisplayOrder = layouts.length > 0
+        ? Math.max(...layouts.map(l => l.display_order)) + 1
         : 1;
-      
+
       const response = await fetch(`${API_URL}/layouts`, {
         method: 'POST',
         headers: {
@@ -235,14 +236,14 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
           display_order: nextDisplayOrder
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to create new page');
       }
-      
+
       // Refresh layouts to include the new one
       await fetchLayouts(collectionId);
-      
+
       setActionMessage({ text: 'New page created successfully!', type: 'success' });
       setTimeout(() => setActionMessage(null), 3000);
     } catch (error) {
@@ -252,38 +253,38 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
       setLayoutsLoading(false);
     }
   };
-  
+
   // Function to delete a layout
   const deleteLayout = async (layoutId: number) => {
     if (!layoutId) return;
-    
+
     try {
       setLayoutsLoading(true);
-      
+
       const response = await fetch(`${API_URL}/layouts/${layoutId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         }
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to delete page');
       }
-      
+
       // Refresh layouts after deletion
       if (selectedCollection) {
         await fetchLayouts(selectedCollection);
       }
-      
+
       setActionMessage({ text: 'Page deleted successfully!', type: 'success' });
       setTimeout(() => setActionMessage(null), 3000);
     } catch (error: any) {
       console.error('Error deleting page:', error);
-      setActionMessage({ 
-        text: `Failed to delete page: ${error.message || 'Please try again.'}`, 
-        type: 'error' 
+      setActionMessage({
+        text: `Failed to delete page: ${error.message || 'Please try again.'}`,
+        type: 'error'
       });
     } finally {
       setLayoutsLoading(false);
@@ -398,20 +399,20 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
   };
 
   return (
-    <div 
-      id="collection-manager-container" 
+    <div
+      id="collection-manager-container"
       data-testid="collection-manager-container"
       className="p-4 bg-white dark:bg-dark-700 rounded-lg shadow-md"
     >
-      <Header 
+      <Header
         onNewCollection={() => setIsCreating(true)}
         isEditing={isEditing}
         isCreating={isCreating}
       />
-      
+
       {actionMessage && (
-        <div 
-          id="collection-manager-message" 
+        <div
+          id="collection-manager-message"
           data-testid="collection-manager-message"
           className={`p-2 mb-3 rounded text-sm ${actionMessage.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}
           role="alert"
@@ -420,406 +421,337 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
           {actionMessage.text}
         </div>
       )}
-      
-      {loading ? (
-        <p 
-          id="collection-manager-loading" 
-          data-testid="collection-manager-loading"
-          className="text-gray-600 dark:text-gray-400"
-        >
-          Loading collections...
-        </p>
-      ) : error ? (
-        <p 
-          id="collection-manager-error" 
-          data-testid="collection-manager-error"
-          className="text-red-500"
-          role="alert"
-        >
-          {error}
-        </p>
-      ) : isCreating ? (
-        <div 
-          id="collection-manager-create-form" 
-          data-testid="collection-manager-create-form"
-          className="bg-gray-50 dark:bg-dark-600 p-3 rounded-md border border-gray-200 dark:border-dark-500"
-        >
-          <h3 
-            id="collection-manager-create-title" 
-            data-testid="collection-manager-create-title"
-            className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+
+      {loading ?
+        // Loading state
+        (
+          <p
+            id="collection-manager-loading"
+            data-testid="collection-manager-loading"
+            className="text-gray-600 dark:text-gray-400"
           >
-            Create New Collection
-          </h3>
-          <div 
-            id="collection-manager-create-name-container" 
-            data-testid="collection-manager-create-name-container"
-            className="mb-3"
-          >
-            <label 
-              id="collection-manager-create-name-label" 
-              data-testid="collection-manager-create-name-label"
-              htmlFor="new-name" 
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            Loading collections...
+          </p>
+        ) :
+        error ?
+          // Error state
+          (
+            <p
+              id="collection-manager-error"
+              data-testid="collection-manager-error"
+              className="text-red-500"
+              role="alert"
             >
-              Collection Name *
-            </label>
-            <input
-              id="new-name"
-              data-testid="collection-manager-create-name-input"
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
-              placeholder="Enter collection name"
-              required
-              aria-required="true"
-              aria-label="New collection name"
-            />
-          </div>
-          <div 
-            id="collection-manager-create-description-container" 
-            data-testid="collection-manager-create-description-container"
-            className="mb-4"
-          >
-            <label 
-              id="collection-manager-create-description-label" 
-              data-testid="collection-manager-create-description-label"
-              htmlFor="new-description" 
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Description (optional)
-            </label>
-            <textarea
-              id="new-description"
-              data-testid="collection-manager-create-description-input"
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
-              placeholder="Enter collection description"
-              rows={3}
-              aria-label="New collection description"
-            />
-          </div>
-          <div 
-            id="collection-manager-create-actions" 
-            data-testid="collection-manager-create-actions"
-            className="flex justify-end space-x-2"
-          >
-            <button
-              id="collection-manager-create-cancel-button"
-              data-testid="collection-manager-create-cancel-button"
-              onClick={() => {
-                setIsCreating(false);
-                setNewName('');
-                setNewDescription('');
-              }}
-              className="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded text-sm"
-              disabled={actionLoading}
-              aria-label="Cancel creating collection"
-            >
-              Cancel
-            </button>
-            <button
-              id="collection-manager-create-submit-button"
-              data-testid="collection-manager-create-submit-button"
-              onClick={createNewCollection}
-              className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm"
-              disabled={!newName.trim() || actionLoading}
-              aria-label="Create new collection"
-            >
-              {actionLoading ? 'Creating...' : 'Create Collection'}
-            </button>
-          </div>
-        </div>
-      ) : collections.length === 0 ? (
-        <p 
-          id="collection-manager-no-collections" 
-          data-testid="collection-manager-no-collections"
-          className="text-gray-600 dark:text-gray-400"
-        >
-          No collections found. Create your first collection!
-        </p>
-      ) : (
-        <div id="collection-manager-content" data-testid="collection-manager-content">
-          <div id="collection-manager-selector-container" data-testid="collection-manager-selector-container" className="mb-4 relative">
-            <label 
-              id="collection-manager-selector-label" 
-              data-testid="collection-manager-selector-label"
-              htmlFor="collection-search" 
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Select Collection
-            </label>
-            
-            {/* Collection Selector Button */}
-            <div 
-              id="collection-manager-selector-button"
-              data-testid="collection-manager-selector-button"
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200 flex justify-between items-center cursor-pointer"
-              onClick={() => !isEditing && setIsCollectionDropdownOpen(!isCollectionDropdownOpen)}
-              role="button"
-              aria-haspopup="listbox"
-              aria-expanded={isCollectionDropdownOpen}
-              aria-label="Select collection"
-            >
-              <div id="collection-manager-selected-collection" data-testid="collection-manager-selected-collection" className="flex items-center">
-                {selectedCollection ? (
-                  <>
-                    <div id="collection-manager-selected-indicator" className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                    <span id="collection-manager-selected-name" data-testid="collection-manager-selected-name">{collections.find(c => c.id === selectedCollection)?.name}</span>
-                  </>
-                ) : (
-                  <>
-                    <div id="collection-manager-no-selection-indicator" className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
-                    <span id="collection-manager-no-selection-text" data-testid="collection-manager-no-selection-text">No-Collection</span>
-                  </>
-                )}
-              </div>
-              <svg 
-                id="collection-manager-dropdown-icon" 
-                data-testid="collection-manager-dropdown-icon"
-                xmlns="http://www.w3.org/2000/svg" 
-                className={`h-4 w-4 transition-transform ${isCollectionDropdownOpen ? 'transform rotate-180' : ''}`} 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-                aria-hidden="true"
+              {error}
+            </p>
+          ) :
+          // Normal state
+          isCreating ?
+            // Create new collection form
+            (
+              <CreateForm
+                newName={newName}
+                onNameChange={setNewName}
+                newDescription={newDescription}
+                onDescriptionChange={setNewDescription}
+                onSubmit={createNewCollection}
+                onCancel={() => {
+                  setIsCreating(false);
+                  setNewName('');
+                  setNewDescription('');
+                }}
+                isLoading={actionLoading}
+              />
+            ) :
+            // If there are no collections, show a message
+            collections.length === 0 ? (
+              <p
+                id="collection-manager-no-collections"
+                data-testid="collection-manager-no-collections"
+                className="text-gray-600 dark:text-gray-400"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-            
-            {/* Dropdown Menu */}
-            {isCollectionDropdownOpen && !isEditing && (
-              <div 
-                id="collection-manager-dropdown" 
-                data-testid="collection-manager-dropdown"
-                className="absolute z-10 mt-1 w-full bg-white dark:bg-dark-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto"
-                role="listbox"
-                aria-labelledby="collection-manager-selector-label"
-              >
-                {/* Search Input */}
-                <div 
-                  id="collection-manager-search-container" 
-                  data-testid="collection-manager-search-container"
-                  className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-dark-700"
-                >
-                  <input
-                    id="collection-search"
-                    data-testid="collection-manager-search-input"
-                    type="text"
-                    placeholder="Search collections..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
-                    onClick={(e) => e.stopPropagation()}
-                    aria-label="Search collections"
-                  />
-                </div>
-                
-                {/* No-Collection Option */}
-                <div 
-                  id="collection-manager-no-collection-option" 
-                  data-testid="collection-manager-no-collection-option"
-                  className={`p-2 hover:bg-gray-100 dark:hover:bg-dark-600 cursor-pointer flex items-center ${!selectedCollection ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
-                  onClick={() => {
-                    const e = { target: { value: '' } } as React.ChangeEvent<HTMLSelectElement>;
-                    handleCollectionChange(e);
-                    setIsCollectionDropdownOpen(false);
-                  }}
-                  role="option"
-                  aria-selected={!selectedCollection}
-                >
-                  <div id="collection-manager-no-collection-indicator" className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
-                  <span id="collection-manager-no-collection-label" data-testid="collection-manager-no-collection-label">No-Collection</span>
-                </div>
-                
-                {/* Collection Options */}
-                <div 
-                  id="collection-manager-options-container" 
-                  data-testid="collection-manager-options-container"
-                  className="max-h-40 overflow-y-auto"
-                >
-                  {collections
-                    .filter(collection => 
-                      collection.name.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map(collection => (
-                      <div 
-                        id={`collection-option-${collection.id}`} 
-                        data-testid={`collection-option-${collection.id}`}
-                        key={collection.id} 
-                        className={`p-2 hover:bg-gray-100 dark:hover:bg-dark-600 cursor-pointer flex items-center ${selectedCollection === collection.id ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
+                No collections found. Create your first collection!
+              </p>
+            ) : (
+              <div id="collection-manager-content" data-testid="collection-manager-content">
+                <div id="collection-manager-selector-container" data-testid="collection-manager-selector-container" className="mb-4 relative">
+                  <label
+                    id="collection-manager-selector-label"
+                    data-testid="collection-manager-selector-label"
+                    htmlFor="collection-search"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Select Collection
+                  </label>
+
+                  {/* Collection Selector Button */}
+                  <div
+                    id="collection-manager-selector-button"
+                    data-testid="collection-manager-selector-button"
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200 flex justify-between items-center cursor-pointer"
+                    onClick={() => !isEditing && setIsCollectionDropdownOpen(!isCollectionDropdownOpen)}
+                    role="button"
+                    aria-haspopup="listbox"
+                    aria-expanded={isCollectionDropdownOpen}
+                    aria-label="Select collection"
+                  >
+                    <div id="collection-manager-selected-collection" data-testid="collection-manager-selected-collection" className="flex items-center">
+                      {selectedCollection ? (
+                        <>
+                          <div id="collection-manager-selected-indicator" className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                          <span id="collection-manager-selected-name" data-testid="collection-manager-selected-name">{collections.find(c => c.id === selectedCollection)?.name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <div id="collection-manager-no-selection-indicator" className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
+                          <span id="collection-manager-no-selection-text" data-testid="collection-manager-no-selection-text">No-Collection</span>
+                        </>
+                      )}
+                    </div>
+                    <svg
+                      id="collection-manager-dropdown-icon"
+                      data-testid="collection-manager-dropdown-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`h-4 w-4 transition-transform ${isCollectionDropdownOpen ? 'transform rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+
+                  {/* Dropdown Menu */}
+                  {isCollectionDropdownOpen && !isEditing && (
+                    <div
+                      id="collection-manager-dropdown"
+                      data-testid="collection-manager-dropdown"
+                      className="absolute z-10 mt-1 w-full bg-white dark:bg-dark-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto"
+                      role="listbox"
+                      aria-labelledby="collection-manager-selector-label"
+                    >
+                      {/* Search Input */}
+                      <div
+                        id="collection-manager-search-container"
+                        data-testid="collection-manager-search-container"
+                        className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-dark-700"
+                      >
+                        <input
+                          id="collection-search"
+                          data-testid="collection-manager-search-input"
+                          type="text"
+                          placeholder="Search collections..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label="Search collections"
+                        />
+                      </div>
+
+                      {/* No-Collection Option */}
+                      <div
+                        id="collection-manager-no-collection-option"
+                        data-testid="collection-manager-no-collection-option"
+                        className={`p-2 hover:bg-gray-100 dark:hover:bg-dark-600 cursor-pointer flex items-center ${!selectedCollection ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
                         onClick={() => {
-                          const e = { target: { value: collection.id.toString() } } as React.ChangeEvent<HTMLSelectElement>;
+                          const e = { target: { value: '' } } as React.ChangeEvent<HTMLSelectElement>;
                           handleCollectionChange(e);
                           setIsCollectionDropdownOpen(false);
                         }}
                         role="option"
-                        aria-selected={selectedCollection === collection.id}
+                        aria-selected={!selectedCollection}
                       >
-                        <div id={`collection-indicator-${collection.id}`} className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                        <span id={`collection-name-${collection.id}`} data-testid={`collection-name-${collection.id}`}>{collection.name}</span>
+                        <div id="collection-manager-no-collection-indicator" className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
+                        <span id="collection-manager-no-collection-label" data-testid="collection-manager-no-collection-label">No-Collection</span>
                       </div>
-                    ))
-                  }
-                  
-                  {/* No Results Message */}
-                  {collections.filter(collection => 
-                    collection.name.toLowerCase().includes(searchTerm.toLowerCase())
-                  ).length === 0 && (
-                    <div className="p-2 text-gray-500 dark:text-gray-400 text-center">
-                      No collections found
+
+                      {/* Collection Options */}
+                      <div
+                        id="collection-manager-options-container"
+                        data-testid="collection-manager-options-container"
+                        className="max-h-40 overflow-y-auto"
+                      >
+                        {collections
+                          .filter(collection =>
+                            collection.name.toLowerCase().includes(searchTerm.toLowerCase())
+                          )
+                          .map(collection => (
+                            <div
+                              id={`collection-option-${collection.id}`}
+                              data-testid={`collection-option-${collection.id}`}
+                              key={collection.id}
+                              className={`p-2 hover:bg-gray-100 dark:hover:bg-dark-600 cursor-pointer flex items-center ${selectedCollection === collection.id ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
+                              onClick={() => {
+                                const e = { target: { value: collection.id.toString() } } as React.ChangeEvent<HTMLSelectElement>;
+                                handleCollectionChange(e);
+                                setIsCollectionDropdownOpen(false);
+                              }}
+                              role="option"
+                              aria-selected={selectedCollection === collection.id}
+                            >
+                              <div id={`collection-indicator-${collection.id}`} className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                              <span id={`collection-name-${collection.id}`} data-testid={`collection-name-${collection.id}`}>{collection.name}</span>
+                            </div>
+                          ))
+                        }
+
+                        {/* No Results Message */}
+                        {collections.filter(collection =>
+                          collection.name.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).length === 0 && (
+                            <div className="p-2 text-gray-500 dark:text-gray-400 text-center">
+                              No collections found
+                            </div>
+                          )}
+                      </div>
                     </div>
                   )}
                 </div>
+
+                {selectedCollection !== null && !isEditing ? (
+                  <div className="mt-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                        {collections.find(c => c.id === selectedCollection)?.name}
+                      </h3>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={startEditing}
+                          className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={deleteCollection}
+                          className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs"
+                          disabled={actionLoading}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      {collections.find(c => c.id === selectedCollection)?.description || 'No description available.'}
+                    </p>
+
+
+
+                    {/* Layout Preview Section */}
+                    {layoutsLoading ? (
+                      <div className="text-center py-4">
+                        <p className="text-gray-600 dark:text-gray-400">Loading layouts...</p>
+                      </div>
+                    ) : layoutsError ? (
+                      <div className="text-center py-4 text-red-500">
+                        <p>{layoutsError}</p>
+                      </div>
+                    ) : (
+                      <LayoutPreview
+                        layouts={layouts}
+                        onLayoutSelect={handleLayoutSelect}
+                        onLoadLayout={handleLoadLayout}
+                        selectedLayoutId={selectedLayout}
+                        collectionId={selectedCollection}
+                        onCreateNewPage={createNewPage}
+                        onDeleteLayout={deleteLayout}
+                      />
+                    )}
+                  </div>
+                ) : selectedCollection && isEditing ? (
+                  <div
+                    id="collection-manager-edit-form"
+                    data-testid="collection-manager-edit-form"
+                    className="mt-4 bg-gray-50 dark:bg-dark-600 p-3 rounded-md border border-gray-200 dark:border-dark-500"
+                  >
+                    <h3
+                      id="collection-manager-edit-title"
+                      data-testid="collection-manager-edit-title"
+                      className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
+                    >
+                      Edit Collection
+                    </h3>
+                    <div
+                      id="collection-manager-edit-name-container"
+                      data-testid="collection-manager-edit-name-container"
+                      className="mb-3"
+                    >
+                      <label
+                        id="collection-manager-edit-name-label"
+                        data-testid="collection-manager-edit-name-label"
+                        htmlFor="edit-name"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Collection Name *
+                      </label>
+                      <input
+                        id="edit-name"
+                        data-testid="collection-manager-edit-name-input"
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
+                        placeholder="Enter collection name"
+                        required
+                        aria-required="true"
+                        aria-label="Collection name"
+                      />
+                    </div>
+                    <div
+                      id="collection-manager-edit-description-container"
+                      data-testid="collection-manager-edit-description-container"
+                      className="mb-4"
+                    >
+                      <label
+                        id="collection-manager-edit-description-label"
+                        data-testid="collection-manager-edit-description-label"
+                        htmlFor="edit-description"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Description (optional)
+                      </label>
+                      <textarea
+                        id="edit-description"
+                        data-testid="collection-manager-edit-description-input"
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
+                        placeholder="Enter collection description"
+                        rows={3}
+                        aria-label="Collection description"
+                      />
+                    </div>
+                    <div
+                      id="collection-manager-edit-actions"
+                      data-testid="collection-manager-edit-actions"
+                      className="flex justify-end space-x-2"
+                    >
+                      <button
+                        id="collection-manager-edit-cancel-button"
+                        data-testid="collection-manager-edit-cancel-button"
+                        onClick={cancelEditing}
+                        className="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded text-sm"
+                        disabled={actionLoading}
+                        aria-label="Cancel editing collection"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        id="collection-manager-edit-save-button"
+                        data-testid="collection-manager-edit-save-button"
+                        onClick={saveCollectionChanges}
+                        className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm"
+                        disabled={!editName.trim() || actionLoading}
+                        aria-label="Save collection changes"
+                      >
+                        {actionLoading ? 'Saving...' : 'Save Changes'}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             )}
-          </div>
-          
-          {selectedCollection !== null && !isEditing ? (
-            <div className="mt-4">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  {collections.find(c => c.id === selectedCollection)?.name}
-                </h3>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={startEditing}
-                    className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={deleteCollection}
-                    className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-xs"
-                    disabled={actionLoading}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                {collections.find(c => c.id === selectedCollection)?.description || 'No description available.'}
-              </p>
-              
-
-              
-              {/* Layout Preview Section */}
-              {layoutsLoading ? (
-                <div className="text-center py-4">
-                  <p className="text-gray-600 dark:text-gray-400">Loading layouts...</p>
-                </div>
-              ) : layoutsError ? (
-                <div className="text-center py-4 text-red-500">
-                  <p>{layoutsError}</p>
-                </div>
-              ) : (
-                <LayoutPreview 
-                  layouts={layouts} 
-                  onLayoutSelect={handleLayoutSelect}
-                  onLoadLayout={handleLoadLayout}
-                  selectedLayoutId={selectedLayout}
-                  collectionId={selectedCollection}
-                  onCreateNewPage={createNewPage}
-                  onDeleteLayout={deleteLayout}
-                />
-              )}
-            </div>
-          ) : selectedCollection && isEditing ? (
-            <div 
-              id="collection-manager-edit-form" 
-              data-testid="collection-manager-edit-form"
-              className="mt-4 bg-gray-50 dark:bg-dark-600 p-3 rounded-md border border-gray-200 dark:border-dark-500"
-            >
-              <h3 
-                id="collection-manager-edit-title" 
-                data-testid="collection-manager-edit-title"
-                className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200"
-              >
-                Edit Collection
-              </h3>
-              <div 
-                id="collection-manager-edit-name-container" 
-                data-testid="collection-manager-edit-name-container"
-                className="mb-3"
-              >
-                <label 
-                  id="collection-manager-edit-name-label" 
-                  data-testid="collection-manager-edit-name-label"
-                  htmlFor="edit-name" 
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >
-                  Collection Name *
-                </label>
-                <input
-                  id="edit-name"
-                  data-testid="collection-manager-edit-name-input"
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
-                  placeholder="Enter collection name"
-                  required
-                  aria-required="true"
-                  aria-label="Collection name"
-                />
-              </div>
-              <div 
-                id="collection-manager-edit-description-container" 
-                data-testid="collection-manager-edit-description-container"
-                className="mb-4"
-              >
-                <label 
-                  id="collection-manager-edit-description-label" 
-                  data-testid="collection-manager-edit-description-label"
-                  htmlFor="edit-description" 
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >
-                  Description (optional)
-                </label>
-                <textarea
-                  id="edit-description"
-                  data-testid="collection-manager-edit-description-input"
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-dark-600 text-gray-800 dark:text-gray-200"
-                  placeholder="Enter collection description"
-                  rows={3}
-                  aria-label="Collection description"
-                />
-              </div>
-              <div 
-                id="collection-manager-edit-actions" 
-                data-testid="collection-manager-edit-actions"
-                className="flex justify-end space-x-2"
-              >
-                <button
-                  id="collection-manager-edit-cancel-button"
-                  data-testid="collection-manager-edit-cancel-button"
-                  onClick={cancelEditing}
-                  className="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded text-sm"
-                  disabled={actionLoading}
-                  aria-label="Cancel editing collection"
-                >
-                  Cancel
-                </button>
-                <button
-                  id="collection-manager-edit-save-button"
-                  data-testid="collection-manager-edit-save-button"
-                  onClick={saveCollectionChanges}
-                  className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm"
-                  disabled={!editName.trim() || actionLoading}
-                  aria-label="Save collection changes"
-                >
-                  {actionLoading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      )}
     </div>
   );
 };
