@@ -41,6 +41,7 @@ const Header: React.FC<HeaderProps> = ({ onNewCollection, isEditing, isCreating 
       data-testid="collection-manager-header"
       className="flex justify-between items-center mb-4"
     >
+      {/* Title */}
       <h2 
         id="collection-manager-title" 
         data-testid="collection-manager-title"
@@ -48,6 +49,8 @@ const Header: React.FC<HeaderProps> = ({ onNewCollection, isEditing, isCreating 
       >
         Collection Manager
       </h2>
+      
+      {/* New Collection Button */}
       <button
         id="collection-manager-new-button"
         data-testid="collection-manager-new-button"
