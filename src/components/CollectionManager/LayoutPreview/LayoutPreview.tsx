@@ -7,6 +7,7 @@
  * @module LayoutPreview
  */
 import React, { useState } from 'react';
+import LayoutThumbnail from './LayoutThumbnail';
 
 /**
  * Represents a single panel within a comic layout
@@ -146,101 +147,7 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({ layouts, onLayoutSelect, 
   // Function to handle opening the rename modal
 
 
-  /**
-   * Renders a single layout thumbnail
-   * 
-   * @param {Layout} layout - The layout to render
-   * @param {string} width - The width of the thumbnail (default: '100%')
-   * @returns {JSX.Element} The rendered layout thumbnail
-   */
-  const renderLayoutThumbnail = (layout: Layout, width: string = '100%') => {
-    const isSelected = selectedLayoutId === layout.id;
-    
-    return (
-      <div 
-        id={`layout-preview-thumbnail-${layout.id}`}
-        data-testid={`layout-preview-thumbnail-${layout.id}`}
-        key={layout.id}
-        className={`relative ${width} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
-      >
-        {/* Render the layout preview */}
-        <div 
-          id={`layout-preview-thumbnail-container-${layout.id}`}
-          data-testid={`layout-preview-thumbnail-container-${layout.id}`}
-          className="bg-white border border-gray-300 aspect-[3/4] relative cursor-pointer group"
-          onClick={() => onLayoutSelect(layout.id)}
-        >
-          {/* If thumbnail exists, use it */}
-          {layout.thumbnail_path ? (
-            <img 
-              id={`layout-preview-thumbnail-image-${layout.id}`}
-              data-testid={`layout-preview-thumbnail-image-${layout.id}`}
-              src={`http://localhost:3001/thumbnails/${layout.thumbnail_path}`} 
-              alt={layout.name}
-              className="w-full h-full object-contain"
-            />
-          ) : (
-            /* Otherwise render a simple representation of the panels */
-            <div 
-              id={`layout-preview-thumbnail-panels-${layout.id}`}
-              data-testid={`layout-preview-thumbnail-panels-${layout.id}`}
-              className="w-full h-full relative"
-            >
-              {layout.panel_data?.panels?.map((panel: Panel) => (
-                <div
-                  id={`layout-preview-panel-${layout.id}-${panel.id}`}
-                  data-testid={`layout-preview-panel-${layout.id}-${panel.number}`}
-                  key={panel.id}
-                  style={{
-                    position: 'absolute',
-                    left: `${panel.x}%`,
-                    top: `${panel.y}%`,
-                    width: `${panel.width}%`,
-                    height: `${panel.height}%`,
-                    border: '1px solid black',
-                    backgroundColor: 'rgba(200, 200, 200, 0.2)',
-                  }}
-                >
-                  <span 
-                    id={`layout-preview-panel-number-${layout.id}-${panel.id}`}
-                    className="absolute top-1 left-1 text-xs font-bold text-black"
-                  >
-                    {panel.number}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {/* Button overlay - appears on hover */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 opacity-0 group-hover:opacity-100 space-y-2">
-            <button 
-              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-medium shadow-md"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering the parent onClick
-                onLoadLayout(layout.id);
-              }}
-            >
-              Load
-            </button>
-            {layout.page_type === 'standard' && onDeleteLayout && (
-              <button 
-                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium shadow-md"
-                onClick={(e) => handleDeleteClick(layout.id, e)}
-              >
-                Delete
-              </button>
-            )}
-          </div>
-        </div>
-        
-        {/* Page label */}
-        <div className="text-center text-xs mt-1 text-gray-700 dark:text-gray-300 truncate">
-          {layout.name}
-        </div>
-      </div>
-    );
-  };
+
   
   return (
     <div 
@@ -293,7 +200,12 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({ layouts, onLayoutSelect, 
               id="layout-preview-front-cover-thumbnail-container"
               className="w-1/3"
             >
-              {renderLayoutThumbnail(frontCover)}
+              <LayoutThumbnail
+                layout={frontCover}
+                isSelected={selectedLayoutId === frontCover.id}
+                onSelect={onLayoutSelect}
+                onLoad={onLoadLayout}
+              />
             </div>
           </div>
         </div>
@@ -314,14 +226,26 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({ layouts, onLayoutSelect, 
               id="layout-preview-first-pair-left"
               className="w-1/3 mx-auto"
             >
-              {renderLayoutThumbnail(pagePairs[0][0])}
+              <LayoutThumbnail
+                layout={pagePairs[0][0]}
+                isSelected={selectedLayoutId === pagePairs[0][0].id}
+                onSelect={onLayoutSelect}
+                onLoad={onLoadLayout}
+                onDelete={handleDeleteClick}
+              />
             </div>
             {pagePairs[0].length > 1 ? (
               <div 
                 id="layout-preview-first-pair-right"
                 className="w-1/3 mx-auto"
               >
-                {renderLayoutThumbnail(pagePairs[0][1])}
+                <LayoutThumbnail
+                  layout={pagePairs[0][1]}
+                  isSelected={selectedLayoutId === pagePairs[0][1].id}
+                  onSelect={onLayoutSelect}
+                  onLoad={onLoadLayout}
+                  onDelete={handleDeleteClick}
+                />
               </div>
             ) : (
               <div 
@@ -349,14 +273,26 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({ layouts, onLayoutSelect, 
               id={`layout-preview-page-pair-left-${index + 1}`}
               className="w-1/3 mx-auto"
             >
-              {renderLayoutThumbnail(pair[0])}
+              <LayoutThumbnail
+                layout={pair[0]}
+                isSelected={selectedLayoutId === pair[0].id}
+                onSelect={onLayoutSelect}
+                onLoad={onLoadLayout}
+                onDelete={handleDeleteClick}
+              />
             </div>
             {pair.length > 1 ? (
               <div 
                 id={`layout-preview-page-pair-right-${index + 1}`}
                 className="w-1/3 mx-auto"
               >
-                {renderLayoutThumbnail(pair[1])}
+                <LayoutThumbnail
+                  layout={pair[1]}
+                  isSelected={selectedLayoutId === pair[1].id}
+                  onSelect={onLayoutSelect}
+                  onLoad={onLoadLayout}
+                  onDelete={handleDeleteClick}
+                />
               </div>
             ) : (
               <div 
@@ -391,7 +327,12 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({ layouts, onLayoutSelect, 
               id="layout-preview-back-cover-thumbnail-container"
               className="w-1/3"
             >
-              {renderLayoutThumbnail(backCover)}
+              <LayoutThumbnail
+                layout={backCover}
+                isSelected={selectedLayoutId === backCover.id}
+                onSelect={onLayoutSelect}
+                onLoad={onLoadLayout}
+              />
             </div>
           </div>
         </div>
