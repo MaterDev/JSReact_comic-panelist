@@ -6,15 +6,7 @@
  * @module CollectionManager/CollectionSelector
  */
 import React from 'react';
-
-/**
- * Represents a collection of comic layouts
- */
-interface Collection {
-  id: number;
-  name: string;
-  description?: string;
-}
+import { Collection } from '../types';
 
 /**
  * Props for the CollectionSelector component that handles collection selection

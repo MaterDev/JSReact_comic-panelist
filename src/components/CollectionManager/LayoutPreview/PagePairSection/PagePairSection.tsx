@@ -8,37 +8,7 @@
  */
 import React from 'react';
 import LayoutThumbnail from '../LayoutThumbnail';
-
-/**
- * Represents a single panel within a comic layout
- */
-interface Panel {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  number: number;
-}
-
-/**
- * Represents a comic layout within a collection
- */
-interface Layout {
-  id: number;
-  collection_id: number;
-  name: string;
-  display_order: number;
-  page_type: 'front_cover' | 'back_cover' | 'standard';
-  panel_data: {
-    panels: Panel[];
-  };
-  thumbnail_path?: string;
-  script_data?: any;
-  creative_direction?: any;
-  created_at: Date;
-  updated_at: Date;
-}
+import { Layout } from '../../types';
 
 /**
  * Props for the PagePairSection component
