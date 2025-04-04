@@ -35,12 +35,28 @@ const fetchWithTimeout = async (url: string, options: RequestInit) => {
 
 export async function generateScript(layout: PanelLayout, apiKey?: string, layoutImage?: string, creativeDirection?: CreativeDirection): Promise<ComicPage> {
   try {
+    // Ensure creativeDirection is passed as a proper object with empty strings preserved
+    const requestData = { 
+      layout, 
+      apiKey, 
+      layoutImage, 
+      creativeDirection: creativeDirection ? {
+        genre: creativeDirection.genre ?? '',
+        emotion: creativeDirection.emotion ?? '',
+        inspiration: creativeDirection.inspiration ?? '',
+        inspirationText: creativeDirection.inspirationText ?? '',
+        exclusions: creativeDirection.exclusions ?? ''
+      } : undefined
+    };
+    
+    console.log('Sending API request with creativeDirection:', requestData.creativeDirection);
+    
     const response = await fetchWithTimeout(`${API_URL}/script/generate-script`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ layout, apiKey, layoutImage, creativeDirection })
+      body: JSON.stringify(requestData)
     });
 
     if (!response.ok) {

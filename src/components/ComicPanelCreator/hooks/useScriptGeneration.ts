@@ -16,6 +16,7 @@ import {
   validateComicPage
 } from '../../ScriptGenerator';
 import { Panel } from '../../../../shared/types/panelTypes';
+import { safeJSONReplacer } from '../utils/scriptUtils';
 
 interface UseScriptGenerationProps {
   panels: Panel[];
@@ -29,7 +30,7 @@ interface UseScriptGenerationReturn {
   isGeneratingScript: boolean;
   generateError: string | null;
   selectedScriptPanel: ScriptPanel | null;
-  generatePanelScript: () => Promise<void>;
+  generatePanelScript: (creativeDirection?: any) => Promise<void>;
   viewPanelScript: (panelId: string) => void;
   setSelectedScriptPanel: (panel: ScriptPanel | null) => void;
   setGeneratedScript: (script: ComicPage | null) => void;
@@ -73,12 +74,33 @@ export const useScriptGeneration = ({
         }))
       };
 
-      // Generate script using API
+      // Use custom implementation to avoid circular references for the layout
+      const safeLayoutData = JSON.parse(JSON.stringify(layout, safeJSONReplacer));
+      
+      // Handle creative direction directly with empty string fallback
+      // This preserves the exact structure needed by the API, including empty strings
+      let safeCreativeDirection = undefined;
+      
+      if (creativeDirection) {
+        // Clone the object directly without using JSON serialization
+        safeCreativeDirection = {
+          genre: creativeDirection.genre !== undefined ? creativeDirection.genre : '',
+          emotion: creativeDirection.emotion !== undefined ? creativeDirection.emotion : '',
+          inspiration: creativeDirection.inspiration !== undefined ? creativeDirection.inspiration : '',
+          inspirationText: creativeDirection.inspirationText !== undefined ? creativeDirection.inspirationText : '',
+          exclusions: creativeDirection.exclusions !== undefined ? creativeDirection.exclusions : ''
+        };
+        
+        // Log for debugging
+        console.log('Sending creative direction:', safeCreativeDirection);
+      }
+
+      // Generate script using API with safe data
       const script = await generateScriptApi(
-        layout,
+        safeLayoutData,
         apiKey,
         layoutImageBase64,
-        creativeDirection
+        safeCreativeDirection
       );
 
       // Validate the response

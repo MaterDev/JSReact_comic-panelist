@@ -7,6 +7,55 @@ import { Panel } from '../../../../shared/types/panelTypes';
 import { ComicPage, PanelLayout } from '../../ScriptGenerator';
 
 /**
+ * Safe JSON replacer function that handles circular references
+ * Use with JSON.stringify to prevent errors when serializing objects with circular structures
+ * @param key The current key being processed
+ * @param value The current value being processed
+ * @returns The filtered or processed value
+ */
+export function safeJSONReplacer(key: string, value: any): any {
+  // Return a placeholder for null or undefined values
+  if (value === null || value === undefined) {
+    return value;
+  }
+  
+  // Handle primitive values directly
+  if (typeof value !== 'object') {
+    return value;
+  }
+  
+  // Check for Window object or DOM-related objects
+  try {
+    if (value === window || 
+        value instanceof Node || 
+        value instanceof Window || 
+        (value && typeof value === 'object' && value.window === window) || 
+        key === 'window' || 
+        key.startsWith('__react') || 
+        key === 'stateNode' ||
+        key === 'ref' ||
+        key === '_owner') {
+      return '[Circular Reference]';
+    }
+  } catch (e) {
+    // If any error occurs while checking for circular refs, return a safe value
+    return '[Potentially Circular Reference]';
+  }
+    
+  // Handle other potential circular references
+  const seen = new WeakSet();
+  return (function replacer(_, v) {
+    if (typeof v === 'object' && v !== null) {
+      if (seen.has(v)) {
+        return '[Circular Reference]';
+      }
+      seen.add(v);
+    }
+    return v;
+  })(key, value);
+}
+
+/**
  * Converts panel array to layout format for script generation
  */
 export function convertPanelsToLayout(panels: Panel[]): PanelLayout {

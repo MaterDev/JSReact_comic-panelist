@@ -304,7 +304,20 @@ const ComicPanelCreator: React.FC = () => {
             apiKey={apiKey}
             onApiKeyChange={setApiKey}
             isGeneratingScript={isGeneratingScript}
-            onGenerateScript={generatePanelScript}
+            onGenerateScript={() => {
+              // Create the creative direction object with current form values
+              const creativeDirection = {
+                genre,
+                emotion,
+                inspiration,
+                inspirationText,
+                exclusions
+              };
+              // Debug log to verify values before passing them
+              console.log('Creative direction form values being sent:', creativeDirection);
+              // Pass the creative direction to the script generation function
+              generatePanelScript(creativeDirection);
+            }}
             hasGeneratedScript={!!generatedScript}
             onViewScript={() => setShowScriptModal(true)}
             onPreviewClick={handlePreviewClick}
