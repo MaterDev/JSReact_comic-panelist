@@ -11,6 +11,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import LayoutPreview from './LayoutPreview';
+import Header from './Header';
 
 /**
  * Represents a single panel within a comic layout
@@ -402,29 +403,11 @@ const CollectionManager: React.FC<CollectionManagerProps> = ({ onLoadLayout, onC
       data-testid="collection-manager-container"
       className="p-4 bg-white dark:bg-dark-700 rounded-lg shadow-md"
     >
-      <div 
-        id="collection-manager-header" 
-        data-testid="collection-manager-header"
-        className="flex justify-between items-center mb-4"
-      >
-        <h2 
-          id="collection-manager-title" 
-          data-testid="collection-manager-title"
-          className="text-xl font-bold text-gray-800 dark:text-gray-200"
-        >
-          Collection Manager
-        </h2>
-        <button
-          id="collection-manager-new-button"
-          data-testid="collection-manager-new-button"
-          onClick={() => setIsCreating(true)}
-          className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm"
-          disabled={isEditing || isCreating}
-          aria-label="Create new collection"
-        >
-          New Collection
-        </button>
-      </div>
+      <Header 
+        onNewCollection={() => setIsCreating(true)}
+        isEditing={isEditing}
+        isCreating={isCreating}
+      />
       
       {actionMessage && (
         <div 
