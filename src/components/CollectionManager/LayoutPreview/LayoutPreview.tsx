@@ -12,38 +12,15 @@ import CoverSection from './CoverSection';
 import PagePairSection from './PagePairSection';
 import EmptyState from './EmptyState';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
-
-/**
- * Represents a single panel within a comic layout
- */
-interface Panel {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  number: number;
-}
-
-/**
- * Represents a comic layout within a collection
- */
-interface Layout {
-  id: number;
-  collection_id: number;
-  name: string;
-  display_order: number;
-  page_type: 'front_cover' | 'back_cover' | 'standard';
-
-  panel_data: {
-    panels: Panel[];
-  };
-  thumbnail_path?: string;
-  script_data?: any;
-  creative_direction?: any;
-  created_at: Date;
-  updated_at: Date;
-}
+import { 
+  Layout, 
+  categorizeLayouts, 
+  groupPagesIntoPairs, 
+  sortLayoutsByDisplayOrder,
+  createDeleteClickHandler,
+  createConfirmDeleteHandler,
+  createCancelDeleteHandler
+} from './utils';
 
 /**
  * Props for the LayoutPreview component
@@ -69,73 +46,17 @@ const LayoutPreview: React.FC<LayoutPreviewProps> = ({ layouts, onLayoutSelect, 
   const [layoutToDelete, setLayoutToDelete] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Sort layouts by display_order
-  const sortedLayouts = [...layouts].sort((a, b) => a.display_order - b.display_order);
-  
-  // Group layouts into categories
-  const frontCover = sortedLayouts.find(layout => layout.page_type === 'front_cover');
-  const backCover = sortedLayouts.find(layout => layout.page_type === 'back_cover');
-  const standardPages = sortedLayouts.filter(layout => layout.page_type === 'standard');
-  
-  /**
-   * Groups standard pages into pairs for side-by-side display
-   * 
-   * @param {Layout[]} pages - The standard pages to group into pairs
-   * @returns {Layout[][]} An array of page pairs
-   */
-  const groupPagesIntoPairs = (pages: Layout[]): Layout[][] => {
-    const pairs: Layout[][] = [];
-    
-    for (let i = 0; i < pages.length; i += 2) {
-      if (i + 1 < pages.length) {
-        pairs.push([pages[i], pages[i + 1]]);
-      } else {
-        // If there's an odd number of pages, the last page is alone
-        pairs.push([pages[i]]);
-      }
-    }
-    
-    return pairs;
-  };
+  // Sort layouts and categorize them
+  const sortedLayouts = sortLayoutsByDisplayOrder(layouts);
+  const { frontCover, backCover, standardPages } = categorizeLayouts(layouts);
   
   // Group standard pages into pairs for side-by-side display
   const pagePairs = groupPagesIntoPairs(standardPages);
   
-  /**
-   * Handles the click event on the delete button for a layout
-   * 
-   * @param {number} layoutId - The ID of the layout to delete
-   * @param {React.MouseEvent} e - The click event
-   * @returns {void}
-   */
-  const handleDeleteClick = (layoutId: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering the parent onClick
-    setLayoutToDelete(layoutId);
-    setShowDeleteConfirm(true);
-  };
-  
-  /**
-   * Confirms the deletion of a layout
-   * 
-   * @returns {Promise<void>} A promise that resolves when the layout is deleted
-   */
-  const confirmDelete = async () => {
-    if (layoutToDelete !== null && onDeleteLayout) {
-      await onDeleteLayout(layoutToDelete);
-      setShowDeleteConfirm(false);
-      setLayoutToDelete(null);
-    }
-  };
-  
-  /**
-   * Cancels the deletion of a layout
-   * 
-   * @returns {void}
-   */
-  const cancelDelete = () => {
-    setShowDeleteConfirm(false);
-    setLayoutToDelete(null);
-  };
+  // Create event handlers using utility functions
+  const handleDeleteClick = createDeleteClickHandler(setLayoutToDelete, setShowDeleteConfirm);
+  const confirmDelete = createConfirmDeleteHandler(onDeleteLayout, setShowDeleteConfirm, setLayoutToDelete, layoutToDelete);
+  const cancelDelete = createCancelDeleteHandler(setShowDeleteConfirm, setLayoutToDelete);
   
   // Function to handle opening the rename modal
   
