@@ -1,67 +1,71 @@
+/**
+ * AIPreviewModal Component
+ * 
+ * This component displays a modal with an AI-generated preview image of the comic panel layout.
+ * It provides a full-screen overlay with the preview image and explanatory text about how
+ * the AI interprets the panel layout. Users can close the modal by clicking the X button.
+ * 
+ * - The modal uses fixed positioning and z-index: 50 to display above other content
+ * 
+ * @module AIPreviewModal
+ */
 import React from 'react';
+import { ModalHeader } from './ModalHeader';
+import { ModalContent } from './ModalContent';
+import { ModalFooter } from './ModalFooter';
 
+// DEBUG flag - set to true to enable console logging for this component
+const DEBUG = false;
+
+/**
+ * Log debug information if DEBUG flag is enabled
+ * @param message - The message to log
+ * @param data - Optional data to log
+ */
+const debugLog = (message: string, data?: any) => {
+  if (DEBUG) {
+    console.log(`[AIPreviewModal] ${message}`, data || '');
+  }
+};
+
+/**
+ * Props for the AIPreviewModal component
+ */
 interface AIPreviewModalProps {
+  /** URL of the AI-generated preview image to display */
   imageUrl: string;
+  /** Callback function to execute when the modal is closed */
   onClose: () => void;
 }
 
+/**
+ * AIPreviewModal component displays an AI-generated preview image in a modal dialog
+ * 
+ * @param {AIPreviewModalProps} props - The component props
+ * @returns {JSX.Element} The rendered AIPreviewModal component
+ */
 export const AIPreviewModal: React.FC<AIPreviewModalProps> = ({ imageUrl, onClose }) => {
+  // Log component render with props for debugging
+  debugLog('Rendering AIPreviewModal', { imageUrl });
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-dark-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col text-gray-900 dark:text-gray-100">
-        <div className="p-4 border-b border-gray-200 dark:border-dark-600 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">AI Panel Layout Preview</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <div 
+      id="ai-preview-modal-overlay" 
+      data-testid="ai-preview-modal"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
+      <div 
+        id="ai-preview-modal-container" 
+        data-testid="ai-preview-modal-container"
+        className="bg-white dark:bg-dark-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col text-gray-900 dark:text-gray-100"
+      >
+        {/* Modal header with title and close button */}
+        <ModalHeader title="AI Panel Layout Preview" onClose={onClose} />
         
-        <div className="p-4 overflow-auto flex-grow">
-          <div className="flex flex-row items-start gap-6">
-            <div className="w-1/3">
-              <h3 className="text-lg font-medium mb-3 text-gray-900 dark:text-white">AI Layout Preview</h3>
-              <div className="text-sm text-gray-700 dark:text-gray-200 space-y-3">
-                <p>
-                  This is the panel layout image that will be sent to the AI for script generation.
-                </p>
-                <p>
-                  <strong className="text-gray-900 dark:text-white">Panel Numbers:</strong> Shown to help the AI understand the reading order.
-                </p>
-                <p>
-                  <strong className="text-gray-900 dark:text-white">Controls:</strong> Hidden to provide a clean view for the AI.
-                </p>
-                <p>
-                  <strong className="text-gray-900 dark:text-white">Guidelines:</strong> Hidden as they're not relevant to the script content.
-                </p>
-                <p className="italic mt-4 text-gray-700 dark:text-gray-200">
-                  The AI will use this visual representation along with the panel coordinates to generate a script that matches your layout.
-                </p>
-              </div>
-            </div>
-            <div className="w-2/3 border border-gray-300 dark:border-dark-600 shadow-md max-h-[70vh] overflow-hidden">
-              <img 
-                src={imageUrl} 
-                alt="Panel Layout Preview" 
-                className="max-w-full object-contain max-h-[70vh]"
-                style={{ width: '100%', height: 'auto' }}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Modal content area with preview image and explanation */}
+        <ModalContent imageUrl={imageUrl} />
         
-        <div className="p-4 border-t border-gray-200 dark:border-dark-600 flex justify-end">
-          <button
-            onClick={onClose}
-            className="bg-gray-500 hover:bg-gray-600 dark:bg-dark-600 dark:hover:bg-dark-500 text-white px-4 py-2 rounded mr-2"
-          >
-            Close
-          </button>
-        </div>
+        {/* Modal footer with actions */}
+        <ModalFooter onClose={onClose} />
       </div>
     </div>
   );
