@@ -6,6 +6,7 @@
  * @module LayoutThumbnail
  */
 import React from 'react';
+import { API_BASE_URL } from '../../../../constants';
 import PanelRepresentation from './PanelRepresentation';
 import ButtonOverlay from './ButtonOverlay';
 import { Layout } from '../../types';
@@ -58,7 +59,7 @@ const LayoutThumbnail: React.FC<LayoutThumbnailProps> = ({
           <img
             id={`layout-thumbnail-image-${layout.id}`}
             data-testid={`layout-thumbnail-image-${layout.id}`}
-            src={`http://localhost:3001/thumbnails/${layout.thumbnail_path}`}
+            src={`${API_BASE_URL}/thumbnails/${layout.thumbnail_path}`}
             alt={layout.name}
             className="w-full h-full object-contain"
           />

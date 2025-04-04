@@ -1,4 +1,5 @@
 import { PanelLayout, ComicPage } from '../../../shared/types/comic';
+import { API_URL } from '../../constants';
 
 export interface CreativeDirection {
   genre?: string;
@@ -34,7 +35,7 @@ const fetchWithTimeout = async (url: string, options: RequestInit) => {
 
 export async function generateScript(layout: PanelLayout, apiKey?: string, layoutImage?: string, creativeDirection?: CreativeDirection): Promise<ComicPage> {
   try {
-    const response = await fetchWithTimeout('http://localhost:3001/api/script/generate-script', {
+    const response = await fetchWithTimeout(`${API_URL}/script/generate-script`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

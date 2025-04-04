@@ -16,6 +16,7 @@
  * including panel operations, script generation, modal dialogs, and layout persistence.
  */
 import React, { useState, useRef, useCallback } from 'react';
+import { API_URL } from '../../constants';
 import {
   ComicPage,
   PanelLayout,
@@ -478,7 +479,7 @@ const ComicPanelCreator: React.FC = () => {
       const thumbnailBase64 = await generateAIPreviewImage();
 
       // Send the update to the server
-      const response = await fetch(`http://localhost:3001/api/layouts/${loadedLayout.id}`, {
+      const response = await fetch(`${API_URL}/layouts/${loadedLayout.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -508,7 +509,7 @@ const ComicPanelCreator: React.FC = () => {
         // Fetch the collection information
         const fetchCollection = async () => {
           try {
-            const response = await fetch(`http://localhost:3001/api/collections/${loadedLayout.collection_id}`);
+            const response = await fetch(`${API_URL}/collections/${loadedLayout.collection_id}`);
             if (response.ok) {
               const collection = await response.json();
               // Update the current collection state
