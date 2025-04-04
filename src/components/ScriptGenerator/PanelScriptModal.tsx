@@ -1,5 +1,5 @@
 import React from 'react';
-import { Panel as ScriptPanel } from './scriptTypes';
+import { Panel as ScriptPanel } from '../../../shared/types/scriptTypes';
 import './ScriptModal.css'; // Reusing the same CSS as ScriptModal
 
 interface PanelScriptModalProps {
