@@ -1,8 +1,19 @@
+/**
+ * ExportPreviewModal Component
+ * 
+ * A modal dialog that displays a preview of the comic in the selected export format.
+ * - Generates a preview image from the comic container reference
+ * - Supports different export formats (PNG, PDF)
+ * - Shows loading state while generating the preview
+ * - Provides a close button to dismiss the modal
+ */
 import React, { useEffect, useState, useRef } from 'react';
 import { ExportFormat } from '../ComicPanelCreator/Controls/Controls';
 import { generatePreviewImage } from '../ComicPanelCreator/utils/exportUtils';
 
-
+/**
+ * Props for the ExportPreviewModal component
+ */
 interface ExportPreviewModalProps {
   containerRef: React.RefObject<HTMLDivElement>;
   exportFormat: ExportFormat;
@@ -18,6 +29,9 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const modalContentRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Generate the preview image when the component mounts or containerRef changes
+   */
   useEffect(() => {
     const generatePreview = async () => {
       if (!containerRef.current) return;
@@ -40,15 +54,27 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
     generatePreview();
   }, [containerRef]);
 
-  // We don't need to manually resize the image as we'll use CSS to handle it
-
+  /**
+   * Render the modal with preview image or loading state
+   */
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div 
+      id="export-preview-modal" 
+      data-testid="export-preview-modal"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
       <div 
+        id="export-preview-modal-content"
+        data-testid="export-preview-modal-content"
         ref={modalContentRef}
         className="bg-white dark:bg-dark-800 rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col text-gray-900 dark:text-gray-100"
       >
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-dark-600">
+        {/* Modal header with title and close button */}
+        <div 
+          id="export-preview-modal-header"
+          data-testid="export-preview-modal-header"
+          className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-dark-600"
+        >
           <h2 className="text-xl font-semibold">Export Preview ({exportFormat.toUpperCase()})</h2>
           <button 
             onClick={onClose}
@@ -60,7 +86,13 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
           </button>
         </div>
         
-        <div className="p-4 overflow-auto flex-grow flex flex-col items-center justify-center">
+        {/* Modal body with preview content */}
+        <div 
+          id="export-preview-modal-body"
+          data-testid="export-preview-modal-body"
+          className="p-4 overflow-auto flex-grow flex flex-col items-center justify-center"
+        >
+
           {isLoading ? (
             <div className="flex flex-col items-center justify-center p-8">
               <svg className="animate-spin h-10 w-10 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -73,7 +105,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
             <div className="flex flex-col items-center w-full">
               <div className="w-full border border-gray-300 dark:border-dark-600 shadow-md max-h-[70vh] overflow-hidden">
                 <img 
-                  src={previewImage} 
+                  src={previewImage || ''} 
                   alt="Export Preview" 
                   className="max-w-full object-contain max-h-[70vh]"
                   style={{ width: '100%', height: 'auto' }}
@@ -90,8 +122,15 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
           )}
         </div>
         
-        <div className="p-4 border-t border-gray-200 dark:border-dark-600 flex justify-end">
+        {/* Modal footer with close button */}
+        <div 
+          id="export-preview-modal-footer"
+          data-testid="export-preview-modal-footer"
+          className="p-4 border-t border-gray-200 dark:border-dark-600 flex justify-end"
+        >
           <button
+            id="export-preview-close-button"
+            data-testid="export-preview-close-button"
             onClick={onClose}
             className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-dark-600 dark:hover:bg-dark-500 text-gray-800 dark:text-gray-200 rounded"
           >
