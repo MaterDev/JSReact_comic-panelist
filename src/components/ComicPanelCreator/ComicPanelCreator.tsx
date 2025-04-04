@@ -16,47 +16,28 @@
  * including panel operations, script generation, modal dialogs, and layout persistence.
  */
 import React, { useState, useRef, useCallback } from 'react';
-import { API_URL } from '../../constants';
-import {
-  ComicPage,
-  PanelLayout,
-  Panel as ScriptPanel,
-  generateScript,
-  validateComicPage
-} from '../ScriptGenerator';
-import { exportComic as exportComicUtil, generateAIPreviewImage as generateAIPreviewImageUtil } from '../ExportUtils';
+import { generateAIPreviewImage as generateAIPreviewImageUtil } from './utils/exportUtils';
 import { Panel as PanelComponent } from '../Panel';
-import { Controls, ExportFormat } from './Controls/Controls';
+import { Controls } from './Controls/Controls';
 import { CreativeDirectionForm } from './CreativeDirectionForm';
 import { ScriptGenerationPanel } from './ScriptGenerationPanel';
 import { PanelOperationsToolbar } from './PanelOperationsToolbar';
 import HeaderToolbar from './HeaderToolbar';
 import { GuideLines } from '../GuideLines';
-import { Panel } from '../../../shared/types/panelTypes';
 
-// Define a local Layout type that matches the HeaderToolbar and LayoutManager components
-interface Layout {
-  id: number;
-  name: string;
-  collection_id: number;
-  description?: string;
-  display_order?: number;
-  page_type?: 'front_cover' | 'back_cover' | 'standard';
-  panel_data: {
-    panels: Panel[];
-    gutterSize: number;
-  };
-  thumbnail_path?: string;
-  script_data?: any;
-  creative_direction?: any;
-  created_at: Date;
-  updated_at: Date;
-}
+// Import custom hooks
+import {
+  usePanelInteraction,
+  usePanelState,
+  usePanelOperations,
+  useCreativeDirection,
+  useScriptGeneration,
+  useExportOptions,
+  useLayoutManagement,
+  useModalState
+} from './hooks';
 
-// Import new components
-import { usePanelInteraction, usePanelState, usePanelOperations } from './hooks';
-import { ModalManager } from './ModalManager';
-import { LayoutManager } from './LayoutManager';
+// Import utilities
 import {
   CONTAINER_WIDTH,
   CONTAINER_HEIGHT
@@ -64,6 +45,8 @@ import {
 
 // Import the CollectionManager component
 import CollectionManager from '../CollectionManager';
+import ModalManager from './ModalManager';
+import LayoutManager from './LayoutManager';
 
 const ComicPanelCreator: React.FC = () => {
   // Use the panel state hook to manage panels and gutter size
@@ -101,33 +84,128 @@ const ComicPanelCreator: React.FC = () => {
   });
   const [showControls, setShowControls] = useState(true);
   const [showGuides, setShowGuides] = useState(true);
-  const [exportFormat, setExportFormat] = useState<ExportFormat>('png');
-  const [generatedScript, setGeneratedScript] = useState<ComicPage | null>(null);
-  const [isGeneratingScript, setIsGeneratingScript] = useState(false);
-  const [showScriptModal, setShowScriptModal] = useState(false);
-  const [selectedScriptPanel, setSelectedScriptPanel] = useState<ScriptPanel | null>(null);
+  
+  // Use export options hook to manage export functionality
+  const {
+    exportFormat,
+    setExportFormat,
+    handleExportComic
+  } = useExportOptions({
+    containerRef,
+    onBeforeExport: () => setShowControls(false),
+    onAfterExport: () => setShowControls(true)
+  });
+  // API key state (kept separate from the hook for flexibility)
   const [apiKey, setApiKey] = useState('');
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [showExportPreviewModal, setShowExportPreviewModal] = useState(false);
+  
+  /**
+   * Generates a preview image of the current layout for AI context.
+   */
+  const generateAIPreviewImage = useCallback(async (): Promise<string> => {
+    // Use the imported generateAIPreviewImage function from ExportUtils
+    const imgData = await generateAIPreviewImageUtil(containerRef);
+    return imgData || '';
+  }, [containerRef]);
+
+  // Use script generation hook to manage script generation state and API calls
+  const {
+    generatedScript,
+    setGeneratedScript,
+    isGeneratingScript,
+    selectedScriptPanel,
+    generatePanelScript,
+    viewPanelScript,
+    setSelectedScriptPanel
+  } = useScriptGeneration({
+    panels,
+    generatePreviewImage: generateAIPreviewImage,
+    apiKey,
+    onScriptGenerated: () => {
+      if (loadedLayout) {
+        setHasUnsavedChanges(true);
+      }
+    }
+  });
+  
+  // Use modal state hook to manage all modals
+  const {
+    showScriptModal,
+    setShowScriptModal,
+    showPreviewModal,
+    setShowPreviewModal,
+    previewImage,
+    showExportPreviewModal,
+    setShowExportPreviewModal,
+    showInstructions,
+    setShowInstructions,
+    handlePreviewClick
+  } = useModalState({
+    generatePreviewImage: generateAIPreviewImage
+  });
+  
+  // Script panel selection state is now managed by the useScriptGeneration hook
 
   // Creative direction states
-  const [genre, setGenre] = useState('');
-  const [emotion, setEmotion] = useState('');
-  const [inspiration, setInspiration] = useState('');
+  // Use the creative direction hook to manage creative inputs
+  const {
+    genre,
+    setGenre,
+    emotion,
+    setEmotion,
+    inspiration,
+    setInspiration,
+    inspirationText,
+    setInspirationText,
+    exclusions,
+    setExclusions,
+    resetCreativeDirection,
+    // We don't use this directly as we're providing our own implementation
+    getCreativeDirectionObject: _getCreativeDirectionObject
+  } = useCreativeDirection();
 
-  // Layout loading state
-  const [loadedLayout, setLoadedLayout] = useState<Layout | null>(null);
-  // These state variables are used in the handleLoadLayout function
-  // They're not directly used in the UI but are needed for state management
-  const [_layoutName, setLayoutName] = useState('');
-  const [_layoutDescription, setLayoutDescription] = useState('');
-  const [inspirationText, setInspirationText] = useState('');
-  const [exclusions, setExclusions] = useState('');
-  // Creative direction state is now managed by the CreativeDirectionForm component
-
-  // Track unsaved changes
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  // Use layout management hook to handle saving and loading layouts
+  const {
+    loadedLayout,
+    hasUnsavedChanges,
+    setHasUnsavedChanges,
+    isSavingLayout,
+    currentCollection,
+    setCurrentCollection,
+    refreshKey,
+    handleLoadLayout,
+    saveCurrentLayout,
+    closeCurrentLayout,
+    closeCollection
+  } = useLayoutManagement({
+    panels,
+    setPanels,
+    gutterSize,
+    setGutterSize,
+    resetPanels,
+    generatedScript,
+    generatePreviewImage: async () => {
+      // Implement preview image generation
+      return "preview-image-placeholder";
+    },
+    setCreativeDirectionFromObject: (direction) => {
+      if (!direction) return;
+      setGenre(direction.genre || '');
+      setEmotion(direction.emotion || '');
+      setInspiration(direction.inspiration || '');
+      setInspirationText(direction.inspirationText || '');
+      setExclusions(direction.exclusions || '');
+    },
+    // Provide creative direction data to the layout management hook
+    getCreativeDirectionObject: () => ({
+      genre,
+      emotion,
+      inspiration,
+      inspirationText,
+      exclusions
+    }),
+    resetCreativeDirection,
+    clearScript: () => setGeneratedScript(null)
+  });
 
   // Panel selection and interaction state
 
@@ -148,33 +226,7 @@ const ComicPanelCreator: React.FC = () => {
 
 
 
-
-
-
-
-  /**
-   * Generates a preview image of the current layout for AI context.
-   * Displays the image in a modal.
-   */
-  const generateAIPreviewImage = useCallback(async (): Promise<string> => {
-    // Use the imported generateAIPreviewImage function from ExportUtils
-    const imgData = await generateAIPreviewImageUtil(containerRef);
-    return imgData || '';
-  }, [containerRef]);
-
-  /**
-   * Handles the preview click event.
-   * Generates a preview image and displays it in a modal.
-   */
-  const handlePreviewClick = useCallback(async () => {
-    try {
-      const previewImageData = await generateAIPreviewImage();
-      setPreviewImage(previewImageData);
-      setShowPreviewModal(true);
-    } catch (error) {
-      console.error('Error generating preview:', error);
-    }
-  }, [generateAIPreviewImage]);
+  // handlePreviewClick is now provided by the useModalState hook
 
   /**
    * Handles the export preview click event.
@@ -189,68 +241,9 @@ const ComicPanelCreator: React.FC = () => {
    * Validates the layout and API key before proceeding.
    * Displays modals for loading state and results/errors.
    */
-  const generatePanelScript = useCallback(async (): Promise<void> => {
-    try {
-      setIsGeneratingScript(true);
+  // generatePanelScript is now provided by the useScriptGeneration hook
 
-      // Generate the preview image
-      const layoutImageBase64 = await generateAIPreviewImage();
-
-      // Convert current panels to layout format
-      const layout: PanelLayout = {
-        panels: panels.map(panel => ({
-          id: panel.id,
-          x: panel.x,
-          y: panel.y,
-          width: panel.width,
-          height: panel.height
-        }))
-      };
-
-      // Create creative direction object with non-empty values
-      const creativeDirection = {
-        ...(genre && { genre }),
-        ...(emotion && { emotion }),
-        ...(inspiration && { inspiration }),
-        ...(inspirationText && { inspirationText }),
-        ...(exclusions && { exclusions })
-      };
-
-      // Generate script using AI with optional API key, layout image, and creative direction
-      const script = await generateScript(
-        layout,
-        apiKey || undefined,
-        layoutImageBase64,
-        Object.keys(creativeDirection).length > 0 ? creativeDirection : undefined
-      );
-
-      // Validate the response
-      if (!validateComicPage(script)) {
-        throw new Error('Generated script does not match expected format');
-      }
-
-      setGeneratedScript(script);
-    } catch (error) {
-      console.error('Error generating script:', error);
-      // TODO: Add proper error handling UI
-    } finally {
-      setIsGeneratingScript(false);
-    }
-  }, [panels, apiKey, genre, emotion, inspiration, inspirationText, exclusions, generateAIPreviewImage]);
-
-  /**
-   * Handles the export action based on the selected format.
-   * @param format The desired export format ('json', 'png').
-   */
-  const handleExportComic = useCallback(async (format: ExportFormat): Promise<void> => {
-    // Use the imported exportComic function with callbacks for UI state management
-    await exportComicUtil({
-      containerRef,
-      format,
-      onBeforeExport: () => setShowControls(false),
-      onAfterExport: () => setShowControls(true)
-    });
-  }, [containerRef]);
+  // handleExportComic is provided by the useExportOptions hook
 
   /**
    * Handles viewing the script for a specific panel.
@@ -280,234 +273,16 @@ const ComicPanelCreator: React.FC = () => {
    * Updates the panel layout and script data accordingly.
    * @param layout The loaded layout object.
    */
-  const handleLoadLayout = useCallback((layout: any) => { // Use 'any' temporarily to bypass strict checks on incoming object
-    console.log("Loading layout:", layout);
-    if (layout && layout.panel_data) {
-      // Convert incoming numeric ID to string and ensure description exists
-      const loadedLayout: Layout = {
-        ...layout,
-        id: String(layout.id), // Convert potential number ID to string
-        description: layout.description || '', // Provide default description
-        panel_data: {
-          ...layout.panel_data,
-          // Ensure panels array exists and map panel numbers
-          panels: (layout.panel_data.panels || []).map((p: any, index: number) => ({
-            ...p,
-            panelNumber: p.panelNumber || index + 1 // Assign panel number if missing
-          })),
-          gutterSize: layout.panel_data.gutterSize ?? 1, // Use nullish coalescing for gutterSize
-        }
-      };
+  // handleLoadLayout is now provided by the useLayoutManagement hook
 
-      console.log("Processed loadedLayout:", loadedLayout);
+  // saveCurrentLayout is now provided by the useLayoutManagement hook
 
-      setLoadedLayout(loadedLayout); // Now conforms to Layout type
-      setPanels(loadedLayout.panel_data.panels.map(p => ({ ...p, panelNumber: p.panelNumber })));
-      setGutterSize(loadedLayout.panel_data.gutterSize);
-      setLayoutName(loadedLayout.name);
-      setLayoutDescription(loadedLayout.description || '');
+  // closeCurrentLayout is now provided by the useLayoutManagement hook
 
-      // Set creative direction state if available
-      if (loadedLayout.creative_direction) {
-        setGenre(loadedLayout.creative_direction.genre || '');
-        setEmotion(loadedLayout.creative_direction.emotion || '');
-        setInspiration(loadedLayout.creative_direction.inspiration || '');
-        setInspirationText(loadedLayout.creative_direction.inspirationText || '');
-        setExclusions(loadedLayout.creative_direction.exclusions || '');
-      }
-      // Set generated script if available
-      if (loadedLayout.script_data) {
-        setGeneratedScript(loadedLayout.script_data);
-      }
+  // closeCollection is now provided by the useLayoutManagement hook
 
-      setHasUnsavedChanges(false); // Reset unsaved changes flag
-      setSelectedPanelId(null); // Deselect any panel
-      setRefreshKey(prev => prev + 1); // Force CollectionManager refresh if needed
-
-    } else {
-      console.error("Attempted to load invalid layout data:", layout);
-    }
-  }, [setPanels, setGutterSize, setLayoutName, setLayoutDescription, setGenre, setEmotion, setInspiration, setInspirationText, setExclusions, setGeneratedScript, setHasUnsavedChanges, setSelectedPanelId]);
-
-  /**
-   * Saves the current layout back to the database.
-   * Updates the layout object with the current panel data and script.
-   */
-  const saveCurrentLayout = useCallback(async () => {
-    if (!loadedLayout) return;
-
-    try {
-      setIsSavingLayout(true);
-
-      // Create a copy of the loaded layout with updated panel data
-      // Convert Panel[] to LayoutPanel[] by ensuring all panels have a panelNumber property
-      const layoutPanels = panels.map(panel => ({
-        ...panel,
-        // Ensure panelNumber is always defined (use panel.panelNumber if defined, otherwise 0)
-        panelNumber: panel.panelNumber !== undefined ? panel.panelNumber : 0
-      }));
-
-      const updatedLayout = {
-        ...loadedLayout,
-        panel_data: {
-          panels: layoutPanels,
-          gutterSize: gutterSize // Include gutterSize in panel_data
-        },
-        script_data: generatedScript,
-        creative_direction: {
-          genre,
-          emotion,
-          inspiration,
-          inspirationText,
-          exclusions
-        }
-      };
-
-      // Generate a thumbnail for the updated layout
-      const thumbnailBase64 = await generateAIPreviewImage();
-
-      // Send the update to the server
-      const response = await fetch(`${API_URL}/layouts/${loadedLayout.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: loadedLayout.name,
-          collection_id: loadedLayout.collection_id,
-          panel_data: updatedLayout.panel_data,
-          script_data: updatedLayout.script_data,
-          creative_direction: updatedLayout.creative_direction,
-          thumbnailBase64
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update layout');
-      }
-
-      // Update the loaded layout with the new data
-      setLoadedLayout(updatedLayout as Layout);
-
-      // Reset unsaved changes flag
-      setHasUnsavedChanges(false);
-
-      // If the layout belongs to a collection, update the collection information
-      if (loadedLayout.collection_id) {
-        // Fetch the collection information
-        const fetchCollection = async () => {
-          try {
-            const response = await fetch(`${API_URL}/collections/${loadedLayout.collection_id}`);
-            if (response.ok) {
-              const collection = await response.json();
-              // Update the current collection state
-              setCurrentCollection({
-                id: collection.id,
-                name: collection.name,
-                description: collection.description
-              });
-            }
-          } catch (error) {
-            console.error('Error fetching collection:', error);
-          }
-        };
-        fetchCollection();
-      }
-
-      // Trigger a refresh of the collection manager layouts
-      setRefreshKey(prevKey => prevKey + 1);
-
-      // Show success message
-      alert(`Layout "${loadedLayout.name}" has been updated successfully.`);
-    } catch (error) {
-      console.error('Error saving layout:', error);
-      alert(`Failed to save layout: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsSavingLayout(false);
-    }
-  }, [loadedLayout, panels, generatedScript, genre, emotion, inspiration, inspirationText, exclusions, generateAIPreviewImage, gutterSize]);
-
-  /**
-   * Closes the current layout.
-   * Resets the panel layout and script data.
-   */
-  const closeCurrentLayout = useCallback(() => {
-    // Check if there are unsaved changes
-    if (hasUnsavedChanges) {
-      if (window.confirm('You have unsaved changes. Are you sure you want to close this layout?')) {
-        // Reset layout
-        setLoadedLayout(null);
-
-        // Reset panels to default
-        resetPanels();
-
-        // Reset script
-        setGeneratedScript(null);
-
-        // Reset creative direction
-        setGenre('');
-        setEmotion('');
-        setInspiration('');
-        setInspirationText('');
-        setExclusions('');
-
-        // Reset unsaved changes flag
-        setHasUnsavedChanges(false);
-      }
-    } else {
-      // Reset layout
-      setLoadedLayout(null);
-
-      // Reset panels to default
-      resetPanels();
-
-      // Reset script
-      setGeneratedScript(null);
-
-      // Reset creative direction
-      setGenre('');
-      setEmotion('');
-      setInspiration('');
-      setInspirationText('');
-      setExclusions('');
-    }
-  }, [hasUnsavedChanges, resetPanels]);
-
-  /**
-   * Closes the collection and resets to a one-off default page.
-   * Resets the panel layout and script data.
-   */
-  const closeCollection = useCallback(() => {
-    // Reset collection
-    setCurrentCollection(null);
-
-    // Reset layout
-    setLoadedLayout(null);
-
-    // Reset panels to default
-    resetPanels();
-
-    // Reset script
-    setGeneratedScript(null);
-
-    // Reset creative direction
-    setGenre('');
-    setEmotion('');
-    setInspiration('');
-    setInspirationText('');
-    setExclusions('');
-
-    // Reset unsaved changes flag
-    setHasUnsavedChanges(false);
-
-    // Increment refresh key to force CollectionManager to rerender with no selection
-    setRefreshKey(prevKey => prevKey + 1);
-  }, [resetPanels]);
-
-  const [showInstructions, setShowInstructions] = useState(false);
-  const [isSavingLayout, setIsSavingLayout] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [currentCollection, setCurrentCollection] = useState<{ id: number; name: string; description?: string } | null>(null);
+  // Use isSavingLayout for layout save operations
+  // Layout state variables are now provided by the useLayoutManagement hook
 
   return (
     <div className="flex flex-col h-screen text-gray-900 dark:text-gray-100">
@@ -614,7 +389,7 @@ const ComicPanelCreator: React.FC = () => {
                   onDelete={deletePanel}
                   canDelete={panels.length > 1}
                   hasScript={!!generatedScript}
-                  onViewScript={handleViewPanelScript}
+                  onViewScript={viewPanelScript}
                 />
               ))}
             </div>

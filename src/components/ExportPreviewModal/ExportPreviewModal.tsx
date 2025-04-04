@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ExportFormat } from '../ComicPanelCreator/Controls/Controls';
-import { generatePreviewImage } from '../ExportUtils';
+import { generatePreviewImage } from '../ComicPanelCreator/utils/exportUtils';
 
 
 interface ExportPreviewModalProps {
