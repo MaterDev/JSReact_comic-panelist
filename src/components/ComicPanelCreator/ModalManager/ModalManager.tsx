@@ -3,6 +3,7 @@ import { ScriptModal, PanelScriptModal, ComicPage, Panel as ScriptPanel } from '
 import { AIPreviewModal } from '../../AIPreviewModal';
 import { ExportPreviewModal } from '../../ExportPreviewModal';
 import { InstructionsModal } from '../../InstructionsModal';
+import { ExportFormat } from '../Controls/Controls';
 
 interface ModalManagerProps {
   showScriptModal: boolean;
@@ -13,7 +14,8 @@ interface ModalManagerProps {
   generatedScript: ComicPage | null;
   selectedScriptPanel: ScriptPanel | null;
   previewImage: string | null;
-  exportPreviewImage: string | null;
+  containerRef: React.RefObject<HTMLDivElement> | null;
+  exportFormat: ExportFormat;
   onCloseScriptModal: () => void;
   onClosePanelScriptModal: () => void;
   onClosePreviewModal: () => void;
@@ -30,7 +32,8 @@ export const ModalManager: React.FC<ModalManagerProps> = ({
   generatedScript,
   selectedScriptPanel,
   previewImage,
-  exportPreviewImage,
+  containerRef,
+  exportFormat,
   onCloseScriptModal,
   onClosePanelScriptModal,
   onClosePreviewModal,
@@ -60,9 +63,10 @@ export const ModalManager: React.FC<ModalManagerProps> = ({
         />
       )}
       
-      {showExportPreviewModal && exportPreviewImage && (
+      {showExportPreviewModal && containerRef && (
         <ExportPreviewModal
-          imageUrl={exportPreviewImage}
+          containerRef={containerRef}
+          exportFormat={exportFormat}
           onClose={onCloseExportPreviewModal}
         />
       )}

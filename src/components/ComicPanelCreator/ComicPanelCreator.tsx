@@ -224,8 +224,6 @@ const ComicPanelCreator: React.FC = () => {
     setSelectedPanelId
   });
 
-
-
   // handlePreviewClick is now provided by the useModalState hook
 
   /**
@@ -449,7 +447,8 @@ const ComicPanelCreator: React.FC = () => {
         generatedScript={generatedScript}
         selectedScriptPanel={selectedScriptPanel}
         previewImage={previewImage}
-        exportPreviewImage={null}
+        containerRef={containerRef}
+        exportFormat={exportFormat}
         onCloseScriptModal={() => setShowScriptModal(false)}
         onClosePanelScriptModal={() => setSelectedScriptPanel(null)}
         onClosePreviewModal={() => setShowPreviewModal(false)}
