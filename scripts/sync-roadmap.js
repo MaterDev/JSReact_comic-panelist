@@ -330,7 +330,7 @@ async function createIssues(roadmap) {
     
     for (const task of epic.tasks) {
       // Create task issue
-      const taskTitle = `[${epic.key}] ${task.name}`;
+      const taskTitle = `${task.name}`;
       let taskBody = `## Description\n${task.description}\n\n`;
       
       if (task.acceptanceCriteria.length > 0) {
@@ -361,7 +361,7 @@ async function createIssues(roadmap) {
         
         // Add to project
         try {
-          await addIssueToProject(taskIssue.data.node_id);
+          await addIssueToProject(taskIssue.data.node_id, task.name);
           log.detail(`Added to project successfully`);
         } catch (projectError) {
           log.error(`Error adding issue to project: ${projectError.message}`);
@@ -371,7 +371,7 @@ async function createIssues(roadmap) {
         
         // Create subtask issues
         for (const subtask of task.subtasks) {
-          const subtaskTitle = `[${epic.key}] ${subtask.name}`;
+          const subtaskTitle = `${subtask.name}`;
           let subtaskBody = `Part of #${taskIssue.data.number}\n\n`;
           
           if (subtask.steps.length > 0) {
@@ -399,7 +399,7 @@ async function createIssues(roadmap) {
             
             // Add to project
             try {
-              await addIssueToProject(subtaskIssue.data.node_id);
+              await addIssueToProject(subtaskIssue.data.node_id, subtask.name);
               log.detail(`Added to project successfully`);
             } catch (projectError) {
               log.error(`Error adding subtask issue to project: ${projectError.message}`);
@@ -447,7 +447,7 @@ async function createIssues(roadmap) {
 /**
  * Add an issue to the GitHub Project
  */
-async function addIssueToProject(issueId) {
+async function addIssueToProject(issueId, cleanTitle) {
   // Check if we're using a project number instead of ID
   let projectId = CONFIG.projectId;
   
@@ -476,7 +476,8 @@ async function addIssueToProject(issueId) {
   }
   
   try {
-    const result = await graphqlWithAuth(`
+    // First add the item to the project
+    const addResult = await graphqlWithAuth(`
       mutation {
         addProjectV2ItemById(input: {
           projectId: "${projectId}"
@@ -489,7 +490,28 @@ async function addIssueToProject(issueId) {
       }
     `);
     
-    return result.addProjectV2ItemById.item.id;
+    const itemId = addResult.addProjectV2ItemById.item.id;
+
+    // Then update the title field to remove brackets
+    const titleFieldId = "title"; // Title is a built-in field
+    await graphqlWithAuth(`
+      mutation {
+        updateProjectV2ItemFieldValue(input: {
+          projectId: "${projectId}"
+          itemId: "${itemId}"
+          fieldId: "${titleFieldId}"
+          value: {
+            text: "${cleanTitle}"
+          }
+        }) {
+          projectV2Item {
+            id
+          }
+        }
+      }
+    `);
+
+    return itemId;
   } catch (error) {
     log.error(`Error adding issue to project: ${error.message}`);
     throw error;
