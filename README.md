@@ -139,12 +139,13 @@ This project uses GitHub Projects for roadmap tracking and task management. The 
 
 ### Roadmap Integration
 
-- **Structured Roadmap**: Located at `docs/ROADMAP_STRUCTURED.md`
+- **Structured Roadmap**: Located at `docs/roadmaps/03_ROADMAP_AlphaBuild-1_Tauri.md`
 - **GitHub Projects**: Tasks are synchronized to GitHub Projects for visual tracking
 - **Automated Sync**: Custom scripts automate the creation of issues from the roadmap
+- **Parent-Child Relationships**: Tasks and subtasks are linked with GitHub's sub-issue feature
 - **Project Board**: [Comic Panelist - App](https://github.com/users/MaterDev/projects/11)
 
-For more information on the roadmap sync process, see the [Scripts README](scripts/README.md).
+For more information on the roadmap sync process, see the [Scripts README](scripts/README.md) and the [Roadmap Sync README](scripts/roadmap-sync/README.md).
 
 ## Available Scripts
 
@@ -161,7 +162,9 @@ For more information on the roadmap sync process, see the [Scripts README](scrip
 
 ### Utility Scripts
 
-- `node scripts/sync-roadmap.js` - Synchronizes the roadmap with GitHub Projects
+- `npm run sync-roadmap` - Synchronizes the roadmap with GitHub Projects
+- `npm run sync-roadmap:test` - Runs the sync with a test roadmap file
+- `npm run sync-roadmap -- --path=./path/to/roadmap.md` - Runs the sync with a custom roadmap file
 - `node scripts/get-project-fields.js` - Retrieves field IDs from GitHub Projects
 
 ## License

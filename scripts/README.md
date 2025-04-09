@@ -35,9 +35,18 @@ GITHUB_TOKEN=your_github_token_here
 
 ### Roadmap Sync
 
-**File:** `sync-roadmap.js`
+**Directory:** `roadmap-sync/`
 
-This script synchronizes a structured markdown roadmap with GitHub Projects. It parses the roadmap file, extracts tasks and subtasks, and creates corresponding GitHub issues with appropriate metadata (priority, size, type).
+This tool synchronizes structured markdown roadmaps with GitHub Projects. It parses the roadmap file, extracts tasks and subtasks, and creates corresponding GitHub issues with appropriate metadata (priority, size, type).
+
+#### Key Features
+
+- Creates GitHub issues for epics, tasks, and subtasks
+- Establishes parent-child relationships between tasks and subtasks
+- Adds issues to GitHub Projects with proper field values
+- Interactive confirmation with keyboard shortcuts (a to accept, c to cancel)
+- Configurable via command-line arguments
+- Detailed configuration display before execution
 
 #### Configuration
 
@@ -97,8 +106,17 @@ const CONFIG = {
 
 #### Usage
 
+The script can be run using npm scripts:
+
 ```bash
-node scripts/sync-roadmap.js
+# Use the default roadmap path
+npm run sync-roadmap
+
+# Use a custom roadmap path
+npm run sync-roadmap -- --path=./path/to/your/roadmap.md
+
+# Use the test roadmap
+npm run sync-roadmap:test
 ```
 
 The script will:

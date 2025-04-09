@@ -1,87 +1,124 @@
 # Roadmap Sync Tool
 
-This tool synchronizes a structured markdown roadmap with GitHub Projects. It parses the roadmap file, extracts tasks and subtasks, and creates corresponding GitHub issues with appropriate metadata (priority, size, type).
+This tool synchronizes structured markdown roadmaps with GitHub Projects, creating issues and sub-issues with appropriate metadata.
 
-## Project Structure
+## Features
 
-```
-roadmap-sync/
-├── config/
-│   └── config.js         # Configuration settings
-├── src/
-│   ├── parser.js         # Roadmap file parsing logic
-│   ├── github.js         # GitHub API interactions
-│   └── fields.js         # Project fields retrieval
-├── utils/
-│   └── logger.js         # Logging utilities
-├── index.js             # Main entry point
-├── get-fields.js        # Fields CLI tool
-├── package.json         # Dependencies and scripts
-└── README.md            # Documentation
-```
+- Parses structured markdown roadmaps with epics, tasks, and subtasks
+- Creates GitHub issues with appropriate labels and metadata
+- Establishes parent-child relationships between tasks and subtasks
+- Adds issues to GitHub Projects with proper field values
+- Interactive confirmation with keyboard shortcuts
+- Configurable via command-line arguments
 
 ## Prerequisites
 
 1. A GitHub Personal Access Token with 'repo' and 'project' permissions
-2. The token must be stored in a .env file as GITHUB_TOKEN
+2. The token must be stored in a `.env` file as `GITHUB_TOKEN`
 3. A GitHub Project (v2) with custom fields for priority, size, and type
-4. Node.js and npm installed
-
-## Installation
-
-1. Create a `.env` file in the project root with your GitHub token:
-   ```
-   GITHUB_TOKEN=your_token_here
-   ```
-
-2. Install dependencies:
-   ```bash
-   cd scripts/roadmap-sync
-   npm install
-   ```
+4. The `@octokit/graphql` and `@octokit/rest` packages
 
 ## Usage
 
-### Retrieving Project Fields
-
-Before configuring the sync tool, you'll need to get your GitHub Project field IDs. Use the `get-fields.js` tool:
-
 ```bash
-# List all available projects
-node get-fields.js
+# Use the default roadmap path
+npm run sync-roadmap
 
-# Get fields for a specific project by ID
-node get-fields.js PROJECT_ID
+# Use a custom roadmap path
+npm run sync-roadmap -- --path=./path/to/your/roadmap.md
 
-# Get fields for a project by owner and number
-node get-fields.js OWNER PROJECT_NUMBER
+# Use the test roadmap
+npm run sync-roadmap:test
 ```
 
-### Running the Sync Tool
+## Interactive Controls
 
-Run the sync tool:
-```bash
-npm start
-```
+When running the script, you'll see configuration details and a prompt:
 
-Or from the project root:
-```bash
-node scripts/roadmap-sync/index.js
-```
+- Press `a` to accept and proceed with the sync
+- Press `c` to cancel the operation
+- Wait 15 seconds for automatic continuation
 
 ## Configuration
 
-Update `config/config.js` with your GitHub information:
-- Repository owner and name
-- Project ID
-- Field IDs for priority, size, and status
-- Default values for tasks
+The configuration is defined in the `CONFIG` object within the script:
 
-## Features
+```javascript
+const CONFIG = {
+  // Path to the roadmap file (relative to project root)
+  roadmapPath: './docs/roadmaps/03_ROADMAP_AlphaBuild-1_Tauri.md',
+  
+  // GitHub repository information
+  owner: 'MaterDev',
+  repo: 'JSReact_comic-panelist',
+  
+  // GitHub Project ID
+  projectId: '11',
+  
+  // Default values for tasks
+  defaults: {
+    priority: 'medium',
+    size: 'm',
+    type: 'feature',
+  },
+  
+  // Field IDs for your GitHub Project
+  fields: {
+    priority: 'PVTSSF_lAHOAPUkmc4A1yv9zgrNK_Q',
+    size: 'PVTSSF_lAHOAPUkmc4A1yv9zgrNK_U',
+    status: 'PVTSSF_lAHOAPUkmc4A1yv9zgrNKOE',
+    epic: 'PVTF_lAHOAPUkmc4A1yv9zgrNKOI',
+  },
+  
+  // Field option IDs for single select fields
+  fieldOptions: {
+    // Option values for priority, size, and status
+  },
+};
+```
 
-- Parses structured markdown roadmap files
-- Creates GitHub issues for tasks and subtasks
-- Adds issues to GitHub Projects
-- Sets priority, size, and type metadata
-- Maintains epic relationships through labels
-- Provides detailed logging and error handling
+## Roadmap Format
+
+The roadmap should follow this structured format:
+
+```markdown
+# Roadmap Title
+
+## Epic: Epic Name
+<!-- priority:high size:xl type:feature -->
+
+**Description**: Epic description.
+
+**Key**: EPIC-KEY
+
+### Task: Task Name
+<!-- priority:high size:l type:feature -->
+
+**Description**: Task description.
+
+**Acceptance Criteria**:
+- [ ] Criteria 1
+- [ ] Criteria 2
+
+#### Subtask: Subtask Name
+<!-- priority:high size:m type:feature -->
+- [ ] Step 1
+- [ ] Step 2
+```
+
+## Getting Field IDs
+
+Use the `get-project-fields.js` script to retrieve field IDs for your GitHub Project:
+
+```bash
+node scripts/get-project-fields.js <project-number>
+```
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Verify your GitHub token has the correct permissions
+2. Check that the project ID is correct
+3. Ensure the roadmap file exists and follows the correct format
+4. Look for error messages in the console output
