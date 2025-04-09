@@ -1,112 +1,213 @@
 # Comic Panel Creator - Alpha Build 1 Roadmap
 
-This document outlines the development roadmap for the first Alpha build of the Comic Panel Creator application, focusing on transforming the web app into a Tauri desktop application while cleaning up the codebase.
+This document outlines the development roadmap for the first Alpha build of the Comic Panel Creator application, focusing on transforming the web app into a Tauri desktop application. With the core UI refactoring now complete and merged to the dev branch, this roadmap covers the remaining tasks for canvas proportions, testing, and Tauri integration.
 
-## Epic: Front-End Refactoring and Testing
+## Epic: Front-End Enhancement and Testing
 <!-- priority:high size:xl type:feature -->
 
-**Description**: Refactor the front-end UI components and implement comprehensive testing.
+**Description**: Complete essential UI refinements and implement comprehensive testing.
 
-**Key**: FE-REFACTOR
+**Key**: FE-ENHANCE
 
-### Task: Complete UI Component Refactoring
+### Task: Refactor Working Area Component Structure
+<!-- priority:high size:m type:feature -->
+
+**Description**: Refactor the working area of the UI to create clear separation between the canvas, guidelines, panel overlay, and container components for better maintainability.
+
+**Technical Notes**: 
+> Currently in ComicPanelCreator.tsx, the canvas structure is tightly coupled with several nested divs (`comic-page-viewport`, `fixed-checkerboard-container`, and `comic-page-container`). The panels and guidelines are rendered directly within this structure without clear separation of concerns. This makes it difficult to implement responsive scaling and maintain the codebase. A component-based approach with clear responsibilities will make future enhancements easier.
+>
+> **Important:** The canvas refactoring will impact several critical functions that rely on the container reference:
+> 1. AI Preview Generation: Uses `containerRef` directly in `generateAIPreviewImageUtil()`
+> 2. PNG/PDF Export: Uses `containerRef` in the `exportComic` utility
+> 3. Script Generation: Relies on the AI preview image generated from the canvas
+> 4. Layout Saving: The `saveCurrentLayout` function uses `generatePreviewImage` which relies on the containerRef
+> 5. Layout Loading: Loaded panels must integrate correctly with the new canvas structure
+>
+> During refactoring, the container reference handling must be carefully managed to maintain these functions. The panel data structure must remain compatible with the layout save/load functionality to ensure collections continue to work properly.
+>
+> **Recommended Implementation Approach**:
+> 1. Create a `CanvasWorkspace` component with subcomponents for each layer
+> 2. Extract and replace one component at a time to minimize breaking changes
+> 3. Use composition to maintain the visual hierarchy while separating logical concerns
+> 4. Follow the existing export standards with index.ts files for each component
+> 5. Test thoroughly after each component extraction
+
+**Acceptance Criteria**:
+- [ ] Working area is refactored into distinct, properly named components
+- [ ] Each component has a single responsibility with proper interfaces
+- [ ] Visual appearance and functionality remains unchanged
+- [ ] Component structure uses proper naming conventions for improved clarity
+- [ ] All refactored components have proper documentation and test IDs
+
+#### Subtask: Create Component Architecture
+<!-- priority:high size:s type:feature -->
+- [ ] Define component hierarchy and responsibilities
+  - [ ] Define props interfaces for all new components first
+  - [ ] Create `CanvasWorkspace` parent component (container for entire workspace)
+  - [ ] Create `CanvasViewport` component (handles overflow and background)
+  - [ ] Create `CanvasContainer` component (handles scaling and dimensions)
+  - [ ] Create `CanvasBackground` component (checkerboard pattern)
+  - [ ] Create `CanvasPage` component (white page area with border)
+  - [ ] Document all component interactions with detailed comments
+
+#### Subtask: Implement Incremental Extraction Strategy
+<!-- priority:high size:m type:feature -->
+- [ ] Use a step-by-step approach to minimize risk
+  - [ ] Step 1: Extract `CanvasViewport` component (outer container)
+  - [ ] Step 2: Extract `CanvasBackground` component (checkerboard pattern)
+  - [ ] Step 3: Extract `CanvasPage` component (white page area)
+  - [ ] Step 4: Extract `CanvasContainer` component (handles dimensions)
+  - [ ] Step 5: Create composable `GuideLineOverlay` and `PanelOverlay` components
+  - [ ] Step 6: Integrate all components into unified `CanvasWorkspace`
+  - [ ] Step 7: Update `containerRef` handling to maintain export/preview functionality
+  - [ ] Step 8: Verify that AI preview, script generation, and export still work
+
+#### Subtask: Ensure Code Quality Standards
+<!-- priority:high size:s type:feature -->
+- [ ] Maintain code quality through the refactoring
+  - [ ] Add proper ID and test ID attributes to all elements following naming conventions
+  - [ ] Add TSDoc documentation to all components and key functions
+  - [ ] Create proper typing for all component props
+  - [ ] Ensure all new components follow the project's component organization pattern
+
+#### Subtask: Validate Export, Preview, and Collections Functionality
+<!-- priority:high size:s type:feature -->
+- [ ] Test all dependent functionality after refactoring
+  - [ ] Verify AI preview image generation works correctly
+  - [ ] Test PNG and PDF export from the refactored canvas
+  - [ ] Ensure script generation works with new component structure
+  - [ ] Verify saving layouts to collections works properly
+  - [ ] Test loading layouts from collections, ensuring panel positioning is preserved
+  - [ ] Confirm that layout thumbnails are still generated properly
+  - [ ] Document any changes needed in utility functions to work with new structure
+
+### Task: Fix HTML Canvas Proportions in Web App
+<!-- priority:high size:m type:feature -->
+
+**Description**: Fix the canvas container to ensure it scales properly when the browser window is resized instead of being truncated horizontally.
+
+**Technical Notes**: 
+> Investigation of the codebase reveals that the canvas container has fixed dimensions set in `panelUtils.ts` (CONTAINER_WIDTH = 600, CONTAINER_HEIGHT calculated based on aspect ratio). When the browser window width becomes narrower than this fixed size, the canvas gets horizontally truncated instead of scaling down proportionally. The container `<div id="fixed-checkerboard-container">` in ComicPanelCreator.tsx needs a responsive approach that maintains the aspect ratio (5.25/7.75) while fitting within the available viewport width.
+
+**Acceptance Criteria**:
+- [ ] Canvas scales proportionally when browser window width is less than 600px
+- [ ] Comic page content is never truncated horizontally regardless of window size
+- [ ] Aspect ratio of 5.25/7.75 is preserved during scaling
+- [ ] Panel positions and dimensions scale correctly with the container
+- [ ] Checkerboard background scales properly with the container
+
+#### Subtask: Implement Responsive Container Scaling
+<!-- priority:high size:m type:feature -->
+- [ ] Refactor fixed-size container to use responsive sizing
+  - [ ] Modify the container to calculate dimensions based on available viewport width
+  - [ ] Implement CSS to ensure the container scales while maintaining aspect ratio
+  - [ ] Update panel position calculations to work with the scaled container
+  - [ ] Ensure all UI elements (panels, guidelines, etc.) scale proportionally
+
+
+
+### Task: Implement Comprehensive Testing
 <!-- priority:high size:l type:feature -->
 
-**Description**: Finalize the refactoring of UI components and merge to dev branch.
+**Description**: Create a complete testing suite for all newly refactored components to ensure stability before Tauri migration.
+
+**Technical Notes**: 
+> Testing should focus on component functionality, state management, and user interactions. The recently refactored components should be prioritized to ensure they work correctly both in isolation and when integrated.
 
 **Acceptance Criteria**:
-- [x] HeaderToolbar component is implemented
-- [x] BreadcrumbNavigation component is implemented
-- [x] LayoutManager component is implemented
-- [x] PanelInteractionHook is implemented
-- [x] ModalManager component is implemented
-- [ ] All components are properly integrated
-- [ ] Refactored code is merged to dev branch
+- [ ] Unit tests for core components are implemented
+- [ ] Integration tests for key user flows are created
+- [ ] Visual regression testing is in place
+- [ ] Test coverage meets minimum threshold (70%)
 
-#### Subtask: Fix HTML Canvas Proportions
+#### Subtask: Set Up Testing Infrastructure
 <!-- priority:high size:m type:feature -->
-- [ ] Fix horizontal proportions of HTML canvas when browser resizes
-  - [ ] Implement responsive canvas sizing
-  - [ ] Ensure proper aspect ratio is maintained
-  - [ ] Test across different screen sizes
+- [ ] Configure testing framework and utilities
+  - [ ] Set up Vitest and React Testing Library
+  - [ ] Create common testing utilities and mocks
+  - [ ] Implement snapshot testing capabilities
+  - [ ] Configure coverage reporting
 
-#### Subtask: Merge Refactored UI to Dev Branch
-<!-- priority:high size:s type:feature -->
-- [ ] Merge refactored front-end UI update to dev branch
-  - [ ] Resolve any merge conflicts
-  - [ ] Ensure all components work together correctly
-  - [ ] Verify no regressions in functionality
-
-### Task: Implement Targeted Testing for Tauri Migration
+#### Subtask: Implement Component Tests
 <!-- priority:high size:m type:feature -->
+- [ ] Create tests for refactored components
+  - [ ] Test HeaderToolbar component
+  - [ ] Test BreadcrumbNavigation component
+  - [ ] Test LayoutManager component
+  - [ ] Test PanelInteractionHook
+  - [ ] Test ModalManager component
 
-**Description**: Write focused tests to ensure stability during the Tauri migration.
-
-**Acceptance Criteria**:
-- [ ] Critical UI components have basic tests
-- [ ] Key functionality works correctly in Tauri environment
-- [ ] Tests verify proper communication between UI and backend
-- [ ] Tests are automated and run in CI/CD pipeline
-
-#### Subtask: Test Critical UI Components
-<!-- priority:high size:m type:feature -->
-- [ ] Write tests for key UI components
-  - [ ] Test panel rendering and interactions
-  - [ ] Test layout loading and saving
+#### Subtask: Create Integration Tests
+<!-- priority:medium size:m type:feature -->
+- [ ] Implement tests for critical user workflows
+  - [ ] Test panel creation and manipulation
+  - [ ] Test layout saving and loading
   - [ ] Test script generation workflow
+  - [ ] Test collection management features
 
-#### Subtask: Test Tauri-Specific Functionality
-<!-- priority:high size:m type:feature -->
-- [ ] Write tests for Tauri integration points
-  - [ ] Test file system operations
-  - [ ] Test window management
-  - [ ] Test API communication
-
-## Epic: Learning and Exploration
+## Epic: Tauri Research and Preparation
 <!-- priority:high size:m type:feature -->
 
-**Description**: Create spike projects to learn and explore the technologies before full implementation.
+**Description**: Research Tauri capabilities and prepare for integration with the existing React application.
 
-**Key**: LEARN
+**Key**: TAURI-PREP
 
-### Task: Create Tauri + React + Rocket + SQLite Spike
+### Task: Evaluate Tauri File System Capabilities
 <!-- priority:high size:m type:feature -->
 
-**Description**: Build a simple spike project to get familiar with Tauri, Rust/Rocket, and SQLite integration.
+**Description**: Research and document how to effectively implement file system operations using Tauri APIs.
+
+**Technical Notes**:
+> The application currently relies heavily on browser APIs for file operations. This task should focus on finding the best approach to replace these with native Tauri capabilities.
 
 **Acceptance Criteria**:
-- [ ] Simple React app with Tauri is created
-- [ ] Basic Rust/Rocket backend with SQLite is implemented
-- [ ] Data flows from SQLite through Rust to React UI
-- [ ] Application builds successfully for macOS
+- [ ] Complete research on Tauri file system APIs is documented
+- [ ] Sample code for key operations is created
+- [ ] Migration strategy from web APIs to Tauri APIs is outlined
+- [ ] Performance considerations are documented
 
-#### Subtask: Set Up Tauri + React Project
+#### Subtask: Research File Operation APIs
 <!-- priority:high size:s type:feature -->
-- [ ] Create a new React project
-  - [ ] Initialize with create-react-app
-  - [ ] Add Tauri to the project
-  - [ ] Configure Tauri settings
+- [ ] Document Tauri file system APIs and patterns
+  - [ ] Research file read/write operations
+  - [ ] Research directory operations
+  - [ ] Research file dialogs and selection
+  - [ ] Document permissions model
 
-#### Subtask: Implement Rust/Rocket Backend
-<!-- priority:high size:s type:feature -->
-- [ ] Create a simple Rust/Rocket backend
-  - [ ] Set up SQLite database with a greeting table
-  - [ ] Implement Tauri command to fetch greeting
-  - [ ] Add error handling
+#### Subtask: Create File System Proof of Concept
+<!-- priority:high size:m type:feature -->
+- [ ] Build a small proof of concept for file operations
+  - [ ] Implement file reading and writing
+  - [ ] Test save/load functionality
+  - [ ] Implement file dialogs
+  - [ ] Test performance with larger files
 
-#### Subtask: Create React Frontend
-<!-- priority:high size:s type:feature -->
-- [ ] Update React frontend to display greeting
-  - [ ] Add state for greeting message
-  - [ ] Implement useEffect to fetch greeting
-  - [ ] Display greeting in UI
+### Task: Evaluate Application Packaging Options
+<!-- priority:medium size:m type:feature -->
 
-#### Subtask: Build and Test
-<!-- priority:high size:s type:feature -->
-- [ ] Build and test the application
-  - [ ] Run in development mode
-  - [ ] Build for macOS
-  - [ ] Test the executable
+**Description**: Research and document the best approach for packaging the Tauri application for distribution.
+
+**Acceptance Criteria**:
+- [ ] Packaging options for different platforms are documented
+- [ ] Auto-update capabilities are researched
+- [ ] Security considerations are documented
+- [ ] Recommended packaging approach is defined
+
+#### Subtask: Research Platform-Specific Packaging
+<!-- priority:medium size:s type:feature -->
+- [ ] Document packaging options for different platforms
+  - [ ] Research macOS packaging and signing
+  - [ ] Research Windows packaging and signing
+  - [ ] Research Linux distribution options
+  - [ ] Document size optimization techniques
+
+#### Subtask: Research Auto-Update Mechanisms
+<!-- priority:medium size:s type:feature -->
+- [ ] Document auto-update options for Tauri applications
+  - [ ] Research built-in update mechanisms
+  - [ ] Explore third-party update services
+  - [ ] Document security best practices for updates
 
 ## Epic: Development Environment Setup
 <!-- priority:high size:m type:feature -->
@@ -165,6 +266,14 @@ This document outlines the development roadmap for the first Alpha build of the 
   - [ ] Configure Tauri for the React application
   - [ ] Set up build scripts
   - [ ] Configure application metadata
+
+#### Subtask: Configure Full Screen Mode
+<!-- priority:high size:m type:feature -->
+- [ ] Set up Tauri application to run in full screen mode
+  - [ ] Configure window settings for full screen launch
+  - [ ] Handle screen resolution differences
+  - [ ] Optimize canvas for full screen display
+  - [ ] Implement proper exit from full screen if needed
 
 #### Subtask: Integrate React with Tauri
 <!-- priority:high size:m type:feature -->
