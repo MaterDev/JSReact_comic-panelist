@@ -51,6 +51,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage",
-    "sync-roadmap": "node scripts/sync-roadmap.js"
+    "sync-roadmap": "node scripts/roadmap-sync/index.js",
+    "sync-roadmap:test": "node scripts/roadmap-sync/index.js --path=./scripts/roadmap-sync/test-roadmap.md"
   }
 }
