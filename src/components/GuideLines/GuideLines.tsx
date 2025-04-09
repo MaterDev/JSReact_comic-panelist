@@ -1,3 +1,13 @@
+/**
+ * GuideLines Component
+ * 
+ * Renders visual guidelines for comic panel layout, including:
+ * - Trim lines showing the physical page boundaries (cyan)
+ * - Safe area margins for content placement (magenta)
+ * - Informational labels with measurements
+ * 
+ * Guidelines can be toggled on/off via the showGuides prop.
+ */
 import React from 'react';
 import {
   CONTAINER_WIDTH,
@@ -11,28 +21,43 @@ import {
   BOTTOM_MARGIN_PERCENT
 } from '../../../shared/utils/panelUtils';
 
+/**
+ * Props for the GuideLines component
+ */
 interface GuideLinesProps {
   showGuides: boolean;
 }
 
 export const GuideLines: React.FC<GuideLinesProps> = ({ showGuides }) => {
+  /**
+   * Early return if guides should not be shown
+   */
   if (!showGuides) return null;
 
-  // Calculate trim dimensions in pixels
+  /**
+   * Calculate trim dimensions in pixels
+   */
   const trimInsetPx = (TRIM_INSET_PERCENT / 100) * CONTAINER_WIDTH;
   const trimWidthPx = (TRIM_WIDTH_PERCENT / 100) * CONTAINER_WIDTH;
   const trimHeightPx = (TRIM_HEIGHT_PERCENT / 100) * CONTAINER_HEIGHT;
 
-  // Calculate margin dimensions in pixels
+  /**
+   * Calculate margin dimensions in pixels
+   */
   const innerMarginPx = (INNER_MARGIN_PERCENT / 100) * CONTAINER_WIDTH;
   const outerMarginPx = (OUTER_MARGIN_PERCENT / 100) * CONTAINER_WIDTH;
   const topMarginPx = (TOP_MARGIN_PERCENT / 100) * CONTAINER_HEIGHT;
   const bottomMarginPx = (BOTTOM_MARGIN_PERCENT / 100) * CONTAINER_HEIGHT;
 
+  /**
+   * Render guide lines with informational labels
+   */
   return (
     <>
       {/* Trim lines (cyan) */}
       <div 
+        id="trim-guide"
+        data-testid="trim-guide"
         className="absolute"
         data-guide-element="true"
         style={{
@@ -46,16 +71,26 @@ export const GuideLines: React.FC<GuideLinesProps> = ({ showGuides }) => {
         }}
       >
         {/* Label for trim line */}
-        <div className="absolute -top-5 left-0 text-xs text-cyan-600 font-mono font-bold">
+        <div 
+          id="trim-guide-label-top"
+          data-testid="trim-guide-label-top"
+          className="absolute -top-5 left-0 text-xs text-cyan-600 font-mono font-bold"
+        >
           Trim (5" × 7.5") - Cyan
         </div>
-        <div className="absolute -bottom-5 right-0 text-xs text-cyan-600 font-mono font-bold">
+        <div 
+          id="trim-guide-label-bottom"
+          data-testid="trim-guide-label-bottom"
+          className="absolute -bottom-5 right-0 text-xs text-cyan-600 font-mono font-bold"
+        >
           0.125" bleed on all sides
         </div>
       </div>
 
       {/* Margin lines (magenta) */}
       <div 
+        id="margin-guide"
+        data-testid="margin-guide"
         className="absolute"
         data-guide-element="true"
         style={{
@@ -69,10 +104,18 @@ export const GuideLines: React.FC<GuideLinesProps> = ({ showGuides }) => {
         }}
       >
         {/* Label for margin line */}
-        <div className="absolute -top-5 left-0 text-xs text-fuchsia-600 font-mono font-bold">
+        <div 
+          id="margin-guide-label-top"
+          data-testid="margin-guide-label-top"
+          className="absolute -top-5 left-0 text-xs text-fuchsia-600 font-mono font-bold"
+        >
           Safe Area (Magenta)
         </div>
-        <div className="absolute top-1 left-1 text-xs text-fuchsia-600 font-mono font-bold">
+        <div 
+          id="margin-guide-label-inner"
+          data-testid="margin-guide-label-inner"
+          className="absolute top-1 left-1 text-xs text-fuchsia-600 font-mono font-bold"
+        >
           Inner: 0.75"
           <br />
           Outer: 0.5"

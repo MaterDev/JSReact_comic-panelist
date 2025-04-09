@@ -133,7 +133,23 @@ The instructions are organized into easy-to-navigate sections with a dropdown me
 - **html2canvas** - For high-quality panel capture
 - **jsPDF** - For PDF generation and export
 
+## Project Management
+
+This project uses GitHub Projects for roadmap tracking and task management. The roadmap is maintained in a structured markdown format and synchronized with GitHub issues using custom scripts.
+
+### Roadmap Integration
+
+- **Structured Roadmap**: Located at `docs/roadmaps/03_ROADMAP_AlphaBuild-1_Tauri.md`
+- **GitHub Projects**: Tasks are synchronized to GitHub Projects for visual tracking
+- **Automated Sync**: Custom scripts automate the creation of issues from the roadmap
+- **Parent-Child Relationships**: Tasks and subtasks are linked with GitHub's sub-issue feature
+- **Project Board**: [Comic Panelist - App](https://github.com/users/MaterDev/projects/11)
+
+For more information on the roadmap sync process, see the [Scripts README](scripts/README.md) and the [Roadmap Sync README](scripts/roadmap-sync/README.md).
+
 ## Available Scripts
+
+### Application Scripts
 
 - `npm run dev` - Runs the development server
 - `npm run start:server` - Runs the backend server in production mode
@@ -143,6 +159,13 @@ The instructions are organized into easy-to-navigate sections with a dropdown me
 - `npm test` - Runs the test suite with Vitest
 - `npm run test:ui` - Runs tests with the Vitest UI
 - `npm run coverage` - Runs tests with coverage reporting
+
+### Utility Scripts
+
+- `npm run sync-roadmap` - Synchronizes the roadmap with GitHub Projects
+- `npm run sync-roadmap:test` - Runs the sync with a test roadmap file
+- `npm run sync-roadmap -- --path=./path/to/roadmap.md` - Runs the sync with a custom roadmap file
+- `node scripts/get-project-fields.js` - Retrieves field IDs from GitHub Projects
 
 ## License
 

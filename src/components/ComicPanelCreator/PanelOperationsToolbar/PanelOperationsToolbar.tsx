@@ -2,7 +2,8 @@ import React from 'react';
 import { Panel } from '../../../../shared/types/panelTypes';
 
 interface PanelOperationsToolbarProps {
-  selectedPanel: Panel | undefined;
+  panels: Panel[];
+  selectedPanelId: string | null;
   canDelete: boolean;
   hasScript: boolean;
   onSplitHorizontally: (id: string) => void;
@@ -12,7 +13,8 @@ interface PanelOperationsToolbarProps {
 }
 
 export const PanelOperationsToolbar: React.FC<PanelOperationsToolbarProps> = ({
-  selectedPanel,
+  panels,
+  selectedPanelId,
   canDelete,
   hasScript,
   onSplitHorizontally,
@@ -20,6 +22,8 @@ export const PanelOperationsToolbar: React.FC<PanelOperationsToolbarProps> = ({
   onDelete,
   onViewScript
 }) => {
+  const selectedPanel = panels.find(p => p.id === selectedPanelId);
+
   if (!selectedPanel) {
     return (
       <div className="p-3 bg-gray-100 dark:bg-dark-700 rounded-lg border border-gray-200 dark:border-dark-600 shadow-sm">
@@ -35,7 +39,7 @@ export const PanelOperationsToolbar: React.FC<PanelOperationsToolbarProps> = ({
       <h2 className="text-base font-semibold mb-2">Panel Operations</h2>
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Panel #{selectedPanel.number}</span>
+          <span className="text-sm font-medium">Panel #{selectedPanel.panelNumber}</span>
           <div className="flex gap-1">
             <button
               onClick={() => onSplitHorizontally(selectedPanel.id)}

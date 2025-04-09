@@ -25,6 +25,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["vitest/globals", "node"]
   },
-  "include": ["src", "shared/types/panelTypes.ts", "shared/utils"],
+  "include": ["src", "shared/types/panelTypes.ts", "shared/utils", "shared/types/scriptTypes.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

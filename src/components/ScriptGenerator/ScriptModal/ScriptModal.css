@@ -1,0 +1,202 @@
+/**
+ * ScriptModal Component Styles
+ * 
+ * Styles for the ScriptModal component which displays the complete comic script in a modal dialog.
+ * Includes styles for modal overlay, container, content sections, and dark mode support.
+ *
+ * @author Comic Panelist Team
+ * @version 1.0.0
+ */
+
+/* Modal overlay - covers the entire screen with semi-transparent background */
+.script-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent dark background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure modal appears above other content */
+}
+
+/* Modal container - holds the modal content */
+.script-modal {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px; /* Limit width for readability */
+  max-height: 90vh; /* Limit height to 90% of viewport height */
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Pronounced shadow for depth */
+}
+
+/* Dark mode styling for modal container */
+:root.dark .script-modal {
+  background: #1f1f1f; /* Dark background for dark mode */
+  color: #d5d5d5; /* Light text for dark mode */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); /* Stronger shadow for dark mode */
+}
+
+/* Close button styling - positioned in the top-right corner */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666; /* Medium gray for visibility */
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Circular button */
+  transition: background-color 0.2s; /* Smooth transition for hover effect */
+}
+
+/* Dark mode styling for close button */
+:root.dark .close-button {
+  color: #a6a6a6; /* Lighter gray for dark mode */
+}
+
+/* Close button hover effect */
+.close-button:hover {
+  background: #f0f0f0; /* Light gray background on hover */
+  color: #333; /* Darker text for better contrast */
+}
+
+/* Dark mode close button hover effect */
+:root.dark .close-button:hover {
+  background: #333333; /* Darker background for dark mode hover */
+  color: #d5d5d5; /* Light text for contrast in dark mode */
+}
+
+/* Main content container for script */
+.script-content {
+  padding: 30px;
+  overflow-y: auto; /* Enable scrolling for long content */
+  max-height: calc(90vh - 60px); /* Calculate height accounting for padding */
+}
+
+/* Typography: Main title (script title) */
+.script-content h2 {
+  margin-bottom: 20px;
+  color: #2c3e50; /* Dark blue-gray */
+  font-size: 24px;
+}
+
+/* Dark mode styling for main title */
+:root.dark .script-content h2 {
+  color: #d5d5d5; /* Light text for dark mode */
+}
+
+/* Synopsis section styling */
+.synopsis {
+  background: #f8f9fa; /* Light gray background for subtle highlight */
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+/* Dark mode styling for synopsis section */
+:root.dark .synopsis {
+  background: #292929; /* Darker background for dark mode */
+}
+
+/* Individual panel container styling */
+.panel-script {
+  background: #fff;
+  border: 1px solid #e9ecef; /* Light gray border */
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
+}
+
+/* Dark mode styling for panel container */
+:root.dark .panel-script {
+  background: #292929; /* Darker background for dark mode */
+  border: 1px solid #333333; /* Darker border for dark mode */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Stronger shadow for dark mode */
+}
+
+/* Typography: Panel headers */
+.panel-script h4 {
+  color: #2c3e50; /* Dark blue-gray */
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+/* Dark mode styling for panel headers */
+:root.dark .panel-script h4 {
+  color: #a6a6a6; /* Light gray for dark mode */
+}
+
+/* Panel section styling - scene, characters, dialogue, visual direction */
+.scene, .characters, .dialogue, .visual-direction {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f9fa; /* Light gray background */
+  border-radius: 6px;
+}
+
+/* Dark mode styling for panel sections */
+:root.dark .scene, 
+:root.dark .characters, 
+:root.dark .dialogue, 
+:root.dark .visual-direction {
+  background: #1f1f1f; /* Darker background for dark mode */
+}
+
+/* Character and dialogue entry styling */
+.character, .dialogue-entry {
+  margin: 10px 0;
+  padding: 10px;
+  border-left: 3px solid #3498db; /* Blue accent for visual hierarchy */
+  background: white; /* White background for maximum readability */
+}
+
+/* Dark mode styling for character and dialogue entries */
+:root.dark .character, 
+:root.dark .dialogue-entry {
+  background: #292929; /* Darker background for dark mode */
+}
+
+/* Dialogue text styling */
+.dialogue-text {
+  font-style: italic; /* Italic for emphasis and readability */
+  margin: 5px 0;
+  color: #2c3e50; /* Dark blue-gray for good contrast */
+}
+
+/* Dark mode styling for dialogue text */
+:root.dark .dialogue-text {
+  color: #a6a6a6; /* Light gray for dark mode */
+}
+
+/* Custom scrollbar styling for better user experience */
+/* Scrollbar width */
+.script-content::-webkit-scrollbar {
+  width: 8px; /* Narrow scrollbar for clean look */
+}
+
+/* Scrollbar track styling */
+.script-content::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light gray track */
+}
+
+/* Scrollbar thumb (draggable part) styling */
+.script-content::-webkit-scrollbar-thumb {
+  background: #888; /* Medium gray thumb */
+  border-radius: 4px; /* Rounded corners */
+}
+
+/* Scrollbar thumb hover state */
+.script-content::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darker gray on hover for better feedback */
+}

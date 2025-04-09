@@ -1,0 +1,162 @@
+/**
+ * ScriptDisplay Component Styles
+ * 
+ * Styles for the ScriptDisplay component which displays the generated comic script.
+ * Includes styles for different states (loading, error, empty) and typography.
+ *
+ * @author Comic Panelist Team
+ * @version 1.0.0
+ */
+
+/* Main container styles */
+.script-display {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  max-width: 600px;
+  margin: 0 20px;
+  overflow-y: auto; /* Enable scrolling for long content */
+  max-height: 90vh; /* Limit height to 90% of viewport height */
+}
+
+/* Status state styles (loading, error, empty) */
+.script-display.loading,
+.script-display.error,
+.script-display.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px; /* Ensure minimum height for visibility */
+  font-size: 1.1em;
+  color: #666; /* Medium gray for status text */
+}
+
+/* Error state specific styles */
+.script-display.error {
+  color: #d32f2f; /* Material Design red for error messages */
+}
+
+/* Typography: Main title (script title) */
+.script-display h2 {
+  color: #2c3e50; /* Dark blue-gray */
+  margin-bottom: 20px;
+  font-size: 1.8em;
+}
+
+/* Typography: Section headers (synopsis, panels) */
+.script-display h3 {
+  color: #34495e; /* Medium blue-gray */
+  margin: 15px 0;
+  font-size: 1.4em;
+}
+
+/* Typography: Panel headers */
+.script-display h4 {
+  color: #2c3e50; /* Dark blue-gray */
+  margin: 10px 0;
+  font-size: 1.2em;
+}
+
+/* Typography: Scene and section headers within panels */
+.script-display h5 {
+  color: #3a4a5a;
+  margin: 8px 0;
+  font-size: 1.1em;
+}
+
+/* Panel content styling */
+.script-display .panel {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee; /* Light separator between panels */
+}
+
+/* Scene, characters, dialogue, and visual direction sections */
+.script-display .scene,
+.script-display .characters,
+.script-display .dialogue,
+.script-display .visual-direction {
+  margin-bottom: 15px;
+}
+
+/* Individual character and dialogue entry styling */
+.script-display .character,
+.script-display .dialogue-entry {
+  margin-bottom: 10px;
+  padding-left: 10px;
+  border-left: 2px solid #e0e0e0; /* Light left border for visual grouping */
+}
+
+/* Synopsis section styling - highlighted box for improved readability */
+.synopsis {
+  margin-bottom: 30px;
+  padding: 15px;
+  background: #f8f9fa; /* Light gray background */
+  border-radius: 6px;
+}
+
+/* Individual panel container styling */
+.panel {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #e9ecef; /* Light gray border */
+  border-radius: 6px;
+  background: #f8f9fa; /* Light background for contrast */
+}
+
+/* Panel content section styling - subdivisions for scene, characters, dialogue, visual direction */
+.scene, .characters, .dialogue, .visual-direction {
+  margin: 15px 0;
+  padding: 15px;
+  background: white; /* White background for maximum readability */
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
+}
+
+/* Individual character and dialogue entry styling */
+.character, .dialogue-entry {
+  margin: 10px 0;
+  padding: 10px;
+  border-left: 3px solid #3498db; /* Blue accent for visual hierarchy */
+  background: #f8f9fa; /* Light gray background for subtle contrast */
+}
+
+/* Dialogue text styling - italic for emphasis and readability */
+.dialogue-text {
+  font-style: italic;
+  margin: 5px 0;
+  color: #2c3e50; /* Dark blue-gray for good contrast */
+}
+
+/* Visual direction paragraph styling */
+.visual-direction p {
+  margin: 5px 0; /* Consistent spacing for readability */
+}
+
+/* Strong text styling - used for labels and important information */
+strong {
+  color: #2c3e50; /* Dark blue-gray for emphasis */
+}
+
+/* Custom scrollbar styling for better user experience */
+/* Scrollbar width */
+.script-display::-webkit-scrollbar {
+  width: 8px; /* Narrow scrollbar for clean look */
+}
+
+/* Scrollbar track styling */
+.script-display::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light gray track */
+}
+
+/* Scrollbar thumb (draggable part) styling */
+.script-display::-webkit-scrollbar-thumb {
+  background: #888; /* Medium gray thumb */
+  border-radius: 4px; /* Rounded corners */
+}
+
+/* Scrollbar thumb hover state */
+.script-display::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darker gray on hover for better feedback */
+}

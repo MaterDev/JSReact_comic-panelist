@@ -144,7 +144,7 @@ export async function generateScript(
           role: 'user' as const,
           content: messageContent
         }],
-        system: 'You are a comic book scriptwriter. Always return valid JSON matching the specified TypeScript interface.'
+        system: 'You are a comic book scriptwriter. Your ONLY task is to return a valid JSON object matching the specified TypeScript interface structure. Do not include any explanations, apologies, or text outside the JSON. The ENTIRE response must be a valid parseable JSON object. Format all dialogue appropriately within the JSON structure. Return ONLY JSON starting with { and ending with }.'
       });
 
       if (!message.content || message.content.length === 0) {
@@ -158,7 +158,67 @@ export async function generateScript(
       }
 
       try {
-        const scriptData = JSON.parse(textContent.text);
+        // Try to extract JSON from the response if it's wrapped in text
+        let jsonText = textContent.text;
+        
+        // Check if the response starts with text instead of JSON
+        if (!jsonText.trim().startsWith('{')) {
+          console.log('Response does not appear to be JSON, attempting to extract JSON');
+          
+          // Look for JSON-like patterns
+          const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            console.log('Found JSON-like content in the response');
+            jsonText = jsonMatch[0];
+          } else {
+            // If no JSON found, create a fallback structure
+            console.error('No JSON found in response, creating fallback structure');
+            const fallbackScript: ComicPage = {
+              title: 'AI Generated Comic',
+              synopsis: 'A story based on your panel layout.',
+              panels: layout.panels.map((panel, index) => ({
+                id: index + 1,
+                position: {
+                  x: panel.x,
+                  y: panel.y,
+                  width: panel.width,
+                  height: panel.height
+                },
+                scene: {
+                  description: 'A scene in your comic.',
+                  setting: 'Undefined setting',
+                  time: 'Daytime',
+                  weather: 'Clear'
+                },
+                characters: [
+                  {
+                    name: 'Character',
+                    emotion: 'Neutral'
+                  }
+                ],
+                dialogue: [
+                  {
+                    type: 'caption',
+                    text: `The AI was unable to generate proper content for this panel.`
+                  }
+                ],
+                visualDirection: {
+                  shotType: 'Medium shot',
+                  angle: 'Eye level',
+                  focus: 'Center',
+                  lighting: 'Natural'
+                }
+              }))
+            };
+            
+            return fallbackScript;
+          }
+        }
+        
+        // Log the JSON being parsed for debugging
+        console.log('Attempting to parse JSON:', jsonText.substring(0, 100) + '...');
+        
+        const scriptData = JSON.parse(jsonText);
         return scriptData as ComicPage;
       } catch (parseError) {
         console.error('Error parsing script JSON:', parseError);

@@ -1,8 +1,20 @@
+/**
+ * DarkModeToggle Component
+ * 
+ * A toggle button that switches between light and dark mode themes.
+ * - Automatically detects and applies the user's system preference on initial load
+ * - Persists the user's preference in localStorage
+ * - Updates the document's class list to apply theme styling
+ * - Displays appropriate sun/moon icons based on current theme
+ */
 import React, { useEffect, useState } from 'react';
 
 export const DarkModeToggle: React.FC = () => {
   const [darkMode, setDarkMode] = useState<boolean>(false);
 
+  /**
+   * Initialize theme based on saved preference or system settings
+   */
   useEffect(() => {
     // Check for saved theme preference or use system preference
     const isDark = localStorage.getItem('darkMode') === 'true' || 
@@ -17,6 +29,12 @@ export const DarkModeToggle: React.FC = () => {
     }
   }, []);
 
+  /**
+   * Toggle between light and dark mode
+   * - Updates state
+   * - Persists preference to localStorage
+   * - Updates document class list
+   */
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
@@ -32,14 +50,20 @@ export const DarkModeToggle: React.FC = () => {
     }
   };
 
+  /**
+   * Render the toggle button with appropriate icon based on current theme
+   */
   return (
     <button
+      id="dark-mode-toggle"
+      data-testid="dark-mode-toggle"
       onClick={toggleDarkMode}
       className="p-2 rounded-full bg-gray-200 dark:bg-dark-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-dark-600 transition-colors"
       aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
       title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {darkMode ? (
+        // Moon icon
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
           <path
             fillRule="evenodd"
@@ -48,6 +72,7 @@ export const DarkModeToggle: React.FC = () => {
           />
         </svg>
       ) : (
+        // Sun icon
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
           <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
         </svg>
