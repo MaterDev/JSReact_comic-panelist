@@ -1,7 +1,5 @@
 # Comic Panel Creator - Development Roadmap
 
-This document outlines the development roadmap for transforming the Comic Panel Creator from a development project into a production-ready desktop application. Each epic represents a major area of work, broken down into specific tasks and subtasks with implementation guidance based on the current codebase.
-
 ## Epic 1: Application Architecture Refactoring
 
 ### Task 1.1: Code Restructuring
