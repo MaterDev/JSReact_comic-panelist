@@ -106,31 +106,42 @@ The Comic Panel Creator is a comprehensive desktop application designed as a com
 
 ## Data Models
 
-### Database Schema
+### Database Schema (SQLite)
+
+#### Database Configuration
+```sql
+-- Performance and reliability optimizations
+PRAGMA journal_mode = WAL;        -- Better concurrent access
+PRAGMA synchronous = NORMAL;      -- Good balance of safety/performance
+PRAGMA cache_size = 10000;        -- Larger cache for better performance
+PRAGMA temp_store = MEMORY;       -- Faster temporary operations
+PRAGMA mmap_size = 268435456;     -- Memory-mapped I/O for large datasets
+PRAGMA foreign_keys = ON;         -- Enable foreign key constraints
+```
 
 #### Collections Table
 ```sql
 CREATE TABLE collections (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
   description TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
 #### Layouts Table
 ```sql
 CREATE TABLE layouts (
-  id SERIAL PRIMARY KEY,
+  id INTEGER PRIMARY KEY,
   collection_id INTEGER REFERENCES collections(id) ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL,
+  name TEXT NOT NULL,
   display_order INTEGER NOT NULL,
-  page_type VARCHAR(50) NOT NULL, -- 'front_cover', 'back_cover', 'standard'
-  canvas_settings JSONB, -- Canvas-level settings (dimensions, guides, etc.)
-  script_data JSONB,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  page_type TEXT NOT NULL CHECK (page_type IN ('front_cover', 'back_cover', 'standard')),
+  canvas_settings JSON, -- Canvas-level settings (dimensions, guides, etc.)
+  script_data JSON,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(collection_id, display_order)
 );
 ```
@@ -138,28 +149,63 @@ CREATE TABLE layouts (
 #### Panels Table
 ```sql
 CREATE TABLE panels (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY,  -- UUID as text
   layout_id INTEGER REFERENCES layouts(id) ON DELETE CASCADE,
   panel_number INTEGER NOT NULL,
-  x DECIMAL(5,2) NOT NULL, -- percentage position (0-100)
-  y DECIMAL(5,2) NOT NULL, -- percentage position (0-100)
-  width DECIMAL(5,2) NOT NULL, -- percentage width (0-100)
-  height DECIMAL(5,2) NOT NULL, -- percentage height (0-100)
+  x REAL NOT NULL, -- percentage position (0-100)
+  y REAL NOT NULL, -- percentage position (0-100)
+  width REAL NOT NULL, -- percentage width (0-100)
+  height REAL NOT NULL, -- percentage height (0-100)
   z_index INTEGER DEFAULT 0,
-  perspective_grid JSONB, -- Perspective grid configuration
-  linework_data JSONB, -- Vector drawing data
-  placed_objects JSONB, -- Objects placed within the panel
-  panel_settings JSONB, -- Panel-specific settings
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  perspective_grid JSON, -- Perspective grid configuration
+  linework_data JSON, -- Vector drawing data
+  placed_objects JSON, -- Objects placed within the panel
+  panel_settings JSON, -- Panel-specific settings
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(layout_id, panel_number)
 );
 ```
 
-#### Panel Content Index
+#### Optimized Indexes
 ```sql
-CREATE INDEX panels_layout_idx ON panels(layout_id, panel_number);
-CREATE INDEX panels_position_idx ON panels(layout_id, z_index);
+-- Primary query patterns
+CREATE INDEX idx_panels_layout_order ON panels(layout_id, panel_number);
+CREATE INDEX idx_panels_layout_z ON panels(layout_id, z_index);
+CREATE INDEX idx_layouts_collection_order ON layouts(collection_id, display_order);
+
+-- Content-specific indexes for performance
+CREATE INDEX idx_panels_has_perspective ON panels(id) WHERE perspective_grid IS NOT NULL;
+CREATE INDEX idx_panels_has_linework ON panels(id) WHERE linework_data IS NOT NULL;
+CREATE INDEX idx_panels_has_objects ON panels(id) WHERE placed_objects IS NOT NULL;
+```
+
+#### Triggers for Automatic Timestamps
+```sql
+-- Auto-update timestamps
+CREATE TRIGGER update_collections_timestamp 
+  AFTER UPDATE ON collections
+  FOR EACH ROW 
+  WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE collections SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;
+
+CREATE TRIGGER update_layouts_timestamp 
+  AFTER UPDATE ON layouts
+  FOR EACH ROW 
+  WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE layouts SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;
+
+CREATE TRIGGER update_panels_timestamp 
+  AFTER UPDATE ON panels
+  FOR EACH ROW 
+  WHEN NEW.updated_at = OLD.updated_at
+BEGIN
+  UPDATE panels SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;
 ```
 
 ### Panel Entity Structure
